@@ -1,4 +1,12 @@
 {
+  "jointAppointment": {
+    "period": "現任",
+    "title": "合聘研究員",
+    "institution": "中央研究院人文社會科學研究中心",
+    "institutionUrl": "https://www.rchss.sinica.edu.tw/",
+    "detail": "Joint Research Fellows, Research Center for Humanities and Social Sciences (RCHSS), Academia Sinica",
+    "sourceNote": "職稱與英文由本人提供，2026-10-02 補充。"
+  },
   "education": [
     {"period":"1992.08–1995.08","title":"心理計量學博士","institution":"美國南加州大學","detail":"Ph.D. in Psychometrics, University of Southern California","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
     {"period":"1988.09–1990.06","title":"心理學碩士","institution":"輔仁大學","detail":"社會心理與工商組織","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
