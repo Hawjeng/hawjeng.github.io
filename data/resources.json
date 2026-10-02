@@ -1,0 +1,110 @@
+[
+  {
+    "id": "heterogeneity-data",
+    "bookId": "heterogeneity-2023",
+    "title": "潛在異質性分析｜範例資料",
+    "format": "RAR",
+    "url": "https://www.wunan.com.tw/www2/download/1H9CDATA%E7%AF%84%E4%BE%8B%E8%B3%87%E6%96%99%E6%AA%94.RAR",
+    "source": "https://www.wunan.com.tw/bookdetail?NO=16340",
+    "verifiedStatus": 200,
+    "description": "搭配書中的 Mplus 潛在類別、剖面與轉移分析範例。",
+    "category": "RAR · BOOK MATERIALS",
+    "label": "下載配套資料（RAR）"
+  },
+  {
+    "id": "statistics-concise-data",
+    "bookId": "statistics-concise-2023",
+    "title": "統計學精華版｜範例資料",
+    "format": "RAR",
+    "url": "https://www.wunan.com.tw/www2/download/1H9D_DATA.RAR",
+    "source": "https://www.wunan.com.tw/bookdetail?NO=16630",
+    "verifiedStatus": 200,
+    "description": "統計學精華版章節練習與分析用資料。",
+    "category": "RAR · BOOK MATERIALS",
+    "label": "下載配套資料（RAR）"
+  },
+  {
+    "id": "statistics-fourth-data",
+    "bookId": "statistics-2022",
+    "title": "統計學第四版｜範例資料",
+    "format": "RAR",
+    "url": "https://www.wunan.com.tw/www2/download/1H90_4E_DATA.RAR",
+    "source": "https://www.wunan.com.tw/bookdetail?NO=12266",
+    "verifiedStatus": 200,
+    "description": "搭配第四版統計原理與 Excel 實作。",
+    "category": "RAR · BOOK MATERIALS",
+    "label": "下載配套資料（RAR）"
+  },
+  {
+    "id": "quantitative-sixth-data",
+    "bookId": "quantitative-spss-r-2019",
+    "title": "量化研究與統計分析第六版｜範例資料",
+    "format": "ZIP",
+    "url": "https://www.wunan.com.tw/www2/download/1H47V6DATA.ZIP",
+    "source": "https://www.wunan.com.tw/bookdetail?NO=14312",
+    "verifiedStatus": 200,
+    "description": "SPSS 與 R 資料分析範例解析的配套資料。",
+    "category": "ZIP · BOOK MATERIALS",
+    "label": "下載配套資料（ZIP）"
+  },
+  {
+    "id": "multilevel-data",
+    "bookId": "multilevel-2017",
+    "title": "多層次模式與縱貫資料分析｜範例資料",
+    "format": "RAR",
+    "url": "https://www.wunan.com.tw/www2/download/1H0JDATA.RAR",
+    "source": "https://www.wunan.com.tw/bookdetail?NO=13528",
+    "verifiedStatus": 200,
+    "description": "Mplus 8 多層次與縱貫分析章節範例。",
+    "category": "RAR · BOOK MATERIALS",
+    "label": "下載配套資料（RAR）"
+  },
+  {
+    "id": "bayesian-syntax",
+    "bookId": "bayesian-2020",
+    "title": "貝氏統計｜分析語法",
+    "format": "RAR",
+    "url": "http://www.yehyeh.com.tw/tool/docbook.aspx?File=200821001.BOK&FileSave=BayesianStatisticsSyntax.rar",
+    "source": "http://www.yehyeh.com.tw/bookdoc.aspx?sysid=00107457",
+    "verifiedStatus": 200,
+    "description": "Mplus 與 R 的貝氏分析配套語法。",
+    "category": "RAR · BOOK MATERIALS",
+    "label": "下載配套資料（RAR）"
+  },
+  {
+    "id": "quantitative-i-data",
+    "bookId": "quantitative-i-2018",
+    "title": "量化研究法（一）｜範例資料",
+    "format": "ZIP",
+    "url": "http://www.yehyeh.com.tw/tool/docbook.aspx?File=180920001.BOK&FileSave=%E7%AF%84%E4%BE%8B%E8%B3%87%E6%96%99.zip",
+    "source": "http://www.yehyeh.com.tw/bookdoc.aspx?sysid=00107335",
+    "verifiedStatus": 200,
+    "description": "研究設計與資料分析的配套範例資料。",
+    "category": "ZIP · BOOK MATERIALS",
+    "label": "下載配套資料（ZIP）"
+  },
+  {
+    "id": "quantitative-iii-data",
+    "bookId": "quantitative-iii-2018",
+    "title": "量化研究法（三）｜分析語法與資料",
+    "format": "RAR",
+    "url": "http://www.yehyeh.com.tw/tool/docbook.aspx?File=180202001.BOK&FileSave=Data3Data.rar",
+    "source": "http://www.yehyeh.com.tw/bookdoc.aspx?sysid=00107270",
+    "verifiedStatus": 200,
+    "description": "測驗原理與量表發展的分析語法與資料檔。",
+    "category": "RAR · BOOK MATERIALS",
+    "label": "下載配套資料（RAR）"
+  },
+  {
+    "id": "quantitative-ii-data",
+    "bookId": "quantitative-ii-2021",
+    "title": "量化研究法（二）｜範例資料",
+    "format": "ZIP",
+    "url": "http://www.yehyeh.com.tw/tool/docbook.aspx?File=210427001.BOK&FileSave=DATA2_data.zip",
+    "source": "http://www.yehyeh.com.tw/bookdoc.aspx?sysid=00107490",
+    "verifiedStatus": 200,
+    "description": "統計原理與分析技術增修版的配套範例資料。",
+    "category": "ZIP · BOOK MATERIALS",
+    "label": "下載配套資料（ZIP）"
+  }
+]

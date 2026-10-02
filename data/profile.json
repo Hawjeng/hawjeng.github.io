@@ -1,0 +1,142 @@
+{
+  "education": [
+    {"period":"1992.08–1995.08","title":"心理計量學博士","institution":"美國南加州大學","detail":"Ph.D. in Psychometrics, University of Southern California","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"1988.09–1990.06","title":"心理學碩士","institution":"輔仁大學","detail":"社會心理與工商組織","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"1985.09–1988.06","title":"心理學學士","institution":"輔仁大學","detail":"企業管理輔系","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"}
+  ],
+  "career": [
+    {"period":"2022.01–迄今","title":"特聘教授","institution":"國立臺灣師範大學企業管理學系","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"2020.08–迄今","title":"合聘教授","institution":"國立臺灣師範大學教育心理與輔導學系","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"2022.01–2024.02","title":"召集人／副主任","institution":"國立臺灣師範大學企業管理學系","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"2020.03–2020.06","title":"訪問學者","institution":"美國聖母大學心理學系","detail":"University of Notre Dame","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"2010.08–2022.01","title":"副教授／教授","institution":"國立臺灣師範大學企業管理學系","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"2007.08–2010.07","title":"副教授","institution":"國立中央大學企業管理學系","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"2002.02–2007.07","title":"副教授","institution":"輔仁大學心理學系","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"1996.08–2002.01","title":"副教授","institution":"世新大學社會心理學系","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"1996.03–1996.07","title":"專案研究員","institution":"教育部訓育委員會","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"1995.06–1996.02","title":"博士後研究員／統計分析師","institution":"加州大學洛杉磯分校神經醫學研究中心","detail":"UCLA Neuropsychiatry Institution (NPI)","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"}
+  ],
+  "service": [
+    {"period":"2017.08–2019.07","title":"主任","institution":"國立臺灣師範大學校務研究辦公室","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"2015.08–2017.07","title":"副總務長","institution":"國立臺灣師範大學總務處","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"2013.02–2015.07","title":"組長","institution":"國立臺灣師範大學進修推廣學院","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"2011.08–2012.07","title":"組長","institution":"國立臺灣師範大學教學發展中心","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"2024–2025","title":"理事長","institution":"臺灣統計方法學學會","detail":"曾於 2005–2006 年擔任理事長","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"2020–2024","title":"理事","institution":"臺灣校務研究專業協會","detail":"2018–2020 年任副秘書長","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"period":"2003–2004","title":"秘書長","institution":"臺灣心理學會","detail":"","source":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"}
+  ],
+  "papers": [
+    {
+      "year":2026,
+      "title":"Bidirectional associations between smart device use and body mass index among children aged 3 to 5 years: a longitudinal study",
+      "authors":"Pairote Chakranon, Jian-Pei Huang, Heng-Kien Au, Hawjeng Chiou, Chen-Li Lin, Yi-Yung Chen, Shih-Peng Mao, Pilyoung Kim, Hsueh-Wen Hsu, Yi-Hua Chen",
+      "journal":"International Journal of Behavioral Nutrition and Physical Activity, 23, 18",
+      "doi":"10.1186/s12966-026-01883-3",
+      "url":"https://link.springer.com/article/10.1186/s12966-026-01883-3",
+      "topic":"兒童發展",
+      "summary":"使用隨機截距交叉延宕模型，檢視 3 至 5 歲幼兒的智慧裝置使用與 BMI，以及親子互動和性別的關聯。"
+    },
+    {
+      "year":2025,
+      "title":"潛在異質性的變與不變：隨機截距潛在轉移模型的分類校正與輔助變數分析之蒙地卡羅模擬與實徵研究",
+      "authors":"邱皓政、王詩婷",
+      "journal":"調查研究—方法與應用，55，1–52",
+      "doi":"10.7014/SRMA.2025100004",
+      "url":"https://www.rchss.sinica.edu.tw/srma/journals/3756",
+      "topic":"統計方法",
+      "summary":"透過模擬與 KIT 父職參與資料，探討隨機截距、分類誤差校正與輔助變數的估計策略。"
+    },
+    {
+      "year":2025,
+      "title":"Insights from normalized developmental rates across diverse domains in early childhood: a National Longitudinal Cohort",
+      "authors":"Chia-Ling Chen, Chien-Ju Chang, Jun-Ren Lee, Po-Hsi Chen, Pei-Chen Liao, Chung-Yao Chen, Haw-Jeng Chiou",
+      "journal":"Acta Psychologica, 260, 105730",
+      "doi":"10.1016/j.actpsy.2025.105730",
+      "url":"https://www.sciencedirect.com/science/article/pii/S0001691825010431",
+      "topic":"兒童發展",
+      "summary":"以臺灣幼兒發展調查資料與 Rasch 分析，比較不同年齡的認知、語言與動作發展速率。"
+    },
+    {
+      "year":2025,
+      "title":"青年教育分流、學用相符、工作滿意及快樂感之縱向關係",
+      "authors":"李宗諭、邱皓政、蘇宜芬",
+      "journal":"教育心理學報，56(3)，599–630",
+      "doi":"10.6251/BEP.202503_56(3).0005",
+      "url":"https://epbulletin.epc.ntnu.edu.tw/BEP/upload/journal/prog/b4b302c9_20250407.pdf",
+      "topic":"教育與職涯",
+      "summary":"使用 TEPS 與 TEPS-B 縱貫資料，分析學用相符、工作滿意及快樂感在青年生涯中的關係。"
+    },
+    {
+      "year":2024,
+      "title":"Sleep problems during early and late infancy: Diverse impacts on child development trajectories across multiple domains",
+      "authors":"Szu-Hua Wang, Kuang-Lin Lin, Chia-Ling Chen, Hawjeng Chiou, Chien-Ju Chang, Po-Hsi Chen, Ching-Yi Wu, Keh-Chung Lin",
+      "journal":"Sleep Medicine, 115, 177–186",
+      "doi":"10.1016/j.sleep.2024.02.018",
+      "url":"https://pubmed.ncbi.nlm.nih.gov/38367360/",
+      "topic":"兒童發展",
+      "summary":"檢視早期與晚期嬰兒睡眠問題和多個兒童發展領域軌跡的關聯。"
+    },
+    {
+      "year":2024,
+      "title":"Differential longitudinal effects of frequent sweetened food consumption at different exposure ages on child cognitive, language, and motor development",
+      "authors":"Zhao-Ting Tsai, Chia-Ling Chen, Hawjeng Chiou, Chien-Ju Chang, Chung-Yao Chen, Katie Pei-Hsuan Wu, Chia-Ying Chung, Po-Hsi Chen",
+      "journal":"Biomedical Journal, 47(1), 100608",
+      "doi":"10.1016/j.bj.2023.100608",
+      "url":"https://pure.lib.cgu.edu.tw/zh/publications/differential-longitudinal-effects-of-frequent-sweetened-food-cons/",
+      "topic":"兒童發展",
+      "summary":"以潛在成長模型比較不同年齡接觸甜食與認知、語言及動作發展的關係。"
+    },
+    {
+      "year":2024,
+      "title":"學生閱讀勝任感對教師閱讀教學活動量、班級經營、閱讀教學自主支持與學生閱讀表現之多層次中介效果研究：兼論教育分流的影響",
+      "authors":"韓佩倫、邱皓政、蘇宜芬",
+      "journal":"當代教育研究季刊，32(1)，3–40",
+      "doi":"10.6151/CERQ.202403_32(1).0001",
+      "url":"https://scholar.lib.ntnu.edu.tw/zh/publications/a-multilevel-mediation-study-of-students-reading-competence-on-te/",
+      "topic":"教育與職涯",
+      "summary":"以多層次中介分析檢視閱讀教學、學生閱讀勝任感與閱讀表現之間的關係。"
+    },
+    {
+      "year":2023,
+      "title":"教師專業自主與教學實踐關係之研究——教師自我效能的中介效果",
+      "authors":"張存真、宋曜廷、邱皓政",
+      "journal":"教育與心理研究，46(1)，1–37",
+      "doi":"10.53106/102498852023034601001",
+      "url":"https://ah.lib.nccu.edu.tw/item?item_id=166204&locale=zh_TW",
+      "topic":"教育與職涯",
+      "summary":"使用 TALIS 臺灣國中教師資料與結構方程模式，分析教師專業自主、自我效能與教學實踐。"
+    },
+    {
+      "year":2022,
+      "title":"Purpose Trajectories During Middle Adolescence: The Roles of Family, Teacher, and Peer Support",
+      "authors":"Hung-Yang Chen, Hawjeng Chiou, Ching-Ling Cheng",
+      "journal":"Journal of Youth and Adolescence, 51(2), 291–304",
+      "doi":"10.1007/s10964-021-01548-3",
+      "url":"https://scholar.lib.ntnu.edu.tw/en/publications/purpose-trajectories-during-middle-adolescence-the-roles-of-famil/",
+      "topic":"教育與職涯",
+      "summary":"追蹤臺灣技職高中學生的目的感發展，分析家庭、教師與同儕支持的角色。"
+    },
+    {
+      "year":2021,
+      "title":"Degrees of Shortage and Uncovered Ratios for Long-Term Care in Taiwan’s Regions: Evidence from Dynamic DEA",
+      "authors":"Kuo-Feng Wu, Jin-Li Hu, Hawjeng Chiou",
+      "journal":"International Journal of Environmental Research and Public Health, 18(2), 605",
+      "doi":"10.3390/ijerph18020605",
+      "url":"https://www.mdpi.com/1660-4601/18/2/605",
+      "topic":"組織與管理",
+      "summary":"使用動態資料包絡分析，研究臺灣各縣市的長期照顧資源缺口與效率。"
+    }
+  ],
+  "talks": [
+    {"date":"2026.09.18","title":"尋尋覓覓之縱貫資料的異質結構與發展軌跡：從潛在轉移分析到混合成長模式","event":"國立臺灣大學／社會工作教育學會／中信兒家研究中心","url":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"date":"2026.08.31、09.04","title":"AI 輔助縱貫資料分析與政策評估工作坊","event":"國家實驗研究院科技政策研究與資訊中心","url":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"date":"2026.07.17","title":"資料價創與挑戰工作坊：變中求異、異中求變？之變異求解","event":"中央研究院統計科學研究所","url":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"date":"2026.06.02","title":"變革時代的學術誠信：從 Nature 三部曲看 AI 統計沙盒與治理","event":"台灣統計方法學學會","url":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"}
+  ],
+  "profileSources": [
+    {"title":"邱皓政個人原網站","url":"https://web.ntnu.edu.tw/~hawjeng/"},
+    {"title":"完整履歷（2026.09.15 修訂）","url":"https://web.ntnu.edu.tw/~hawjeng/hawjengvita.pdf"},
+    {"title":"國立臺灣師範大學管理學院教師介紹","url":"https://www.mgt.ntnu.edu.tw/%E9%82%B1%E7%9A%93%E6%94%BF"},
+    {"title":"原網站研究清單","url":"https://web.ntnu.edu.tw/~hawjeng/research.html"}
+  ]
+}
