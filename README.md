@@ -4,9 +4,11 @@
 
 網站已包含 12 本書目與原文序言（含校閱作品）、10 篇精選期刊研究、學經歷、9 組專書配套資料連結，以及可新增的公開專案區。
 
+正式網站：[https://hawjeng.github.io/](https://hawjeng.github.io/)；來源 repository：[Hawjeng/hawjeng.github.io](https://github.com/Hawjeng/hawjeng.github.io)。GitHub Pages 已使用 GitHub Actions 發布，HTTPS 已開啟，[首次部署工作流](https://github.com/Hawjeng/hawjeng.github.io/actions/runs/36966136424)成功完成。
+
 ## 先看網頁
 
-解壓縮後，直接開啟 `index.html`。圖片、樣式、程式與序言都在檔案內，不需安裝套件。外部出版社與論文連結需要網路。
+可直接瀏覽[正式網站](https://hawjeng.github.io/)。若要本機瀏覽，解壓縮後開啟 `index.html`；圖片、樣式、程式與序言都在檔案內，不需安裝套件。外部出版社與論文連結需要網路。
 
 本機預覽也可在這個資料夾執行：
 
@@ -16,7 +18,9 @@ python -m http.server 8765
 
 再開啟 `http://localhost:8765`。
 
-## 放到 GitHub Pages
+## 在其他 repository 部署
+
+目前的 [Hawjeng/hawjeng.github.io](https://github.com/Hawjeng/hawjeng.github.io) 已完成部署；只有另外建立網站副本時，才需要以下設定。
 
 1. 在 GitHub 建立公開 repository。若希望網址是 `https://hawjeng.github.io/`，repository 名稱使用小寫的 `hawjeng.github.io`；若使用其他名稱，網址會多一段 repository 名稱。
 2. 上傳**這個資料夾裡的檔案與資料夾**至 repository 根目錄。保留 `.github/workflows/pages.yml`，不要把整包再包進第二層資料夾。
@@ -79,9 +83,15 @@ python scripts/verify.py
 
 照片、書封與序言為作者原網站／出版社提供的既有素材；素材來源記錄在 `data/image-sources.json`。這些素材及著作文字的權利仍屬原權利人，沒有宣稱開放授權。
 
-## GitHub 個人首頁與頭貼
+## GitHub 個人首頁與照片
 
-另附交付包中的 `github-profile/README.md`，可放入 `Hawjeng/Hawjeng` repository 顯示於個人 GitHub 首頁。它是給訪客看的個人介紹，與此網站維護說明分開。
+GitHub 個人首頁 README 已提交至 [Hawjeng/Hawjeng](https://github.com/Hawjeng/Hawjeng)，遠端內容與本機檔案逐位元組比對一致；交付包中另附 `github-profile/README.md`。它是給訪客看的個人介紹，與此網站維護說明分開；專書序言及配套資料連結指向新站。
 
-另附原站演講照 `github-avatar-original.jpg`，供 GitHub 頭貼使用，未改造人像。於 GitHub **Settings → Public profile → Profile picture → Edit → Upload a photo** 上傳；在 GitHub 內裁切框選臉部和肩膀後保存。目前尚未上傳至 GitHub。
+使用者已取消更換 GitHub 頭貼，頭貼未修改。`github-avatar-original.jpg` 另附作為原站演講照片素材，未改造人像。
+
+## 發布後核對
+
+正式站 19 個 HTML、首頁 10 個圖片／CSS／JavaScript 等資源均可存取；canonical 指向正式網址；全部 12 本書的 106 段原文序言與來源資料一致；404 頁可正確回首頁。
+
+桌面 1280 × 900 首頁與書籍資訊展開已檢查；手機 375 像素寬度未出現橫向溢位，選單展開及點選專書後收起已通過。手機瀏覽器連線中斷，後續截圖、專書搜尋與序言展開操作未完成。
 
