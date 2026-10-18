@@ -338,7 +338,7 @@ interval_theory<-tagList(
   p(tags$a("NIST：信賴區間的意義",href="https://www.itl.nist.gov/div898/handbook/prc/section1/prc14.htm",target="_blank",rel="noopener noreferrer"),"；",tags$a("NIST：平均數的信賴界限",href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm",target="_blank",rel="noopener noreferrer")))
 
 home_ui<-withMathJax(div(class="intro-home",tabsetPanel(
-  tabPanel("基本概念",h2("抽樣與估計"),p("Sampling and estimation"),
+  tabPanel("基本概念",h2("抽樣分配與估計"),p("Sampling Distribution and Estimation"),
     p("抽樣（sampling）從目標母體選取樣本；估計（estimation）用樣本資料推知未知母體參數。隨機抽樣與合適的抽樣框（sampling frame）是推論的基礎；本章依序介紹抽樣分配、中央極限定理、點估計與區間估計。"),
     h3("從母體到樣本"),
     p("母體（population）是研究希望了解的全體對象；樣本（sample）是實際觀察的一部分。母體參數（population parameter）描述母體特性，例如平均數 μ 與比例 π；樣本統計量（sample statistic）由樣本資料計算，例如平均數 x̄ 與比例 p。估計的目的，就是用可觀察的樣本統計量推知未知的母體參數。"),
