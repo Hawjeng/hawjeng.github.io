@@ -34,6 +34,10 @@ def main():
     pages={}; errors=[]; links=0
     for path in folder.rglob('*.html'):
         if path.parts[-2:] and '_site' in path.relative_to(folder).parts: continue
+        # Shinylive owns the generated HTML/runtime under teaching/.
+        # Validate the site links to these exports below, without imposing
+        # the academic site's page template on third-party runtime files.
+        if path.relative_to(folder).parts[0] == 'teaching': continue
         p=Page(); p.feed(path.read_text(encoding='utf-8')); pages[path.resolve()]=p
         if p.lang!='zh-Hant': errors.append(f'{path.name}: language missing')
         if p.h1!=1: errors.append(f'{path.name}: expected one h1, got {p.h1}')
@@ -69,6 +73,16 @@ def main():
             for paragraph in pref.get('paragraphs',[]):
                 if paragraph not in content: errors.append(f'{bid}: preface paragraph missing')
     if len(pages)!=7+len(books): errors.append(f'Expected {7+len(books)} pages, found {len(pages)}')
+    if (folder / 'teaching').exists():
+        for app in ('probability-distributions', 'central-limit-theorem'):
+            for filename in ('index.html', 'app.json'):
+                if not (folder / 'teaching' / app / filename).is_file():
+                    errors.append(f'{app}: missing Shinylive {filename}')
+        for filename in ('Central_Limit_Theorem.R', 'Stat_distribution.R'):
+            if not (folder / 'teaching/source' / filename).is_file():
+                errors.append(f'Teaching source missing: {filename}')
+        if not (folder / 'teaching/fonts/NotoSansCJKtc-Regular.otf').is_file():
+            errors.append('Missing Chinese plot font')
     if errors:
         print('\n'.join(errors)); sys.exit(1)
     print(f'PASS: {len(pages)} pages, {links} internal links/assets, {len(books)} complete book prefaces, metadata and image alt text.')
