@@ -32,7 +32,7 @@ jobs:
         with:
           use-public-rspm: true
       - name: Install Shinylive exporter
-        run: Rscript -e 'install.packages("shinylive", repos="https://cloud.r-project.org")'
+        run: Rscript -e 'install.packages(c("shinylive", "shiny"), repos="https://cloud.r-project.org")'
       - name: Export interactive teaching apps
         run: Rscript scripts/export-shinylive.R
       - name: Verify pages and local links
