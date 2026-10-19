@@ -1,6 +1,17 @@
 # ============================================================================
 # 機率分配教學 shiny 套件；機率函數皆使用 R 內建 stats 套件
 # ============================================================================
+
+# Browser-only font setup: keep the downloadable original R sources unchanged.
+if (grepl("emscripten", R.version$os)) {
+  .font_dir <- "/home/web_user/fonts"
+  dir.create(.font_dir, recursive = TRUE, showWarnings = FALSE)
+  .font_file <- file.path(.font_dir, "NotoSansCJKtc-Regular.otf")
+  .font_origin <- as.character(get("eval_js", envir=asNamespace(paste0("web", "r")))("self.location.origin"))
+  download.file(paste0(.font_origin, "/teaching/fonts/NotoSansCJKtc-Regular.otf"),
+                .font_file, mode = "wb", quiet = TRUE)
+}
+
 if (.Platform$OS.type == "windows") {
   invisible(Sys.setlocale("LC_CTYPE", "Chinese (Traditional)_Taiwan.utf8"))
   grDevices::windowsFonts(Teaching = grDevices::windowsFont("Microsoft JhengHei"))
@@ -33,7 +44,7 @@ draw_point_labels <- function(x,y,color) {
 # m = E(X)；v = Var(X)；標準差統一由 sqrt(v) 計算，避免混淆 σ 和 σ²。
 make_distribution <- function(kind, n = 10, p = .5, N = 50, S = 20,
                               lambda = 4, mu = 0, sigma = 1, a = 0, b = 10) {
-  switch(kind,
+  z <- switch(kind,
     binomial = {
       stopifnot(is.finite(n), n >= 1, n == floor(n), p >= 0, p <= 1)
       list(kind = kind, title = "二項分配", discrete = TRUE,
@@ -101,6 +112,22 @@ make_distribution <- function(kind, n = 10, p = .5, N = 50, S = 20,
         mechanism = "X≥0，常用來描述固定速率事件的等待時間。R 的 dexp/pexp 使用 rate=λ，不是尺度參數。",
         effect = "λ 越大，等待時間越短，μ 與 σ 同時變小。分配始終右偏，偏態係數為 2。圖形右端涵蓋 99.99% 機率，完整右尾延伸到無限大。")
     })
+  # Standardized theoretical central moments; KU is excess kurtosis (normal = 0).
+  shape <- if(z$v <= 0) c(NA_real_, NA_real_) else switch(kind,
+    binomial = c((1-2*p)/sqrt(z$v), (1-6*p*(1-p))/z$v),
+    hyper = {
+      x <- seq.int(z$domain[1], z$domain[2])
+      mass <- z$d(x)
+      standardized <- (x-z$m)/sqrt(z$v)
+      c(sum(standardized^3*mass), sum(standardized^4*mass)-3)
+    },
+    poisson = c(1/sqrt(lambda), 1/lambda),
+    normal = c(0, 0),
+    uniform = c(0, -6/5),
+    exponential = c(2, 6))
+  z$sk <- shape[1]
+  z$ku <- shape[2]
+  z
 }
 
 # 本檔可直接按 Source 執行，不需要 app.R；調查範例程式已合併在本檔。
@@ -505,6 +532,11 @@ ui <- fluidPage(
     .well .btn{padding:6px 8px}
     .metric{padding:9px 12px;margin:0 0 8px;font-size:12px;border-radius:7px}
     .metric strong{font-size:22px}
+    .metrics-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.metrics-row .metric{min-width:0;padding:6px 8px;margin:0 0 6px;font-size:11px;white-space:nowrap}.metrics-row .metric strong{font-size:18px}
+    .metric strong.shape-orange{color:#d97706}.metric strong.shape-red{color:#dc2626}
+    .metric strong.shape-undefined{color:#64748b;font-size:17px}
+
+    @media(max-width:575px){.metrics-row{gap:4px}.metrics-row .metric{padding:5px 4px;font-size:10px}.metrics-row .metric strong{font-size:15px}}
     #distribution_plot{height:clamp(190px,calc(100vh - 245px),360px)!important;width:100%!important}
     #exercise_plot{height:clamp(190px,45vh,340px)!important}
     .intro-home{margin:10px auto 20px;padding:18px 26px;font-size:13px}
@@ -535,9 +567,13 @@ ui <- fluidPage(
     helpText("同一分配可保留一組參數。切換分配會清除比較；有保留曲線時，兩組使用共同座標。"),
     div(class="note","觀察：μ 決定分配的中心；σ 描述 X 的分散程度。圖上的 μ±σ 是位置標記，不一定是可能取值，也不是信賴區間。")
   ), mainPanel(width=9,
-    fluidRow(column(4,div(class="metric","理論平均數 μ",br(),strong(textOutput("mean",inline=TRUE)))),
-             column(4,div(class="metric","理論標準差 σ",br(),strong(textOutput("sd",inline=TRUE)))),
-             column(4,div(class="metric","理論變異數 σ²",br(),strong(textOutput("variance",inline=TRUE))))),
+    div(class="metrics-row",
+      div(class="metric","平均數 μ",br(),strong(textOutput("mean",inline=TRUE))),
+      div(class="metric","標準差 σ",br(),strong(textOutput("sd",inline=TRUE))),
+      div(class="metric","變異數 σ²",br(),strong(textOutput("variance",inline=TRUE))),
+      div(class="metric","偏態 SK",br(),uiOutput("sk",inline=TRUE)),
+      div(class="metric","峰度 KU",br(),uiOutput("ku",inline=TRUE))),
+    helpText("SK 為偏態；KU 為超額峰度（常態為 0）。絕對值 > 0.5 顯示橘色，> 1 顯示紅色。此為形狀判讀提示，並非正式常態性檢定；變異數為 0 時係數未定義。"),
     tabsetPanel(
       tabPanel("分配探索",
         checkboxInput("point_labels","在離散圖上標示各取值的 P(X=x)",TRUE),
@@ -791,9 +827,16 @@ server <- function(input, output, session) {
     }
     data
   },striped=TRUE,bordered=TRUE,spacing="s",digits=4)
-  output$mean <- renderText(fmt(current()$m))
-  output$sd <- renderText(fmt(sqrt(current()$v)))
-  output$variance <- renderText(fmt(current()$v))
+  output$mean <- renderText(sprintf("%.3f", current()$m))
+  output$sd <- renderText(sprintf("%.3f", sqrt(current()$v)))
+  output$variance <- renderText(sprintf("%.3f", current()$v))
+  shape_value <- function(value) {
+    if(!is.finite(value)) return(strong(class="shape-undefined", "未定義"))
+    level <- if(abs(value)>1) "shape-red" else if(abs(value)>.5) "shape-orange" else "shape-normal"
+    strong(class=level, sprintf("%.3f", if(abs(value)<0.0005) 0 else value))
+  }
+  output$sk <- renderUI(shape_value(current()$sk))
+  output$ku <- renderUI(shape_value(current()$ku))
   output$formulas <- renderTable(formula_table,striped=TRUE,bordered=TRUE)
   output$calculation <- renderUI({
     z<-current()
