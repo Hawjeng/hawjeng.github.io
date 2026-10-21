@@ -39,7 +39,7 @@ FOCI = [
 
 def header(active, prefix):
     links = [('index.html','首頁'),('books.html','專書著作'),('research.html','研究'),('about.html','學經歷'),('resources.html','教學與專案')]
-    nav = ''.join(f'<a href="{prefix}{path}"'+(' aria-current="page"' if path == active else '')+f'>{title}</a>' for path,title in links)
+    nav = ''.join(f'<a href="{prefix}{path}"'+(' aria-current="page"' if path == active else '')+f'>{title}</a>'+(ext(S['cv'], 'VITA', '') if path == 'about.html' else '') for path,title in links)
     return f'''<a class="skip-link" href="#main">跳到主要內容</a>
 <header class="site-header"><div class="container header-inner">
 <a class="brand" href="{prefix}index.html" aria-label="邱皓政，回首頁"><span class="brand-mark" aria-hidden="true">Hc</span><span class="brand-name">邱皓政<span class="brand-en">HAWJENG CHIOU</span></span></a>
