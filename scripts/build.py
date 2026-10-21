@@ -98,8 +98,8 @@ def timeline(items):
     return '<div class="timeline">'+''.join(f'<div class="timeline-row"><div class="period">{E(i["period"])}</div><div><h3>'+(ext(i['institutionUrl'],i['institution'],'') if i.get('institutionUrl') else E(i['institution']))+f' · {E(i["title"])}</h3>'+(f'<p>{E(i["detail"])}</p>' if i.get('detail') else '')+'</div></div>' for i in items)+'</div>'
 
 def degree_credential():
-    chinese = ext(D['institutionUrl'], D['institution'] + D['title'], 'appointment-link')
-    english = ext(D['institutionUrl'], 'University of Southern California', 'appointment-link')
+    chinese = ext(D['institutionUrl'], D['institution'] + D['title'], 'appointment-link') if D.get('institutionUrl') else E(D['institution'] + D['title'])
+    english = ext(D['institutionUrl'], 'University of Southern California', 'appointment-link') if D.get('institutionUrl') else 'University of Southern California'
     return f'<div class="credential"><span class="credential-label">學術背景</span><strong>{chinese}</strong><small lang="en">{english} (Ph.D. in Psychometrics)</small></div>'
 
 def ntnu_highlight():
