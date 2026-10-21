@@ -48,8 +48,8 @@ def header(active, prefix):
 
 def footer(prefix):
     return f'''<section class="contact-band" id="contact" aria-labelledby="contact-title"><div class="container contact-inner">
-<div><div class="eyebrow">Book information</div><h2 id="contact-title">專書資訊查詢</h2><p>專書著作、版次、售價與購買資訊，請直接至各出版社網站檢索。本站「專書著作」頁提供各書的出版社連結。</p></div>
 <div class="contact-details"><a href="mailto:{url(S['email'])}">{E(S['email'])}</a><div class="contact-meta">國立臺灣師範大學管理學院 · <a class="phone-link" href="tel:{url(S['telephone'])}">02-7749-3312</a></div><div class="copy-row"><button type="button" data-copy="{E(S['email'])}" hidden>複製 Email</button><span role="status" aria-live="polite"></span></div></div>
+<div><div class="eyebrow">Book information</div><h2 id="contact-title">專書資訊查詢</h2><p>專書著作、版次、售價與購買資訊，請直接至各出版社網站檢索。本站「專書著作」頁提供各書的出版社連結。</p></div>
 </div></section><footer class="site-footer"><div class="container footer-inner"><div>© 2026 邱皓政 Hawjeng Chiou <span class="footer-date">· 資料核對 {E(S['updated'])}</span></div><div class="footer-links">{ext(S['github'],'GitHub','')}{ext(S['oldSite'],'師大原網站','')}<a href="{prefix}sources.html">資料來源</a><a href="#top">回到頂端</a></div></div></footer>'''
 
 def page(path, title, description, body, active=None):
