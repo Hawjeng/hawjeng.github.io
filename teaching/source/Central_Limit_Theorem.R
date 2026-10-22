@@ -44,7 +44,7 @@ demo_ui <- fluidPage(
       actionButton("simulate", "重新抽樣", class="btn-primary", width="100%"),
       hr(),
       checkboxInput("show_normal", "常態近似曲線", TRUE),
-      div(class="note-box", HTML("<b>教學重點</b><br>樣本數增加時，樣本平均數的抽樣分配會更集中。虛線為模擬抽樣分配的核密度曲線，實線為理論常態曲線；下方單次樣本改以彩色魚肚圖呈現樣本密度，並保留散點。X 軸固定後，可清楚看到分配逐漸收縮。理論標準誤為 σ/√n。"))
+      div(class="note-box", HTML("<b>教學重點</b><br>樣本數增加時，樣本平均數的抽樣分配會更集中。大量重複時虛線為模擬密度，實線為常態參考曲線；每次抽 n 個觀察值，算出一個平均數；重複 k 次得到 k 個平均數。k<30 僅畫點圖，30≤k<100 畫直方圖，k≥100 才畫平滑密度。下方可逐次對照原始資料與平均數。X 軸固定後，可清楚看到分配逐漸收縮。理論標準誤為 σ/√n。"))
     ),
     mainPanel(
       width = 9,
@@ -55,7 +55,12 @@ demo_ui <- fluidPage(
         column(3, div(class="value-box", div(class="value-title","模擬標準誤 SD(x̄)"), div(class="value-number", textOutput("simulated_se", inline=TRUE))))
       ),
       tabsetPanel(
-        tabPanel("抽樣分配", br(), plotOutput("sampling_plot", height="480px"), verbatimTextOutput("interpretation")),
+        tabPanel("抽樣分配", br(), plotOutput("sampling_plot", height="480px"), verbatimTextOutput("interpretation"),
+          h4("逐次抽樣：原始資料與平均數"),
+          plotOutput("draws_plot", height="300px"),
+          helpText("圓點是原始觀察值；菱形是該次平均數。每頁顯示最多 10 次，表格列出每次完整資料。"),
+          numericInput("draw_page", "抽樣紀錄頁次（每頁 10 次）", 1, min=1, step=1),
+          tableOutput("draws_table")),
         tabPanel("母體分配疊加抽樣分配與單次樣本", br(),
                  plotOutput("population_plot", height="420px"),
                  plotOutput("sample_plot", height="280px")),
@@ -449,7 +454,7 @@ ci_ui <- tabsetPanel(id="ci_section",selected="prop",tabPanel("平均數區間�
 
 ui <- fluidPage(
   tags$head(tags$meta(charset="utf-8"),tags$style(HTML('body{font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif;background:#f5f7fa;color:#334155}.nav-tabs>li>a{padding:11px 18px;color:#687c8c}.nav-tabs>li.active>a{color:#215f7a;border-top:2px solid #39788f}.tab-content{padding-top:14px}.intro-home{max-width:1120px;margin:20px auto 36px;padding:26px 38px;line-height:1.85;background:white;border:1px solid #e4e9ef;border-radius:7px}.intro-home h2{font-size:22px;color:#245f77}.intro-home h3{font-size:19px;color:#245f77;margin-top:24px}.intro-home p{margin-bottom:15px}.home-equation{overflow-x:auto;padding:8px 0;font-size:16px}.formula{font-size:17px;color:#245f77;padding:12px 0}.formula p{margin:4px 0}.intro-source{font-size:12px;color:#7b8794}.well{background:white!important}.value-number{color:#146d92}.note-box{background:#eaf3fa!important;border-left:3px solid #6792a5!important}@media(max-width:767px){.intro-home{padding:18px;margin:8px 0}.nav-tabs>li>a{padding:9px}}'))),
-  titlePanel("抽樣與估計 Sampling and estimation"),
+  titlePanel("抽樣分配與估計 Sampling Distribution and Estimation"),
   # 隨可用視窗高度調整圖形容器，tab 切換後重新量測。
   tags$head(tags$style(HTML('
     .container-fluid>h2{margin-top:15px;margin-bottom:13px}
@@ -616,16 +621,73 @@ server <- function(input, output, session) {
     req(length(input$seed)==1, is.finite(input$seed),input$seed>=1,input$seed<=2147480000,input$seed==floor(input$seed))
     set.seed(input$seed)
     p <- population_parameters()
-    one_sample <- p$generator(input$n)
-    sample_means <- replicate(input$reps, mean(p$generator(input$n)))
-    list(sample=one_sample, sample_means=sample_means,
+    samples <- matrix(p$generator(input$n * input$reps), nrow=input$n)
+    sample_means <- colMeans(samples)
+    list(sample=samples[,1], samples=samples, sample_means=sample_means,
          theoretical_se=p$sd/sqrt(input$n), simulated_se=sd(sample_means), pars=p)
   }, ignoreNULL=FALSE)
+
+
+  # Small simulations show observations, never an artificial smoothed distribution.
+  draw_mean_points <- function(x, xlim, main) {
+    bins <- round((x-xlim[1])/diff(xlim)*60)
+    levels <- ave(seq_along(x), bins, FUN=seq_along)
+    plot(x, levels, xlim=range(xlim,x), ylim=c(0,max(levels)+2),
+         xlab="樣本平均數", ylab="", yaxt="n", main=main,
+         pch=19, col="#147da0", bty="l")
+    text(x,levels,labels=seq_along(x),pos=3,cex=.75,col="#147da0")
+    mtext("每個點代表一次抽樣的平均數；數字為抽樣次序", side=3, cex=.8)
+  }
+  draw_indices <- reactive({
+    req(input$draw_page)
+    validate(need(is.finite(input$draw_page) && input$draw_page>=1 &&
+      input$draw_page==floor(input$draw_page), "請輸入正整數頁次。"))
+    k <- length(simulation()$sample_means)
+    page <- min(input$draw_page, ceiling(k/10))
+    seq.int((page-1)*10+1, min(page*10,k))
+  })
+  observeEvent(input$reps, {
+    updateNumericInput(session,"draw_page",max=ceiling(input$reps/10),
+      value=min(isolate(input$draw_page),ceiling(input$reps/10)))
+  })
+  output$draws_plot <- renderPlot({
+    s<-simulation();j<-draw_indices();m<-s$samples[,j,drop=FALSE]
+    op<-par(mar=c(4,4,3,1));on.exit(par(op))
+    plot(NA,xlim=range(s$pars$xlim,m),ylim=c(.5,length(j)+.5),
+      xlab="原始觀察值與樣本平均數",ylab="",yaxt="n",
+      main=sprintf("每次 n=%d 個觀察值 → 1 個平均數",input$n))
+    axis(2,at=seq_along(j),labels=paste0("第",j,"次"),las=1)
+    cols<-grDevices::hcl.colors(length(j),"Dark 3")
+    for(i in seq_along(j)) {
+      # Deterministic vertical offsets keep coincident observations visible.
+      offset<-if(nrow(m)==1) 0 else seq(-.18,.18,length.out=nrow(m))
+      points(m[,i],i+offset,pch=16,col=adjustcolor(cols[i],alpha.f=.6),cex=.7)
+      points(s$sample_means[j[i]],i,pch=23,bg="#c23c50",col="white",cex=1.5)
+    }
+    legend("topright",c("原始觀察值","該次平均數"),pch=c(16,23),
+      col=c("#147da0","white"),pt.bg=c(NA,"#c23c50"),bty="n",cex=.8)
+  })
+  output$draws_table <- renderTable({
+    s<-simulation();j<-draw_indices()
+    data.frame(抽樣次序=j,
+      原始觀察值=vapply(j,function(i) paste(sprintf("%.4f",s$samples[,i]),collapse="、"),character(1)),
+      樣本平均數=sprintf("%.4f",s$sample_means[j]),check.names=FALSE)
+  },striped=TRUE,bordered=TRUE,spacing="s")
 
   output$compare_n <- renderPlot({
     s<-simulation();p<-s$pars;ns<-c(1,5,30,100)
     set.seed(input$seed+3000)
     xs<-lapply(ns,function(n) replicate(input$reps,mean(p$generator(n))))
+    if(input$reps<100) {
+      op<-par(mfrow=c(2,2),mar=c(4,4,3,1));on.exit(par(op))
+      for(i in seq_along(ns)) {
+        title<-sprintf("n=%d；k=%d；SE=%.3f",ns[i],input$reps,p$sd/sqrt(ns[i]))
+        if(input$reps<30) draw_mean_points(xs[[i]],p$xlim,title)
+        else hist(xs[[i]],probability=TRUE,xlim=range(p$xlim,xs[[i]]),main=title,xlab="樣本平均數",ylab="密度",col="#d9edf2")
+        abline(v=p$mean,lty=2)
+      }
+      return(invisible(NULL))
+    }
     ds<-lapply(xs,function(x) density(x,from=p$xlim[1],to=p$xlim[2],n=2048))
     ymax<-max(vapply(ds,function(d) max(d$y),numeric(1)),dnorm(p$mean,p$mean,p$sd/10))*1.08
     op<-par(mfrow=c(2,2),mar=c(4,4,3,1));on.exit(par(op))
@@ -644,6 +706,18 @@ server <- function(input, output, session) {
     op <- par(mar=c(2.5,4.1,3.1,4.1)); on.exit(par(op))
     s <- simulation(); xbar <- s$sample_means; p <- s$pars
     xlim <- p$xlim
+    if(length(xbar)<100) {
+      title<-sprintf("重複抽樣所得的樣本平均數（n=%d，k=%d）",input$n,input$reps)
+      if(length(xbar)<30) draw_mean_points(xbar,xlim,title)
+      else {
+        hist(xbar,probability=TRUE,xlim=range(xlim,xbar),main=title,
+          xlab="樣本平均數",ylab="密度",col="#d9edf2",border="white")
+        if(isTRUE(input$show_normal)) curve(dnorm(x,p$mean,s$theoretical_se),add=TRUE,lwd=2)
+      }
+      abline(v=p$mean,lty=2,col="#475569")
+      abline(v=mean(xbar),lty=3,col="#c23c50")
+      return(invisible(NULL))
+    }
 
     d_sim <- density(
       xbar,
@@ -673,7 +747,7 @@ server <- function(input, output, session) {
       xlim = xlim,
       ylim = c(0, y_max),
       main = paste0(
-        "樣本平均數的抽樣分配變化〔固定 X 軸、平滑曲線〕",
+        "樣本平均數的模擬密度〔至少 100 次才平滑〕",
         "（n = ", input$n, "，重複抽樣 ", input$reps, " 次）"
       ),
       xlab = "",
@@ -694,7 +768,7 @@ server <- function(input, output, session) {
 
     annotate_stats(c(
       sprintf("母體：偏態 = %.3f；峰度 = %.3f", p$skew, p$ex_kurt),
-      sprintf("抽樣分配：偏態 = %.3f；峰度 = %.3f", skew_xbar, kurt_xbar)
+      if(length(xbar)>=100) sprintf("模擬平均數：偏態 = %.3f；超額峰度 = %.3f", skew_xbar, kurt_xbar) else "重複次數少，不解讀偏態與峰度"
     ), cex = 0.95)
 
     legend("topright",
@@ -712,6 +786,13 @@ server <- function(input, output, session) {
     s <- simulation()
     p <- s$pars
     v <- p$generator(50000)
+    if(length(s$sample_means)<100) {
+      hist(v,breaks=60,probability=TRUE,xlim=p$xlim,col="white",border="grey60",
+        main=paste("母體分配：",p$label),xlab="X",ylab="母體密度")
+      rug(s$sample_means,col="firebrick",lwd=2)
+      mtext("底部紅色短線：各次樣本平均數（少量結果不平滑）",side=3,cex=.8)
+      return(invisible(NULL))
+    }
     xbar <- s$sample_means
 
     pop_breaks <- if (identical(p$xlim, c(0,1))) seq(0,1,length.out=61) else 60
@@ -786,8 +867,8 @@ server <- function(input, output, session) {
     p <- s$pars
     x <- s$sample
 
-    if(length(x)<2 || sd(x)==0) {
-      plot(x,0,xlim=p$xlim,ylim=c(-.5,.5),yaxt="n",ylab="",xlab="觀察值 X",main="單次樣本僅有一筆觀察值，無法估計密度",pch=19,col="#147da0")
+    if(length(x)<30 || sd(x)==0) {
+      plot(x,rep(0,length(x)),xlim=range(p$xlim,x),ylim=c(-.5,.5),yaxt="n",ylab="",xlab="觀察值 X",main=sprintf("第一次樣本：%d 個原始觀察值（少量資料不平滑）",length(x)),pch=19,col="#147da0")
       abline(v=mean(x),lty=2)
       return(invisible(NULL))
     }
@@ -901,7 +982,7 @@ server <- function(input, output, session) {
 
   output$interpretation <- renderText({
     s<-simulation(); ratio<-s$simulated_se/s$theoretical_se
-    paste0("解讀：目前每次抽樣 n = ",input$n,"。理論標準誤為 ",sprintf("%.3f",s$theoretical_se),
+    paste0(if(input$reps<30) "重複次數少，模擬標準誤尚不穩定。\n" else "", "每次抽 n 個值算出一個平均數；k 次產生 k 個平均數。\n解讀：目前每次抽樣 n = ",input$n,"。理論標準誤為 ",sprintf("%.3f",s$theoretical_se),
            "，模擬標準誤為 ",sprintf("%.3f",s$simulated_se),"。模擬值約為理論值的 ",sprintf("%.1f%%",ratio*100),
            "。將 n 增加為原來的 4 倍時，標準誤約縮小為原來的 1/2。")
   })
