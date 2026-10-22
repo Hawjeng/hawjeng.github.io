@@ -52,6 +52,8 @@ demo_ui <- fluidPage(
       actionButton("simulate", "重新抽樣", class="btn-primary", width="100%"),
       hr(),
       checkboxInput("show_normal", "常態近似曲線", TRUE),
+      checkboxInput("show_population_bg", "淡色母體分配背景", TRUE),
+      helpText("密度圖的淡藍網底與前景共用密度刻度；點圖網底僅示意母體形狀。Gamma、Beta 的邊界密度可能無限高，超出圖框部分截斷。"),
       div(class="note-box", HTML("<b>教學重點</b><br>樣本數增加時，樣本平均數的抽樣分配會更集中。大量重複時虛線為模擬密度，實線為常態參考曲線；每次抽 n 個觀察值，算出一個平均數；重複 k 次得到 k 個平均數。k<30 僅畫點圖，30≤k<100 畫直方圖，k≥100 才畫平滑密度。下方可逐次對照原始資料與平均數。X 軸固定後，可清楚看到分配逐漸收縮。理論標準誤為 σ/√n。"))
     ),
     mainPanel(
@@ -570,6 +572,7 @@ server <- function(input, output, session) {
         sd = 10,
         skew = 0,
         ex_kurt = 0,
+        density = function(x) dnorm(x,50,10),
         generator = function(size) rnorm(size, 50, 10),
         xlim = c(10, 90),
         label = "常態分布：N(50, 10²)"
@@ -586,6 +589,7 @@ server <- function(input, output, session) {
           sd = (b-a)/sqrt(12),
           skew = 0,
           ex_kurt = -6/5,
+          density = function(x) dunif(x,min=a,max=b),
           generator = function(size) runif(size, min=a, max=b),
           xlim = c(a,b),
           label = sprintf("矩形分配：U(%g, %g)", a, b)
@@ -600,6 +604,7 @@ server <- function(input, output, session) {
           sd = sqrt(alpha) * theta,
           skew = 2 / sqrt(alpha),
           ex_kurt = 6 / alpha,
+          density = function(x) dgamma(x,shape=alpha,scale=theta),
           generator = function(size) rgamma(size, shape = alpha, scale = theta),
           xlim = c(0, qgamma(0.995, shape = alpha, scale = theta)),
           label = sprintf(
@@ -614,6 +619,7 @@ server <- function(input, output, session) {
         sd = sqrt(125),
         skew = 0,
         ex_kurt = 26875 / (125^2) - 3,
+        density = function(x) .5*dnorm(x,40,5)+.5*dnorm(x,60,5),
         generator = function(size) {
           g <- rbinom(size, 1, .5)
           rnorm(size, ifelse(g == 0, 40, 60), 5)
@@ -630,6 +636,7 @@ server <- function(input, output, session) {
           sd = sqrt(a * b / ((a + b)^2 * (a + b + 1))),
           skew = 2 * (b - a) * sqrt(a + b + 1) / ((a + b + 2) * sqrt(a * b)),
           ex_kurt = 6 * (((a - b)^2 * (a + b + 1)) - a * b * (a + b + 2)) / (a * b * (a + b + 2) * (a + b + 3)),
+          density = function(x) dbeta(x,shape1=a,shape2=b),
           generator = function(size) rbeta(size, shape1 = a, shape2 = b),
           xlim = c(0, 1),
           label = sprintf("Beta 分布：Beta(α = %.1f, β = %.1f)", a, b)
@@ -654,13 +661,27 @@ server <- function(input, output, session) {
   }, ignoreNULL=FALSE)
 
 
+  population_background <- function(p, shape_only=FALSE) {
+    if(!isTRUE(input$show_population_bg)) return(invisible(NULL))
+    xx<-seq(p$xlim[1],p$xlim[2],length.out=2048)
+    yy<-p$density(xx)
+    top<-par("usr")[4]
+    if(shape_only) yy<-yy/max(yy[is.finite(yy)])*.6
+    yy<-pmin(yy,top)
+    polygon(c(xx[1],xx,tail(xx,1)),c(0,yy,0),
+      col="#dcebf3",border=NA)
+    lines(xx,yy,col="#a8c5d7",lwd=1)
+  }
+
   # Small simulations show observations, never an artificial smoothed distribution.
   draw_mean_points <- function(x, xlim, main) {
     bins <- round((x-xlim[1])/diff(xlim)*60)
     levels <- ave(seq_along(x), bins, FUN=seq_along)
     plot(x, levels, xlim=range(xlim,x), ylim=c(0,max(levels)+2),
          xlab="樣本平均數", ylab="", yaxt="n", main=main,
-         pch=19, col="#147da0", bty="l")
+         pch=19, col="#147da0", bty="l", type="n")
+    population_background(simulation()$pars,shape_only=TRUE)
+    points(x,levels,pch=19,col="#147da0")
     text(x,levels,labels=seq_along(x),pos=3,cex=.75,col="#147da0")
     mtext("每個點代表一次抽樣的平均數；數字為抽樣次序", side=3, cex=.8)
   }
@@ -736,8 +757,14 @@ server <- function(input, output, session) {
       title<-sprintf("重複抽樣所得的樣本平均數（n=%d，k=%d）",input$n,input$reps)
       if(length(xbar)<30) draw_mean_points(xbar,xlim,title)
       else {
-        hist(xbar,probability=TRUE,xlim=range(xlim,xbar),main=title,
-          xlab="樣本平均數",ylab="密度",col="#d9edf2",border="white")
+        hh<-hist(xbar,plot=FALSE)
+        py<-p$density(seq(xlim[1],xlim[2],length.out=2048))
+        ymax<-max(hh$density,if(isTRUE(input$show_population_bg)) py[is.finite(py)] else 0,
+          if(isTRUE(input$show_normal)) dnorm(p$mean,p$mean,s$theoretical_se) else 0)*1.18
+        plot(hh,freq=FALSE,xlim=range(xlim,xbar),ylim=c(0,ymax),main=title,
+          xlab="樣本平均數",ylab="密度",col=NA,border=NA)
+        population_background(p)
+        plot(hh,freq=FALSE,add=TRUE,col="#147da030",border="#147da0")
         if(isTRUE(input$show_normal)) curve(dnorm(x,p$mean,s$theoretical_se),add=TRUE,lwd=2)
       }
       abline(v=p$mean,lty=2,col="#475569")
@@ -762,12 +789,14 @@ server <- function(input, output, session) {
 
     skew_xbar <- sample_skewness(xbar)
     kurt_xbar <- sample_excess_kurtosis(xbar)
-    y_max <- max(d_sim$y, y_theory, na.rm = TRUE) * 1.18
+    py<-p$density(seq(xlim[1],xlim[2],length.out=2048))
+    y_max <- max(d_sim$y, if(isTRUE(input$show_normal)) y_theory else 0,
+      if(isTRUE(input$show_population_bg)) py[is.finite(py)] else 0,na.rm=TRUE)*1.18
 
     plot(
       d_sim$x,
       d_sim$y,
-      type = "l",
+      type = "n",
       lwd = 2,
       lty = 2,
       xlim = xlim,
@@ -782,6 +811,8 @@ server <- function(input, output, session) {
       xaxs = "i",
       yaxs = "i"
     )
+    population_background(p)
+    lines(d_sim$x,d_sim$y,lwd=2,lty=2)
     mtext(expression(bar(x)), side=1, line=.7, at=par("usr")[2], adj=0, cex=.9, xpd=NA)
     axis(4)
     mtext("密度", side = 4, line = 2)
@@ -799,11 +830,13 @@ server <- function(input, output, session) {
 
     legend("topright",
            legend = c(
+             if(isTRUE(input$show_population_bg)) "淡藍網底：母體密度" else "母體背景已關閉",
              sprintf("母體平均數 μ = %.2f", p$mean),
              sprintf("模擬平均數 = %.2f", mean(xbar)),
              sprintf("理論 SE = %.3f", s$theoretical_se)
            ),
-           lty = c(2, 3, 1), lwd = c(3, 2, 3), bty = "n", cex = 0.85)
+           pch=c(15,NA,NA,NA),col=c("#a8c5d7","black","black","black"),
+           lty = c(NA,2,3,NA), lwd = c(NA,3,2,NA), bty = "n", cex = 0.85)
   })
 
 
