@@ -16,6 +16,7 @@ demo_ui <- fluidPage(
       selectInput("population", "母體分配",
                   choices = c(
                     "常態分布"="normal",
+                    "矩形分配（均勻分配）"="uniform",
 
                     "Gamma 分布（可調 α、θ）"="gamma",
                     "雙峰分布"="bimodal",
@@ -38,6 +39,13 @@ demo_ui <- fluidPage(
         sliderInput("beta_alpha", "Beta 形狀參數 α", min=0.1, max=10, value=2, step=0.1),
         sliderInput("beta_beta", "Beta 形狀參數 β", min=0.1, max=10, value=5, step=0.1),
         helpText("α=β=1 時為 U(0,1)；α<β 時右偏，α>β 時左偏；α=β 時對稱，形狀仍取決於參數大小。")
+      ),
+
+      conditionalPanel(
+        condition = "input.population == 'uniform'",
+        numericInput("uniform_min", "矩形分配下界 a", value=0),
+        numericInput("uniform_max", "矩形分配上界 b", value=100),
+        helpText("U(a,b)：區間內密度相同。μ=(a+b)/2；σ=(b−a)/√12；須 a<b。")
       ),
 
       numericInput("seed", "隨機種子", value=1234, min=1, step=1),
@@ -567,6 +575,23 @@ server <- function(input, output, session) {
         label = "常態分布：N(50, 10²)"
       ),
 
+      uniform = {
+        req(input$uniform_min, input$uniform_max)
+        a <- input$uniform_min
+        b <- input$uniform_max
+        validate(need(is.finite(a) && is.finite(b) && a < b &&
+          is.finite(b-a), "矩形分配須使用有限上下界，且下界 a 小於上界 b。"))
+        list(
+          mean = a + (b-a)/2,
+          sd = (b-a)/sqrt(12),
+          skew = 0,
+          ex_kurt = -6/5,
+          generator = function(size) runif(size, min=a, max=b),
+          xlim = c(a,b),
+          label = sprintf("矩形分配：U(%g, %g)", a, b)
+        )
+      },
+
       gamma = {
         alpha <- input$gamma_shape
         theta <- input$gamma_scale
@@ -616,7 +641,8 @@ server <- function(input, output, session) {
   simulation <- eventReactive(list(
     input$simulate, input$n, input$reps, input$population, input$seed,
     input$gamma_shape, input$gamma_scale,
-    input$beta_alpha, input$beta_beta
+    input$beta_alpha, input$beta_beta,
+    input$uniform_min, input$uniform_max
   ), {
     req(length(input$seed)==1, is.finite(input$seed),input$seed>=1,input$seed<=2147480000,input$seed==floor(input$seed))
     set.seed(input$seed)
