@@ -477,6 +477,8 @@ home_ui <- withMathJax(div(class="intro-home",
 
 # 4. 操作介面：首頁為預設頁；探索頁保留原有控制項與統計量卡片。
 ui <- fluidPage(
+  tags$a(href = "https://hawjeng.github.io/resources.html", class = "btn btn-default btn-sm",
+         style = "margin-top: 10px;", "← 返回教學與專案"),
   tags$head(tags$meta(charset="utf-8"), tags$style(HTML('
     body{font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif;background:#f5f7fa;color:#334155;font-size:14px;-webkit-font-smoothing:antialiased}
     .container-fluid>h2{font-size:27px;font-weight:500;letter-spacing:.08em;margin:24px 0 20px}
