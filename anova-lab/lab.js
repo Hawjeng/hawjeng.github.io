@@ -167,7 +167,15 @@ function show(res,a){
  const overview='<div class="descriptive-layout"><div class="descriptive-summary">'+desc+'</div><div class="descriptive-plot">'+plot+'</div></div>';
  if(res.ratio){
   let z=res.ratio;
-  return overview+'<h3>F 檢定</h3><p class="note">F('+z.d+', '+z.e+') = '+f(z.f)+'，雙尾 p '+(z.p<.0001?'':'= ')+esc(p(z.p))+'；'+(z.p<a?'拒絕':'未拒絕')+'兩母體變異數相等。雙尾臨界值：'+f(z.lo)+'、'+f(z.hi)+'。</p>'+fchart(z.d,z.e,z.f,z.lo,z.hi,'both');
+  const ratioCases=[
+   ['A／B','右尾',z.f,z.d,z.e,upper(z.f,z.d,z.e),q=>critical(z.d,z.e,q)],
+   ['B／A','左尾',1/z.f,z.e,z.d,lower(1/z.f,z.e,z.d),q=>1/critical(z.d,z.e,q)]
+  ];
+  const caseRows=ratioCases.flatMap(([order,tail,obs,df1,df2,prob,cutoff])=>[a,a/2].map(q=>
+   [order,tail,f(q),df1,df2,f(obs),p(prob),f(cutoff(q)),prob<q?'拒絕 H₀':'不拒絕 H₀']));
+  const caseTable=table(['變異數比','尾端','每尾水準','df₁','df₂','F','單尾 p','臨界值','判定'],caseRows,'課本的四欄比較')+
+   '<p>每尾水準 α 用於方向性單尾檢定。每尾水準 α／2 用於雙尾檢定，表中的 B／A 左尾臨界值取倒數後，即為 A／B 雙尾檢定的左尾臨界值。</p>';
+  return overview+'<h3>F 檢定</h3>'+caseTable+'<h4>A／B 的雙尾檢定</h4><p class="note">F('+z.d+', '+z.e+') = '+f(z.f)+'，雙尾 p '+(z.p<.0001?'':'= ')+esc(p(z.p))+'；'+(z.p<a?'拒絕':'未拒絕')+'兩母體變異數相等。雙尾臨界值：'+f(z.lo)+'、'+f(z.hi)+'。</p>'+fchart(z.d,z.e,z.f,z.lo,z.hi,'both');
  }
  const tested=res.terms.filter(t=>t.err);
  const conclusion=tested.map(x=>'<li>'+esc(x.name)+'：F('+x.df+', '+x.df2+') = '+f(x.f)+'，p '+(x.p!==null&&x.p<.0001?'':'= ')+esc(p(x.p))+'；'+(x.p===null?'無法檢定（誤差與效果均為零）':x.p<a?'<strong class="sig">達顯著</strong>':'未達顯著')+'。</li>').join('');
