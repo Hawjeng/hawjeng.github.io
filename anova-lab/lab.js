@@ -2,7 +2,7 @@
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const f=v=>v===null||Number.isNaN(v)||v===undefined?'—':v===Infinity?'∞':Math.abs(v)>=10000?v.toExponential(3):Number(v.toFixed(4)).toString();
-const p=v=>v==null?'—':v<.0001?'< 0.0001':f(v);
+const p=v=>v==null?'—':v<.0001?'< .0001':v.toFixed(4).replace(/^0/,'');
 const data=globalThis.LAB_DATA;
 const tabs=[['theory','原理說明'],['book','課本範例'],['survey','調查研究'],['exercise','習作詳解'],['manual','自行輸入'],['r-code','R 與 Python 語法'],['downloads','下載與來源']];
 const options=(xs)=>xs.map(([v,n])=>'<option value="'+esc(v)+'">'+esc(n)+'</option>').join('');
@@ -94,7 +94,7 @@ function apaResult(zh,en,stat,pv,alpha,adjustment='',effectSize=null){
  if(pv==null)return '<p>'+esc(zh)+'無法檢定。</p><p lang="en">'+esc(en)+' could not be tested.</p>';
  const decimal=value=>value.toFixed(3).replace(/^0/,'');
  const significant=pv<alpha;
- const statistics=stat+', <i>p</i> '+(pv<.001?'&lt; .001':'= '+decimal(pv))+
+ const statistics=stat+', <i>p</i> '+(pv<.0001?'&lt; .0001':'= '+p(pv))+
   (effectSize==null?'':', η<sub>p</sub>² = '+decimal(effectSize));
  const method=adjustment?'（'+adjustment+' 校正）':'';
  const methodEn=adjustment?' ('+adjustment+'-adjusted <i>p</i>)':'';
