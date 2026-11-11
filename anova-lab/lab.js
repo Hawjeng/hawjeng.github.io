@@ -356,6 +356,7 @@ function mountR(caseIndex){
   if(data.items[preselect]?.kind===kind.value)index.value=preselect;
   changeCase();
  }
+ r-variable.value='手機遊戲成癮';
  if(caseIndex==='survey')kind.value='survey';
  else if(caseIndex!==undefined&&data.items[+caseIndex])kind.value=data.items[+caseIndex].kind;
  changeType(caseIndex);
@@ -393,6 +394,7 @@ function mount(route){
  }else if(id==='book'||id==='exercise'){
   $('case').onchange=()=>exampleUpdate(id);$('alpha').onchange=()=>exampleUpdate(id,false);exampleUpdate(id);
  }else if(id==='survey'){
+  variable.value='手機遊戲成癮';
   for(let x of ['variable','group'])$(x).onchange=()=>surveyUpdate(true);
   $('group-b').onchange=()=>surveyUpdate(true,false);
   $('survey-groups').onchange=()=>surveyUpdate();
