@@ -4,7 +4,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const f=v=>v===null||Number.isNaN(v)||v===undefined?'—':v===Infinity?'∞':Math.abs(v)>=10000?v.toExponential(3):Number(v.toFixed(4)).toString();
 const p=v=>v==null?'—':v<.0001?'< 0.0001':f(v);
 const data=globalThis.LAB_DATA;
-const tabs=[['theory','原理說明'],['book','課本範例'],['survey','調查研究'],['exercise','習作詳解'],['manual','自行輸入'],['r-code','R 語法'],['downloads','下載與來源']];
+const tabs=[['theory','原理說明'],['book','課本範例'],['survey','調查研究'],['exercise','習作詳解'],['manual','自行輸入'],['r-code','R 與 Python 語法'],['downloads','下載與來源']];
 const options=(xs)=>xs.map(([v,n])=>'<option value="'+esc(v)+'">'+esc(n)+'</option>').join('');
 const field=(id,title,inner)=>'<label>'+title+'<select id="'+id+'">'+inner+'</select></label>';
 const alpha=()=>field('alpha','顯著水準 α',options([['.05','0.05'],['.01','0.01'],['.10','0.10']]));
@@ -190,7 +190,7 @@ function examples(kind){
 function exampleUpdate(kind,change=true){
  let z=data.items.filter(x=>x.kind===kind)[+$('case').value],a=+$('alpha').value;
  if(change){
-  $('case-notes').innerHTML='<p class="note">'+esc(labels[z.model])+'</p><p>'+esc(z.note)+'</p><p class="muted">資料：'+esc(z.source)+'</p><a href="downloads/'+z.file+'" download>下載案例 CSV</a> · <a href="#r-code/'+data.items.indexOf(z)+'">查看此案例的 R 語法</a>';
+  $('case-notes').innerHTML='<p class="note">'+esc(labels[z.model])+'</p><p>'+esc(z.note)+'</p><p class="muted">資料：'+esc(z.source)+'</p><a href="downloads/'+z.file+'" download>下載案例 CSV</a> · <a href="#r-code/'+data.items.indexOf(z)+'">查看此案例的 R 與 Python 語法</a>';
   $('pool-control').innerHTML=z.model==='within'?'<div class="check"><label><input type="checkbox" id="pool" '+(kind==='book'?'checked':'')+'> 採用課本的合併殘差</label></div>':'';
   $('pool')?.addEventListener('change',()=>exampleUpdate(kind,false));
  }
@@ -210,7 +210,7 @@ function exampleUpdate(kind,change=true){
 function survey(){
  const vars=Object.keys(data.survey);
  return heading('調查研究')+'<p>以 '+data.surveyN+' 筆問卷的公開分組摘要，探索星座、性別、手機或上網方案與數值變項的關係。</p><div class="grid"><div class="card controls">'+
- field('variable','結果變項',options(vars.map(v=>[v,v])))+field('group','分組因子',options(Object.keys(data.survey[vars[0]]).map(v=>[v,v])))+alpha()+'<h3>納入組別</h3><div id="survey-groups" class="check"></div><p><a href="#r-code/survey">前往調查研究 R 語法</a></p></div><div class="card" id="results" aria-live="polite"></div></div><p class="note">這是觀察性調查，組別沒有隨機分派。分析按變項排除缺失、保留 0；傳統 ANOVA 的等變異假設對偏態或組別不均的資料尤其重要。跨結果變項反覆探索時，不應將個別顯著結果視為驗證性證據。</p>';
+ field('variable','結果變項',options(vars.map(v=>[v,v])))+field('group','分組因子',options(Object.keys(data.survey[vars[0]]).map(v=>[v,v])))+alpha()+'<h3>納入組別</h3><div id="survey-groups" class="check"></div><p><a href="#r-code/survey">前往調查研究 R 與 Python 語法</a></p></div><div class="card" id="results" aria-live="polite"></div></div><p class="note">這是觀察性調查，組別沒有隨機分派。分析按變項排除缺失、保留 0；傳統 ANOVA 的等變異假設對偏態或組別不均的資料尤其重要。跨結果變項反覆探索時，不應將個別顯著結果視為驗證性證據。</p>';
 }
 function surveyUpdate(rebuild=false){
  let rows=data.survey[$('variable').value][$('group').value];
@@ -245,29 +245,34 @@ function runManual(){safe($('results'),()=>{let {m,h,rows}=readManual(),a=+$('al
 function sample(){let m=$('model').value,z=data.items.find(x=>x.model===m);$('paste').value=csv(z.headers,z.rows);runManual();}
 function rCode(){
  let vars=Object.keys(data.survey), groups=Object.keys(data.survey[vars[0]]);
- return heading('R 語法')+'<p>選擇案例或調查組別，即可在 R 或 RStudio 執行同一份資料。語法內含資料，只使用 R 內建函數。</p>'+
+ return heading('R 與 Python 語法')+'<p>選擇案例或調查組別，即可用同一份資料執行兩種語法。先列 R（不需安裝套件），再列 Python（需安裝 NumPy 和 SciPy）。</p>'+
  '<div class="grid"><div class="card controls">'+field('r-type','資料類型',options([['book','課本範例'],['exercise','習作計算題'],['survey','調查研究']]))+
  '<div id="r-cases">'+field('r-case','案例',options(data.items.map((z,i)=>[i,z.title])))+'</div>'+
  '<div id="r-survey" hidden>'+field('r-variable','結果變項',options(vars.map(x=>[x,x])))+
  field('r-group','分組因子',options(groups.map(x=>[x,x])))+'<h3>納入組別</h3><div id="r-groups" class="check"></div></div>'+
  alpha()+'<div class="check" id="r-pool-control" hidden><label><input id="r-pool" type="checkbox"> 採用課本的合併殘差</label></div></div>'+
- '<div class="card"><div class="inline"><button class="primary" id="r-copy" type="button">複製 R 語法</button><button id="r-download" type="button">下載 .R</button></div><p id="r-status" role="status"></p><label for="r-output"><strong>可執行的 R 程式</strong></label><textarea id="r-output" rows="20" readonly spellcheck="false"></textarea></div></div>';
+ '<div><section class="card"><h3>R</h3><div class="inline"><button class="primary" id="r-copy" type="button">複製 R 語法</button><button id="r-download" type="button">下載 .R</button></div><p id="r-status" role="status"></p><label for="r-output"><strong>可執行的 R 程式</strong></label><textarea id="r-output" rows="20" readonly spellcheck="false"></textarea></section><section class="card"><h3>Python</h3><div class="inline"><button class="primary" id="py-copy" type="button">複製 Python 語法</button><button id="py-download" type="button">下載 .py</button></div><p id="py-status" role="status"></p><label for="py-output"><strong>可執行的 Python 程式</strong></label><textarea id="py-output" rows="20" readonly spellcheck="false"></textarea></section></div></div>';
 }
 function mountR(caseIndex){
  const kind=$('r-type'), index=$('r-case'), out=$('r-output'), status=$('r-status'), pick=$('r-groups');
+ const py=$('py-output'), pyStatus=$('py-status');
  function update(){
   let a=+$('alpha').value, z=data.items[+index.value];
+  pyStatus.textContent='';
   status.textContent='';
   if(kind.value==='survey'){
    let variable=$('r-variable').value, group=$('r-group').value;
    let rows=data.survey[variable][group].filter((_,i)=>pick.querySelectorAll('input')[i].checked);
    out.value=rows.length<2?'':rSurvey(variable,group,rows,a);
+   py.value=rows.length<2?'':pythonSurvey(variable,group,rows,a);
    if(!out.value)status.textContent='請至少選擇兩個組別。';
   }else{
    $('r-pool-control').hidden=z.model!=='within';
    out.value=rCase(z,a,$('r-pool').checked);
+   py.value=pythonCase(z,a,$('r-pool').checked);
   }
   $('r-copy').disabled=$('r-download').disabled=!out.value;
+  $('py-copy').disabled=$('py-download').disabled=!py.value;
  }
  function surveyGroups(){
   pick.innerHTML=data.survey[$('r-variable').value][$('r-group').value].map(([g,n])=>'<label><input type="checkbox" checked> '+esc(g)+'（n='+n+'）</label>').join('');
@@ -297,10 +302,15 @@ function mountR(caseIndex){
   try{await navigator.clipboard.writeText(out.value);status.textContent='已複製 R 語法。';}
   catch{out.select();status.textContent='已選取語法，請按 Ctrl+C（Mac 為 Command+C）複製。';}
  };
+ $('py-copy').onclick=async()=>{
+  try{await navigator.clipboard.writeText(py.value);pyStatus.textContent='已複製 Python 語法。';}
+  catch{py.select();pyStatus.textContent='已選取語法，請按 Ctrl+C（Mac 為 Command+C）複製。';}
+ };
+ $('py-download').onclick=()=>save(kind.value==='survey'?'anova-survey.py':data.items[+index.value].file.replace('.csv','.py'),py.value,'text/plain;charset=utf-8',false);
  $('r-download').onclick=()=>save(kind.value==='survey'?'anova-survey.R':data.items[+index.value].file.replace('.csv','.R'),out.value,'text/plain;charset=utf-8',false);
 }
 function downloads(){
- return heading('下載與來源')+card('<h3>可重現資料與程式</h3><ul><li><a href="#r-code">查看、複製或下載 R 語法</a></li><li><a href="downloads/survey-summary.csv" download>調查研究分組摘要 CSV</a>（每組 n、平均數、樣本變異數）</li><li><a href="stats.js" download>下載計算程式 JavaScript</a></li><li><a href="https://github.com/Hawjeng/hawjeng.github.io/tree/main/anova-lab">網站原始碼</a></li></ul><p>課本來源：邱皓政《統計學》第五版及其配套資料檔。案例 CSV 僅摘錄計算使用的欄列，欄名依教材用途整理。調查來源為 data3.xlsx 的 Cleaned_Data；只發布彙總資料，不提供逐筆問卷或 Word 校稿。交互作用示意圖取自 Ch12p330t12.2.xlsx。二因子計算採用正式表格中的 Excel 觀測值，不混用其他工作表或 SPSS 版本。</p>'+
+ return heading('下載與來源')+card('<h3>可重現資料與程式</h3><ul><li><a href="#r-code">查看、複製或下載 R 與 Python 語法</a></li><li><a href="downloads/survey-summary.csv" download>調查研究分組摘要 CSV</a>（每組 n、平均數、樣本變異數）</li><li><a href="stats.js" download>下載計算程式 JavaScript</a></li><li><a href="https://github.com/Hawjeng/hawjeng.github.io/tree/main/anova-lab">網站原始碼</a></li></ul><p>課本來源：邱皓政《統計學》第五版及其配套資料檔。案例 CSV 僅摘錄計算使用的欄列，欄名依教材用途整理。調查來源為 data3.xlsx 的 Cleaned_Data；只發布彙總資料，不提供逐筆問卷或 Word 校稿。交互作用示意圖取自 Ch12p330t12.2.xlsx。二因子計算採用正式表格中的 Excel 觀測值，不混用其他工作表或 SPSS 版本。</p>'+
  table(['案例','原始資料檔','資料下載'],data.items.map((z,i)=>[z.title,z.source,'CSV '+(i+1)]))+'<ol>'+data.items.map(z=>'<li><a href="downloads/'+z.file+'" download>'+esc(z.title)+' CSV</a></li>').join('')+'</ol>');
 }
 function mount(route){
