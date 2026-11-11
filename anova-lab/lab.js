@@ -73,7 +73,7 @@ const concepts=[
 ];
 function theory(){
  return heading('原理說明')+card(concepts.map(([t,b,m],i)=>'<details'+(!i?' open':'')+'><summary>'+t+'</summary><p>'+b+'</p><span class="math">'+m+'</span></details>').join('')+
- card('<details><summary>圖 12.2｜比較交互作用的型態</summary><p>切換課本示意平均數，觀察線條交叉、差距改變或逐漸收斂。只有細格平均數，沒有個別觀測值，不能用這張圖作 F 檢定。</p><label for="sketch">示意圖：</label><select id="sketch">'+options(sketches.map((_,i)=>[i,'圖 12.2（'+(i+1)+'）']))+'</select><div id="sketch-out"></div></details>')+
+ card('<details><summary>比較交互作用的型態</summary><p>切換課本示意平均數，觀察線條交叉、差距改變或逐漸收斂。只有細格平均數，沒有個別觀測值，不能用這張圖作 F 檢定。</p><label for="sketch">示意圖：</label><select id="sketch">'+options(sketches.map((_,i)=>[i,'示意圖 '+(i+1)]))+'</select><div id="sketch-out"></div></details>')+
  '<p class="muted">本教材使用傳統未校正 F，不代做球面性或等變異檢查。實際研究應先檢查設計及殘差；違反球面性時，可考慮 Greenhouse–Geisser 校正或混合模型。</p>')+
  '<div class="grid"><div class="card controls"><h3>F 分配與查表</h3>'+alpha()+'<label>分子自由度 df₁<input id="d1" type="number" value="3" min="1" max="1000" step="1"></label><label>分母自由度 df₂<input id="d2" type="number" value="18" min="1" max="10000" step="1"></label><label>觀察 F<input id="obs" type="number" value="8.99" min="0" max="10000000" step="any"></label>'+field('tail','用途',options([['right','右尾｜ANOVA'],['both','雙尾｜變異數比']]))+'</div><div class="card" id="f-out" aria-live="polite"></div></div>';
 }
@@ -84,12 +84,12 @@ function theoryUpdate(){safe($('f-out'),()=>{
  let ds=unique([1,2,3,4,5,6,8,10,d]).sort((a,b)=>a-b),es=unique([1,2,3,4,5,6,8,10,12,15,20,30,60,120,e]).sort((a,b)=>a-b);
  return '<p class="note">F('+d+', '+e+')：觀察值 '+f(obs)+'，p '+(pv<.0001?'':'= ')+esc(p(pv))+'；'+(lo?'左界 '+f(lo)+'，':'')+'右界 '+f(hi)+'。</p>'+fchart(d,e,obs,lo,hi,tail)+table(['df₂ ＼ df₁',...ds],es.map(y=>[y,...ds.map(x=>f(critical(x,y,q)))]),'F 右尾臨界值表｜右尾面積 '+q,(i,j)=>es[i]===e&&ds[j-1]===d);
  });}
-const exercises='<details><summary>習作 11.1｜辨識獨立與相依設計</summary>'+table(['情境','因子 → 依變數','設計與樣本數','事後比較'],[
+const exercises='<details><summary>辨識獨立與相依設計</summary>'+table(['情境','因子 → 依變數','設計與樣本數','事後比較'],[
  ['直營與加盟','店別 → 口味好感','獨立；每組 50，100 人','兩組不需'],
  ['三種婚育狀態','婚育狀態 → 食安重視','獨立；每組 8，24 人','三組整體顯著後比較'],
  ['大一至大四','年級 → 簡報能力','相依；每年 50，50 人、200 筆','四條件整體顯著後比較'],
  ['訓練前後','時間 → 顧客抱怨','相依；每次 25，25 人、50 筆','兩條件不需']])+'</details>'+
- '<details><summary>習作 12.1｜辨識二因子設計</summary><p>四題均檢驗 A、B 與 A×B。細格數是兩因子水準的乘積；邊際平均數的個數是兩因子水準數的總和。</p>'+table(['情境','水準與設計','細格數與每格 n','邊際平均數個數與觀測數'],[
+ '<details><summary>辨識二因子設計</summary><p>四題均檢驗 A、B 與 A×B。細格數是兩因子水準的乘積；邊際平均數的個數是兩因子水準數的總和。</p>'+table(['情境','水準與設計','細格數與每格 n','邊際平均數個數與觀測數'],[
  ['婚育 × 性別（個別訪問）','3×2，完全獨立','6 格，各 10','5 個：婚育各 20；性別各 30'],
  ['婚育 × 性別（成對訪問）','3×2，混合；以對為區組','6 格，各 10','5 個：婚育各 20 筆；性別各 30 筆'],
  ['性別 × 年級','2×4，混合；年級相依','8 格：男每格 20、女每格 30','6 個：性別 80／120 筆；年級各 50 筆'],
@@ -156,7 +156,7 @@ function readManual(){
 function runManual(){safe($('results'),()=>{let {m,h,rows}=readManual(),a=+$('alpha').value;return show(compute(m,h,rows,a,$('pool').checked),a);});}
 function sample(){let m=$('model').value,z=data.items.find(x=>x.model===m);$('paste').value=csv(z.headers,z.rows);runManual();}
 function downloads(){
- return heading('下載與來源')+card('<h3>可重現資料與程式</h3><ul><li><a href="downloads/survey-summary.csv" download>調查研究分組摘要 CSV</a>（每組 n、平均數、樣本變異數）</li><li><a href="stats.js" download>下載計算程式 JavaScript</a></li><li><a href="https://github.com/Hawjeng/hawjeng.github.io/tree/main/anova-lab">網站原始碼</a></li></ul><p>課本來源：邱皓政《統計學》第五版第 11、12 章與同章資料檔。案例 CSV 僅摘錄計算使用的欄列，欄名依教材用途整理。調查來源為 data3.xlsx 的 Cleaned_Data；只發布彙總資料，不提供逐筆問卷或 Word 校稿。圖 12.2 取自 Ch12p330t12.2.xlsx。二因子計算採用正式表格中的 Excel 觀測值，不混用其他工作表或 SPSS 版本。</p>'+
+ return heading('下載與來源')+card('<h3>可重現資料與程式</h3><ul><li><a href="downloads/survey-summary.csv" download>調查研究分組摘要 CSV</a>（每組 n、平均數、樣本變異數）</li><li><a href="stats.js" download>下載計算程式 JavaScript</a></li><li><a href="https://github.com/Hawjeng/hawjeng.github.io/tree/main/anova-lab">網站原始碼</a></li></ul><p>課本來源：邱皓政《統計學》第五版及其配套資料檔。案例 CSV 僅摘錄計算使用的欄列，欄名依教材用途整理。調查來源為 data3.xlsx 的 Cleaned_Data；只發布彙總資料，不提供逐筆問卷或 Word 校稿。交互作用示意圖取自 Ch12p330t12.2.xlsx。二因子計算採用正式表格中的 Excel 觀測值，不混用其他工作表或 SPSS 版本。</p>'+
  table(['案例','原始資料檔','資料下載'],data.items.map((z,i)=>[z.title,z.source,'CSV '+(i+1)]))+'<ol>'+data.items.map(z=>'<li><a href="downloads/'+z.file+'" download>'+esc(z.title)+' CSV</a></li>').join('')+'</ol>');
 }
 function mount(id){
