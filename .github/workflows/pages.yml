@@ -42,6 +42,8 @@ jobs:
         run: Rscript scripts/export-shinylive.R
       - name: Verify pages and local links
         run: python3 scripts/verify.py --site _site
+      - name: Check ANOVA calculations
+        run: node scripts/check-anova.cjs
       - name: Upload website
         uses: actions/upload-pages-artifact@v4
         with:

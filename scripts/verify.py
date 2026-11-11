@@ -72,7 +72,7 @@ def main():
         for pref in prefs:
             for paragraph in pref.get('paragraphs',[]):
                 if paragraph not in content: errors.append(f'{bid}: preface paragraph missing')
-    if len(pages)!=7+len(books): errors.append(f'Expected {7+len(books)} pages, found {len(pages)}')
+    if len(pages)!=8+len(books): errors.append(f'Expected {8+len(books)} pages, found {len(pages)}')
     if (folder / 'teaching').exists():
         for app in ('probability-distributions', 'central-limit-theorem'):
             for filename in ('index.html', 'app.json'):
