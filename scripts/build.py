@@ -123,8 +123,9 @@ def toolbar(categories, unit, placeholder):
     return f'<div class="catalog-toolbar"><div class="filter-row" data-filters data-unit="{E(unit)}" role="group" aria-label="依主題篩選">{buttons}</div><div class="search-row"><div class="search-field"><label for="catalog-search" class="search-label">搜尋</label><input id="catalog-search" type="search" placeholder="{E(placeholder)}" autocomplete="off"></div><p id="result-count" class="result-count" role="status" aria-live="polite"></p></div></div><noscript><p class="no-js-note">以下列出完整內容。搜尋與主題篩選需啟用 JavaScript。</p></noscript>'
 
 def archive_book_card(b):
+    preface = ext(b['prefaceUrl'], '閱讀序言', '') if b.get('prefaceUrl') else '<span>序言待補</span>'
     cover = f'assets/images/{E(Path(b["cover"]).name)}'
-    return f'''<article class="book-card" data-category="{E(b['category'])}"><div class="book-art"><span class="book-year">{E(b['year'])}</span><img src="{cover}" alt="《{E(b['title'])}》封面" width="230" height="320" loading="lazy"></div><div class="book-info"><div class="book-meta"><span>{E(b['publisher'])}</span><span>{E(b['edition'])}</span></div><h3>{E(b['title'])}</h3><p class="book-author">{E(b['authors'])}</p><div class="book-links">{ext(b['url'],b['label'],'')}</div></div></article>'''
+    return f'''<article class="book-card" data-category="{E(b['category'])}"><div class="book-art"><span class="book-year">{E(b['year'])}</span><img src="{cover}" alt="《{E(b['title'])}》封面" width="230" height="320" loading="lazy"></div><div class="book-info"><div class="book-meta"><span>{E(b['publisher'])}</span><span>{E(b['edition'])}</span></div><h3>{E(b['title'])}</h3><p class="book-author">{E(b['authors'])}</p><div class="book-links">{preface}{ext(b['url'],b['label'],'')}</div></div></article>'''
 
 def books_page():
     catalog = sorted([(b, book_card) for b in BOOKS] + [(b, archive_book_card) for b in BOOK_ARCHIVE],

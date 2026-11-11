@@ -30,7 +30,8 @@
     "category": "研究方法",
     "cover": "archive-1bg3.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/quan0.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/quan0.htm#:~:text=%E7%AC%AC%E4%B8%89%E7%89%88%E5%BA%8F"
   },
   {
     "title": "量化研究與統計分析：SPSS 中文視窗版資料分析範例解析",
@@ -41,7 +42,8 @@
     "category": "研究方法",
     "cover": "archive-1h47.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/quan0s.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/quan0s.htm#:~:text=%E5%9F%BA%E7%A4%8E%E7%89%88%E5%BA%8F"
   },
   {
     "title": "量化研究法（一）：研究設計與資料處理",
@@ -52,7 +54,8 @@
     "category": "研究方法",
     "cover": "archive-quan1.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/quan1.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/quan1.htm#:~:text=%E5%9C%A8%E6%88%91%E7%8F%BE%E5%9C%A8%E5%AF%AB%E5%BA%8F%E7%9A%84%E5%89%8E%E9%82%A3"
   },
   {
     "title": "量化研究法（二）：統計原理與分析技術",
@@ -85,7 +88,8 @@
     "category": "進階統計",
     "cover": "archive-1h41.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/mlm.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/mlm.htm#:~:text=%E9%82%B1%E7%9A%93%E6%94%BF"
   },
   {
     "title": "多层次模型分析导论",
@@ -107,7 +111,8 @@
     "category": "研究方法",
     "cover": "archive-survey.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/survey.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/survey.htm#:~:text=%E8%AA%BF%E6%9F%A5%E7%A0%94%E7%A9%B6%E6%96%B9%E6%B3%95%E4%B8%80%E6%9B%B8"
   },
   {
     "title": "潜在类别模型的原理与技术",
@@ -129,7 +134,8 @@
     "category": "進階統計",
     "cover": "archive-1h56.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/latentclass.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/latentclass.htm#:~:text=%E5%89%8D%E4%B8%80%E4%BA%9B%E6%97%A5%E5%AD%90"
   },
   {
     "title": "階層線性模式",
@@ -140,7 +146,8 @@
     "category": "進階統計",
     "cover": "archive-1h57.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/hlm.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/hlm.htm#:~:text=%E8%AC%9B%E5%88%B0%20HLM"
   },
   {
     "title": "創造力：當代理論與議題",
@@ -151,7 +158,8 @@
     "category": "專題與合著",
     "cover": "archive-aaa.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/creativity.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/creativity.htm#:~:text=%E5%A6%82%E6%9E%9C%E5%9B%A0%E7%82%BA%E9%80%99%E9%A1%86%E5%A4%A7%E8%85%A6"
   },
   {
     "title": "结构方程模式的原理与应用",
@@ -162,7 +170,8 @@
     "category": "進階統計",
     "cover": "archive-semchina.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/SEMChina.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/SEMChina.htm#:~:text=%E9%82%B1%E7%9A%93%E6%94%BF%E8%87%AA%E5%BA%8F"
   },
   {
     "title": "量化研究與統計分析：SPSS／PASW 中文視窗版資料分析範例解析",
@@ -173,7 +182,8 @@
     "category": "研究方法",
     "cover": "archive-quan5.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/quan5.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/quan5.htm#:~:text=%E7%AC%AC%E4%BA%94%E7%89%88%E5%BA%8F"
   },
   {
     "title": "結構方程模式：LISREL／SIMPLIS 的原理與應用",
@@ -217,7 +227,8 @@
     "category": "統計入門",
     "cover": "archive-1h78.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/1H78.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/1H78.htm#:~:text=%E5%8B%99%E4%B9%83%E8%87%B3%E6%96%BC%E5%9C%8B%E5%AE%B6%E6%B2%BB%E7%90%86"
   },
   {
     "title": "統計學：原理與應用",
@@ -228,7 +239,8 @@
     "category": "統計入門",
     "cover": "archive-book2014.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/1H90.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/1H90.htm#:~:text=%E5%9C%A8%E6%9C%AC%E6%9B%B8%E7%9A%84%E7%AC%AC%E4%B8%80%E7%89%88%E5%BA%8F%E8%A8%80%E4%B8%AD"
   },
   {
     "title": "統計學：原理與應用",
@@ -250,7 +262,8 @@
     "category": "進階統計",
     "cover": "archive-sem_2019.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/SEM_2019.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/SEM_2019.htm#:~:text=%E4%BA%8C%E7%89%88%E5%BA%8F"
   },
   {
     "title": "量化研究法（二）：統計原理與分析技術",
@@ -261,7 +274,8 @@
     "category": "研究方法",
     "cover": "archive-data2_2019.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/Data2_2020.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/Data2_2020.htm#:~:text=%E5%9C%A8%E9%80%99%E6%9C%AC%E6%9B%B8%E7%9A%84%E5%88%9D%E7%89%88%E5%BA%8F%E4%B8%AD%E6%88%91%E8%AA%AA%E9%81%93"
   },
   {
     "title": "多層次模式方法論：階層線性模式的關鍵問題與試解",
@@ -272,6 +286,7 @@
     "category": "進階統計",
     "cover": "archive-hlm2.jpg",
     "url": "https://web.ntnu.edu.tw/~hawjeng/HLM2.htm",
-    "label": "書籍原頁"
+    "label": "書籍原頁",
+    "prefaceUrl": "https://web.ntnu.edu.tw/~hawjeng/HLM2.htm#:~:text=%E9%82%B1%E5%BA%8F"
   }
 ]
