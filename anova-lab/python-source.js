@@ -87,8 +87,14 @@ for j, b in enumerate(levels_b):
     p = f_test(f"A | {b}", n*np.sum((cell[:,j]-mb[j])**2), A-1, *shared_a)
     print(f"  Bonferroni p={min(1,(A+B)*p):.6g}")
 `;
+function pythonLiteral(value, indent=''){
+ const inline=JSON.stringify(value);
+ if(!Array.isArray(value)||inline.length<=65)return inline;
+ const inner=indent+'    ';
+ return '[\n'+value.map(item=>inner+pythonLiteral(item,inner)).join(',\n')+'\n'+indent+']';
+}
 function pythonCase(z,alpha,pooled){
- const literal=JSON.stringify;
+ const literal=pythonLiteral;
  const put=(name,value)=>name+' = '+literal(value)+'\n';
  const array=(name,value)=>name+' = np.array('+literal(value)+', dtype=float)\n';
  const keys=(rows,i)=>[...new Set(rows.map(r=>r[i]))];
@@ -129,6 +135,6 @@ pairs(names, means, lambda i,j: np.std(y[:,i]-y[:,j], ddof=1)/np.sqrt(n), n-1)
 }
 function pythonSurvey(variable,group,rows,alpha){
  return '# '+variable+'｜依'+group+'分組\n# 僅使用公開摘要：組別、樣本數、平均數、樣本變異數。\n'+
-  pyBase+'alpha = '+alpha+'\nrows = '+JSON.stringify(rows)+'\nindependent(*zip(*rows))\n';
+  pyBase+'alpha = '+alpha+'\nrows = '+pythonLiteral(rows)+'\nindependent(*zip(*rows))\n';
 }
 if(typeof module!=='undefined')module.exports={pythonCase,pythonSurvey};

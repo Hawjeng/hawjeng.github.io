@@ -1,9 +1,16 @@
 'use strict';
 const rQuote = s => JSON.stringify(String(s));
-const rVec = (xs, format = rQuote) => 'c('+xs.map(format).join(', ')+')';
+const rVec = (xs, format = rQuote) => {
+ const values = xs.map(format);
+ const inline = values.join(', ');
+ if(inline.length <= 60)return 'c('+inline+')';
+ const lines = [];
+ for(let i=0;i<values.length;i+=6)lines.push(values.slice(i,i+6).join(', '));
+ return 'c(\n  '+lines.join(',\n  ')+'\n)';
+};
 const rFactor = xs => 'factor('+rVec(xs)+', levels = '+rVec([...new Set(xs.map(String))])+')';
 function rFrame(cols){
- return 'd <- data.frame(\n'+cols.map(([name,value])=>'  '+name+' = '+value).join(',\n')+'\n)\n';
+ return 'd <- data.frame(\n'+cols.map(([name,value])=>'  '+name+' = '+value.replace(/\n/g,'\n  ')).join(',\n')+'\n)\n';
 }
 const rPairBlock = [
  'pair <- combn(levels(d$condition), 2, simplify = FALSE)',
