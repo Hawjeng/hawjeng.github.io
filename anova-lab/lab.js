@@ -370,9 +370,9 @@ function selectedSurvey(variable,first,second,container){
 }
 function survey(){
  const vars=Object.keys(data.survey);
- return heading('調查研究')+'<p>以 '+data.surveyN+' 筆問卷的公開分組摘要，探索星座、性別、手機或上網方案與數值變項的關係。</p><div class="grid survey-layout"><details class="card controls survey-controls" open><summary>分析設定</summary><div class="survey-fields">'+
+ return heading('調查研究')+'<p>以 '+data.surveyN+' 筆問卷的公開分組摘要，探索星座、性別、手機、上網方案、個性、課外活動或學院別與數值變項的關係。</p><div class="grid survey-layout"><details class="card controls survey-controls" open><summary>分析設定</summary><div class="survey-fields">'+
  field('variable','結果變項',options(vars.map(v=>[v,v])))+field('group','分組因子 A',options(Object.keys(data.survey[vars[0]]).map(v=>[v,v])))+field('group-b','分組因子 B（選填）','')+alpha()+
- '<p>第二因子只列出交叉細格皆至少 5 人的組合。</p><h3>納入組別</h3><div id="survey-groups" class="check"></div><p><a href="#r-code/survey">前往調查研究 R 與 Python 語法</a></p></div></details><div class="card" id="results" aria-live="polite"></div></div><p class="note">這是觀察性調查。分析排除所選變項或因子缺失的資料，保留 0；群組差異不能解釋為因果效果。</p>';
+ '<p>第二因子只列出交叉細格皆至少 5 人的組合。</p><h3>納入組別</h3><div id="survey-groups" class="check"></div><p><a href="#r-code/survey">前往調查研究 R 與 Python 語法</a></p></div></details><div class="card" id="results" aria-live="polite"></div></div><p class="note">這是觀察性調查。分析排除所選變項或因子缺失的資料，保留 0。新增因子只顯示有效樣本至少 5 人的類別；群組差異不能解釋為因果效果。</p>';
 }
 function surveyUpdate(rebuild=false,rebuildOptions=true){
  const variable=$('variable').value,first=$('group').value, second=$('group-b'),groups=$('survey-groups'), a=+$('alpha').value;
