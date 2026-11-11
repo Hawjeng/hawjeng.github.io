@@ -56,29 +56,29 @@ function fchart(d,e,obs,lo,hi,tail='right',a=upper(hi,d,e)*(tail==='both'?2:1)){
   '<text x="646" y="190" text-anchor="end" font-size="13" fill="#4c3c86">Fobt = '+f(obs)+'</text></svg>'+
   '<figcaption>H₀ 下的 F('+d+', '+e+') 分配。<strong style="color:#a24a14">橙色底：α 拒絕域</strong>；<strong style="color:#2265a5">藍色斜線：p 值尾域（p '+(pValue<.0001?'':'= ')+esc(p(pValue))+'）</strong>。'+(obs>X?' Fobt 超出圖域。':'')+'</figcaption></figure>';
 }
-function profile({as,bs,M,ci}){
+function profile({as,bs,M,ci,groups=false}){
  let extent=ci?[...M.flat(),...ci.flat(2)]:M.flat();
  let min=Math.min(...extent),max=Math.max(...extent),pad=(max-min||1)*.17;
  let x=j=>78+j*514/(bs.length-1),y=v=>206-(v-min+pad)/(max-min+2*pad)*163;
  const col=['#266b80','#a44827','#5c518f','#367343','#81651a','#a04271'];
  const point=(i,j)=>x(j)+(ci&&as.length>1?((i/(as.length-1))-.5)*Math.min(24,200/(bs.length-1)):0);
- return '<h3>細格平均數圖'+(ci?'｜95% 信賴區間':'')+'</h3><figure><svg viewBox="0 0 670 250" role="img" aria-label="'+(ci?'各細格平均數與 95% 信賴區間':'各細格平均數示意圖，無信賴區間')+'">'+
+ return '<h3>'+(groups?'各組平均數圖':'細格平均數圖')+(ci?'｜95% 信賴區間':'')+'</h3><figure><svg viewBox="0 0 670 250" role="img" aria-label="'+(ci?'各細格平均數與 95% 信賴區間':'各細格平均數示意圖，無信賴區間')+'">'+
  Array.from({length:5},(_,i)=>{let v=min-pad+(max-min+2*pad)*i/4;return '<path d="M55 '+y(v)+'H620" stroke="#d5e3e1"/><text x="50" y="'+(y(v)+4)+'" text-anchor="end" font-size="11">'+f(v)+'</text>';}).join('')+
  bs.map((v,j)=>'<text x="'+x(j)+'" y="233" text-anchor="middle" font-size="12">'+esc(v)+'</text>').join('')+
  M.map((r,i)=>{
   const color=col[i%6];
-  return '<polyline fill="none" stroke="'+color+'" stroke-width="2.5" stroke-dasharray="'+(i%2?'6 3':'none')+'" points="'+r.map((v,j)=>point(i,j)+','+y(v)).join(' ')+'"/>'+
+  return (groups?'':'<polyline fill="none" stroke="'+color+'" stroke-width="2.5" stroke-dasharray="'+(i%2?'6 3':'none')+'" points="'+r.map((v,j)=>point(i,j)+','+y(v)).join(' ')+'"/>')+
    r.map((v,j)=>{
-    const X=point(i,j),Y=y(v),lim=ci?.[i]?.[j],tip=as[i]+' × '+bs[j]+'：平均數 '+f(v)+(lim?'；95% CI ['+lim.map(f).join(', ')+']':'');
+    const X=point(i,j),Y=y(v),lim=ci?.[i]?.[j],tip=(groups?'':as[i]+' × ')+bs[j]+'：平均數 '+f(v)+(lim?'；95% CI ['+lim.map(f).join(', ')+']':'');
     const near=M.some((other,k)=>k!==i&&Math.abs(y(other[j])-Y)<18);
     const offset=near?(i%2?15:-9):-9;
     const bars=lim?'<path d="M'+X+' '+y(lim[0])+'V'+y(lim[1])+' M'+(X-4)+' '+y(lim[0])+'h8 M'+(X-4)+' '+y(lim[1])+'h8" fill="none" stroke="'+color+'" stroke-width="1.5"/>':'';
     return '<g><title>'+esc(tip)+'</title>'+bars+'<circle cx="'+X+'" cy="'+Y+'" r="4" fill="'+color+'"/><text class="plot-label" x="'+X+'" y="'+(Y+offset)+'" fill="'+color+'" text-anchor="middle" font-size="11" font-weight="700">'+f(v)+'</text></g>';
    }).join('');
  }).join('')+
- '</svg><figcaption>'+as.map((v,i)=>'<strong style="color:'+col[i%6]+'">● '+esc(v)+'</strong>').join('　')+
- (ci?'。點旁數字為細格平均數，誤差線為各細格未校正的 95% t 信賴區間：平均數 ± t × s／√n。相依設計的誤差線不是配對差值的區間；不可依區間是否重疊判定交互作用。':'。點旁數字為示意平均數；原資料未提供細格樣本數與變異，無法估計 95% CI。')+'</figcaption></figure>'+
- (ci?'<details><summary>查看平均數與 95% CI 數值</summary>'+table(['A 水準','B 水準','平均數','95% CI 下限','95% CI 上限'],M.flatMap((row,i)=>row.map((v,j)=>[as[i],bs[j],f(v),...ci[i][j].map(f)])))+'</details>':'');
+ '</svg><figcaption>'+(groups?'點旁數字為各組平均數；誤差線是未校正的 95% t 信賴區間。相依資料的區間描述各條件平均，並非配對差值的區間。</figcaption></figure>':as.map((v,i)=>'<strong style="color:'+col[i%6]+'">● '+esc(v)+'</strong>').join('　')+
+ (ci?'。點旁數字為細格平均數，誤差線為各細格未校正的 95% t 信賴區間：平均數 ± t × s／√n。相依設計的誤差線不是配對差值的區間；不可依區間是否重疊判定交互作用。':'。點旁數字為示意平均數；原資料未提供細格樣本數與變異，無法估計 95% CI。')+'</figcaption></figure>')+
+ (ci?'<details><summary>查看平均數與 95% CI 數值</summary>'+table([...(groups?['組別']:['A 水準','B 水準']),'平均數','95% CI 下限','95% CI 上限'],M.flatMap((row,i)=>row.map((v,j)=>[...(groups?[bs[j]]:[as[i],bs[j]]),f(v),...ci[i][j].map(f)])))+'</details>':'');
 }
 const decision=(pv,a)=>pv==null?'無法檢定':pv<a?'達顯著':'未達顯著';
 function comparisons(res,a){
@@ -128,17 +128,19 @@ function fSteps(res,a){
 }
 function show(res,a){
  const desc=table(['組別／細格','n','平均數','樣本變異數'],res.desc.map(([n,k,m,v])=>[n,k,f(m),f(v)]),'敘述統計');
+ const groupPlot=()=>profile({groups:true,as:[''],bs:res.desc.map(r=>r[0]),M:[res.desc.map(r=>r[2])],ci:[res.desc.map(([,n,m,v])=>{const w=Math.sqrt(critical(1,n-1,.05)*v/n);return [m-w,m+w];})]});
  if(res.ratio){
   let z=res.ratio;
-  return '<p class="note">F('+z.d+', '+z.e+') = '+f(z.f)+'，雙尾 p '+(z.p<.0001?'':'= ')+esc(p(z.p))+'；'+(z.p<a?'拒絕':'未拒絕')+'兩母體變異數相等。雙尾臨界值：'+f(z.lo)+'、'+f(z.hi)+'。</p>'+fchart(z.d,z.e,z.f,z.lo,z.hi,'both')+desc;
+  return desc+groupPlot()+'<h3>F 檢定</h3><p class="note">F('+z.d+', '+z.e+') = '+f(z.f)+'，雙尾 p '+(z.p<.0001?'':'= ')+esc(p(z.p))+'；'+(z.p<a?'拒絕':'未拒絕')+'兩母體變異數相等。雙尾臨界值：'+f(z.lo)+'、'+f(z.hi)+'。</p>'+fchart(z.d,z.e,z.f,z.lo,z.hi,'both');
  }
  const tested=res.terms.filter(t=>t.err);
  const conclusion=tested.map(x=>'<li>'+esc(x.name)+'：F('+x.df+', '+x.df2+') = '+f(x.f)+'，p '+(x.p!==null&&x.p<.0001?'':'= ')+esc(p(x.p))+'；'+(x.p===null?'無法檢定（誤差與效果均為零）':x.p<a?'<strong class="sig">達顯著</strong>':'未達顯著')+'。</li>').join('');
- let html='<ul class="note">'+conclusion+'</ul>'+table(['變異來源','SS','df','MS','分母誤差項','F','p','F 臨界值','偏 η²'],
+ let tests='<h3>F 檢定</h3><ul class="note">'+conclusion+'</ul>'+table(['變異來源','SS','df','MS','分母誤差項','F','p','F 臨界值','偏 η²'],
   res.terms.map(z=>[z.name,f(z.s),z.df,f(z.ms),z.err??'—',f(z.f),p(z.p),f(z.crit),f(z.eta)]),'變異數分析摘要表');
+ let html=desc;
  if(res.profile)html+=profile(res.profile)+table(['A 水準',...res.profile.bs,'A 邊際平均'],[...res.profile.M.map((r,i)=>[res.profile.as[i],...r.map(f),f(avg(r))]),['B 邊際平均',...res.profile.bs.map((_,j)=>f(avg(res.profile.M.map(r=>r[j])))),f(avg(res.profile.M.flat()))]],'細格與邊際平均');
- html+=fSteps(res,a);
- html+=desc;
+ else html+=groupPlot();
+ html+=(res.methodNote??'')+tests+fSteps(res,a);
  html+=comparisons(res,a)+simpleEffects(res,a);
  return html;
 }
@@ -244,18 +246,38 @@ function exampleUpdate(kind,change=true){
   return '<h3>'+esc(z.title)+'</h3>'+show(r,a)+extra+'<details><summary>展開原始觀測值</summary>'+table(z.headers,z.rows)+'</details>';
  });
 }
+function refreshSurveyGroups(variable,first,second,container,rebuildOptions=true){
+ const prior=second.value;
+ if(rebuildOptions){
+  const alternatives=(globalThis.SURVEY_FACTORIAL[variable]??[]).filter(z=>z.factors.includes(first)).map(z=>z.factors.find(x=>x!==first));
+  second.innerHTML=options([['','無（單因子）'],...alternatives.map(x=>[x,x])]);
+  if(alternatives.includes(prior))second.value=prior;
+ }
+ const factors=second.value?[first,second.value]:[first];
+ container.innerHTML=factors.map((factor,i)=>'<fieldset><legend>'+esc(factor)+'</legend>'+
+  data.survey[variable][factor].map(([name,n])=>'<label><input type="checkbox" data-axis="'+i+'" value="'+esc(name)+'" checked> '+esc(name)+(factors.length===1?'（n='+n+'）':'')+'</label>').join('')+'</fieldset>').join('');
+}
+function selectedSurvey(variable,first,second,container){
+ const selected=i=>new Set([...container.querySelectorAll('input[data-axis="'+i+'"]:checked')].map(el=>el.value));
+ const a=selected(0), b=selected(1);
+ if(!second)return {rows:data.survey[variable][first].filter(([g])=>a.has(g))};
+ const z=globalThis.SURVEY_FACTORIAL[variable].find(z=>z.factors.includes(first)&&z.factors.includes(second));
+ const cells=(z.factors[0]===first?z.cells:z.cells.map(([x,y,...r])=>[y,x,...r])).filter(([x,y])=>a.has(x)&&b.has(y));
+ return {cells,names:[first,second]};
+}
 function survey(){
  const vars=Object.keys(data.survey);
  return heading('調查研究')+'<p>以 '+data.surveyN+' 筆問卷的公開分組摘要，探索星座、性別、手機或上網方案與數值變項的關係。</p><div class="grid"><div class="card controls">'+
- field('variable','結果變項',options(vars.map(v=>[v,v])))+field('group','分組因子',options(Object.keys(data.survey[vars[0]]).map(v=>[v,v])))+alpha()+'<h3>納入組別</h3><div id="survey-groups" class="check"></div><p><a href="#r-code/survey">前往調查研究 R 與 Python 語法</a></p></div><div class="card" id="results" aria-live="polite"></div></div><p class="note">這是觀察性調查，組別沒有隨機分派。分析按變項排除缺失、保留 0；傳統 ANOVA 的等變異假設對偏態或組別不均的資料尤其重要。跨結果變項反覆探索時，不應將個別顯著結果視為驗證性證據。</p>';
+ field('variable','結果變項',options(vars.map(v=>[v,v])))+field('group','分組因子 A',options(Object.keys(data.survey[vars[0]]).map(v=>[v,v])))+field('group-b','分組因子 B（選填）','')+alpha()+
+ '<p>第二因子只列出交叉細格皆至少 5 人的組合。</p><h3>納入組別</h3><div id="survey-groups" class="check"></div><p><a href="#r-code/survey">前往調查研究 R 與 Python 語法</a></p></div><div class="card" id="results" aria-live="polite"></div></div><p class="note">這是觀察性調查。分析排除所選變項或因子缺失的資料，保留 0；群組差異不能解釋為因果效果。</p>';
 }
-function surveyUpdate(rebuild=false){
- let rows=data.survey[$('variable').value][$('group').value];
- if(rebuild){
-  $('survey-groups').innerHTML=rows.map(([k,n],i)=>'<label><input type="checkbox" value="'+i+'" checked> '+esc(k)+'（n='+n+'）</label>').join('');
-  $('survey-groups').onchange=()=>surveyUpdate();
- }
- safe($('results'),()=>show(oneSummary(rows.filter((_,i)=>$('survey-groups').querySelectorAll('input')[i].checked),+$('alpha').value),+$('alpha').value));
+function surveyUpdate(rebuild=false,rebuildOptions=true){
+ const variable=$('variable').value,first=$('group').value, second=$('group-b'),groups=$('survey-groups'), a=+$('alpha').value;
+ if(rebuild)refreshSurveyGroups(variable,first,second,groups,rebuildOptions);
+ safe($('results'),()=>{
+  const z=selectedSurvey(variable,first,second.value,groups);
+  return z.cells?show(factorialSummary(z.cells,z.names,a),a):show(oneSummary(z.rows,a),a);
+ });
 }
 function parse(s){
  let lines=s.trim().split(/\r?\n/).filter(x=>x.trim()),sep=lines[0]?.includes('\t')?'\t':',';
@@ -286,7 +308,7 @@ function rCode(){
  '<div class="grid"><div class="card controls">'+field('r-type','資料類型',options([['book','課本範例'],['exercise','習作計算題'],['survey','調查研究']]))+
  '<div id="r-cases">'+field('r-case','案例',options(data.items.map((z,i)=>[i,z.title])))+'</div>'+
  '<div id="r-survey" hidden>'+field('r-variable','結果變項',options(vars.map(x=>[x,x])))+
- field('r-group','分組因子',options(groups.map(x=>[x,x])))+'<h3>納入組別</h3><div id="r-groups" class="check"></div></div>'+
+ field('r-group','分組因子 A',options(groups.map(x=>[x,x])))+field('r-group-b','分組因子 B（選填）','')+'<h3>納入組別</h3><div id="r-groups" class="check"></div></div>'+
  alpha()+'<div class="check" id="r-pool-control" hidden><label><input id="r-pool" type="checkbox"> 採用課本的合併殘差</label></div></div>'+
  '<div><section class="card"><h3>R</h3><div class="inline"><button class="primary" id="r-copy" type="button">複製 R 語法</button><button id="r-download" type="button">下載 .R</button></div><p id="r-status" role="status"></p><label for="r-output"><strong>可執行的 R 程式</strong></label><textarea id="r-output" rows="20" readonly spellcheck="false"></textarea></section><section class="card"><h3>Python</h3><div class="inline"><button class="primary" id="py-copy" type="button">複製 Python 語法</button><button id="py-download" type="button">下載 .py</button></div><p id="py-status" role="status"></p><label for="py-output"><strong>可執行的 Python 程式</strong></label><textarea id="py-output" rows="20" readonly spellcheck="false"></textarea></section></div></div>';
 }
@@ -299,10 +321,16 @@ function mountR(caseIndex){
   status.textContent='';
   if(kind.value==='survey'){
    let variable=$('r-variable').value, group=$('r-group').value;
-   let rows=data.survey[variable][group].filter((_,i)=>pick.querySelectorAll('input')[i].checked);
-   out.value=rows.length<2?'':rSurvey(variable,group,rows,a);
-   py.value=rows.length<2?'':pythonSurvey(variable,group,rows,a);
-   if(!out.value)status.textContent='請至少選擇兩個組別。';
+   const z=selectedSurvey(variable,group,$('r-group-b').value,pick);
+   if(z.cells){
+    const valid=unique(z.cells.map(r=>r[0])).length>=2&&unique(z.cells.map(r=>r[1])).length>=2;
+    const scripts=valid?factorialScripts(z.cells,z.names,a):{r:'',py:''};
+    out.value=scripts.r;py.value=scripts.py;
+   }else{
+    out.value=z.rows.length<2?'':rSurvey(variable,group,z.rows,a);
+    py.value=z.rows.length<2?'':pythonSurvey(variable,group,z.rows,a);
+   }
+   if(!out.value)status.textContent='請為每個因子至少選擇兩個水準。';
   }else{
    $('r-pool-control').hidden=z.model!=='within';
    out.value=rCase(z,a,$('r-pool').checked);
@@ -311,8 +339,8 @@ function mountR(caseIndex){
   $('r-copy').disabled=$('r-download').disabled=!out.value;
   $('py-copy').disabled=$('py-download').disabled=!py.value;
  }
- function surveyGroups(){
-  pick.innerHTML=data.survey[$('r-variable').value][$('r-group').value].map(([g,n])=>'<label><input type="checkbox" checked> '+esc(g)+'（n='+n+'）</label>').join('');
+ function surveyGroups(rebuildOptions=true){
+  refreshSurveyGroups($('r-variable').value,$('r-group').value,$('r-group-b'),pick,rebuildOptions);
   update();
  }
  function changeCase(){
@@ -333,7 +361,8 @@ function mountR(caseIndex){
  changeType(caseIndex);
  kind.onchange=()=>changeType();
  index.onchange=changeCase;
- $('r-variable').onchange=$('r-group').onchange=surveyGroups;
+ $('r-variable').onchange=$('r-group').onchange=()=>surveyGroups();
+ $('r-group-b').onchange=()=>surveyGroups(false);
  pick.onchange=$('alpha').onchange=$('r-pool').onchange=update;
  $('r-copy').onclick=async()=>{
   try{await navigator.clipboard.writeText(out.value);status.textContent='已複製 R 語法。';}
@@ -365,6 +394,8 @@ function mount(route){
   $('case').onchange=()=>exampleUpdate(id);$('alpha').onchange=()=>exampleUpdate(id,false);exampleUpdate(id);
  }else if(id==='survey'){
   for(let x of ['variable','group'])$(x).onchange=()=>surveyUpdate(true);
+  $('group-b').onchange=()=>surveyUpdate(true,false);
+  $('survey-groups').onchange=()=>surveyUpdate();
   $('alpha').onchange=()=>surveyUpdate();surveyUpdate(true);
  }else if(id==='r-code'){
   mountR(caseIndex);
