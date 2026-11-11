@@ -110,12 +110,26 @@ const englishGroups={
  天秤座:'Libra',天蠍座:'Scorpio',射手座:'Sagittarius',摩羯座:'Capricorn',
  日常:'usual activity',慢跑:'jogging',有氧:'aerobic exercise',男性:'men',女性:'women'
 };
+let comparisonMethod='scheffe';
+let currentComparison;
+const comparisonMethods=[['lsd','Fisher LSD'],['hsd','Tukey HSD'],['scheffe','Scheffé']];
 function comparisons(res,a){
+ if(!res.pairs?.length)return '';
+ currentComparison={res,a};
+ return '<section id="pairwise-results">'+comparisonContent(res,a)+'</section>';
+}
+function comparisonContent(res,a){
  if(!res.pairs?.length)return '';
  const effect=res.terms.find(z=>z.err);
  const paired=res.terms.some(z=>z.name==='受試者／區組');
- const comparisonP=pair=>paired?pair.adj:pair.scheffe;
- const pMethod=paired?'Holm 校正後':'Scheffé 檢定的';
+ const selected=paired?'paired':comparisonMethod;
+ const methodName=paired?'Holm':comparisonMethods.find(([value])=>value===selected)[1];
+ const probabilities=new Map(res.pairs.map(pair=>[pair,pair.f==null?null:
+  selected==='hsd'?tukeyUpper(Math.sqrt(2*pair.f),res.desc.length,pair.df):
+  selected==='lsd'?pair.p:paired?pair.adj:pair.scheffe]));
+ const pMethod=paired?'Holm 校正後的':methodName+' 檢定的';
+ const selector=paired?'':'<label for="comparison-method">多重比較方法</label><select id="comparison-method">'+
+  comparisonMethods.map(([value,label])=>'<option value="'+value+'"'+(selected===value?' selected':'')+'>'+label+'</option>').join('')+'</select>';
  const labels=res.desc.map(([name])=>name);
  const englishLabels=labels.map((label,i)=>Object.hasOwn(englishGroups,label)?englishGroups[label]:
   /\p{Script=Han}/u.test(label)?(paired?'Condition ':'Group ')+(i+1):label);
@@ -124,21 +138,24 @@ function comparisons(res,a){
   if(j>=i)return j===i?'—':'';
   const pairIndex=j*(2*labels.length-j-1)/2+i-j-1;
   const pair=res.pairs[pairIndex];
-  const pv=comparisonP(pair);
+  const pv=probabilities.get(pair);
   return f(-pair.delta)+(pv!=null&&pv<a?'*':'')+' ('+p(pv)+')';
  })]);
  const df=res.pairs[0].df;
  const method=paired?'採配對 t 檢定。df = 配對數 − 1 = '+df+'。':
-  '採 Scheffé 檢定。分母自由度 = 總樣本數 − 組數 = '+df+'。';
+  '採 '+methodName+' 檢定。'+(selected==='hsd'?'樣本數不等時採 Tukey–Kramer。':'')+'分母自由度 = 總樣本數 − 組數 = '+df+'。';
  return '<h3>'+(res.pairs.length===1?'兩組平均數比較':'多重比較｜平均差矩陣')+'</h3>'+
-  table(['組/格',...labels],rows)+
+  selector+table(['組/格',...labels],rows)+
   '<p class="note">平均差為列組平均數減欄組平均數。括號內為 '+pMethod+' p 值。* 表示該 p 值 &lt; '+f(a)+'。'+method+'</p>'+
   (effect.p==null||effect.p>=a?'<p class="note">整體 F 未達顯著或無法檢定。矩陣結果供教學或探索。</p>':'')
   +'<details><summary>各組比較的中英文 APA 報告</summary>'+res.pairs.map((pair,i)=>{
    const magnitude=Math.sqrt(pair.f);
    const t=pair.delta<0?-magnitude:magnitude;
+   const tValue='<i>t</i>('+pair.df+') = '+(Number.isFinite(t)?t.toFixed(2):f(t));
+   const statistic=selected==='scheffe'?apaF(effect.df,pair.df,pair.f/effect.df):
+    selected==='hsd'?'<i>q</i>('+res.desc.length+', '+pair.df+') = '+f(Math.sqrt(2*pair.f)):tValue;
    return apaResult(pair.name+' 的平均數差異','The mean difference between '+englishPairs[i],
-    paired?'<i>t</i>('+pair.df+') = '+(Number.isFinite(t)?t.toFixed(2):f(t)):apaF(effect.df,pair.df,pair.f/effect.df),comparisonP(pair),a,paired?'Holm':'Scheffé');
+    statistic,probabilities.get(pair),a,selected==='lsd'?'':methodName);
   }).join('')+'</details>';
 }
 function simpleEffects(res,a){
@@ -495,5 +512,12 @@ function mount(route){
   $('export').onclick=()=>save('anova-input.csv',$('paste').value,'text/csv;charset=utf-8');
  }
 }
+document.addEventListener('change',event=>{
+ if(event.target.id!=='comparison-method')return;
+ comparisonMethod=event.target.value;
+ const {res,a}=currentComparison;
+ $('pairwise-results').innerHTML=comparisonContent(res,a);
+ $('comparison-method').focus();
+});
 window.addEventListener('hashchange',()=>mount(location.hash.slice(1)));
 mount(location.hash.slice(1));

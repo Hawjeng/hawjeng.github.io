@@ -32,6 +32,36 @@ function density(f,d,e){
  const a=d/2,b=e/2,t=d/e;
  return Math.exp(a*Math.log(t)+(a-1)*Math.log(f)-(a+b)*Math.log1p(f*t)+lg(a+b)-lg(a)-lg(b));
 }
+// Integrate the normal range over the independent residual chi distribution.
+function tukeyUpper(q, groups, df){
+ if(q===Infinity)return 0;
+ if(q<=0)return 1;
+ if(groups===2)return upper(q*q/2,1,df);
+ const normalDensity=x=>Math.exp(-x*x/2)/Math.sqrt(2*Math.PI);
+ const cdf=x=>{
+  const t=1/(1+.2316419*Math.abs(x));
+  const tail=normalDensity(x)*t*(.319381530+t*(-.356563782+t*(1.781477937+t*(-1.821255978+t*1.330274429))));
+  return x<0?tail:1-tail;
+ };
+ const integrate=(fn,lo,hi,n)=>{
+  const step=(hi-lo)/n;
+  let sum=fn(lo)+fn(hi);
+  for(let i=1;i<n;i++)sum+=(i%2?4:2)*fn(lo+i*step);
+  return sum*step/3;
+ };
+ const mode=Math.sqrt(df-1);
+ const logConstant=(1-df/2)*Math.LN2-lg(df/2);
+ const rangeSurvival=width=>integrate(x=>{
+  const mass=Math.max(0,cdf(x+width)-cdf(x));
+  const full=cdf(-x);
+  return groups*normalDensity(x)*Math.max(0,full**(groups-1)-mass**(groups-1));
+ },-9,9,144);
+ const probability=integrate(x=>{
+  const density=x===0?(df===1?Math.exp(logConstant):0):Math.exp(logConstant+(df-1)*Math.log(x)-x*x/2);
+  return density*rangeSurvival(q*x/Math.sqrt(df));
+ },Math.max(0,mode-9),mode+9,144);
+ return Math.max(0,Math.min(1,probability));
+}
 function term(name,s,df){
  s=Math.max(0,s);return {name,s,df,ms:df?s/df:null};
 }
@@ -153,4 +183,4 @@ function compute(model,h,r,a,pooled=false){
  }));
  return {terms,desc,profile:{as,bs,M,ci},slices:posthoc(slices),sharedSlices};
 }
-if(typeof module!=='undefined')module.exports={compute,oneSummary,upper,lower,critical,labels,density};
+if(typeof module!=='undefined')module.exports={tukeyUpper,compute,oneSummary,upper,lower,critical,labels,density};
