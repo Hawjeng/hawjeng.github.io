@@ -90,6 +90,20 @@ function profile({as,bs,M,ci,groups=false}){
  (ci?'<details><summary>查看平均數與 95% CI 數值</summary>'+table([...(groups?['組別']:['A 水準','B 水準']),'平均數','95% CI 下限','95% CI 上限'],M.flatMap((row,i)=>row.map((v,j)=>[...(groups?[bs[j]]:[as[i],bs[j]]),f(v),...ci[i][j].map(formatCI)])))+'</details>':'');
 }
 const decision=(pv,a)=>pv==null?'無法檢定':pv<a?'達顯著':'未達顯著';
+function apaResult(zh,en,stat,pv,alpha,adjustment='',effectSize=null){
+ if(pv==null)return '<p>'+esc(zh)+'無法檢定。</p><p lang="en">'+esc(en)+' could not be tested.</p>';
+ const decimal=value=>value.toFixed(3).replace(/^0/,'');
+ const significant=pv<alpha;
+ const statistics=stat+', <i>p</i> '+(pv<.001?'&lt; .001':'= '+decimal(pv))+
+  (effectSize==null?'':', η<sub>p</sub>² = '+decimal(effectSize));
+ const method=adjustment?'（'+adjustment+' 校正）':'';
+ const methodEn=adjustment?' ('+adjustment+'-adjusted <i>p</i>)':'';
+ return '<p>'+esc(zh)+(significant?'達統計顯著':'未達統計顯著')+'，'+statistics+method+'。</p>'+
+  '<p lang="en">'+esc(en)+(significant?' was statistically significant, ':' was not statistically significant, ')+statistics+methodEn+'.</p>';
+}
+function apaF(df1,df2,value){
+ return '<i>F</i>('+df1+', '+df2+') = '+(Number.isFinite(value)?value.toFixed(2):f(value));
+}
 function comparisons(res,a){
  if(!res.pairs?.length)return '';
  const effect=res.terms.find(z=>z.err);
@@ -108,7 +122,13 @@ function comparisons(res,a){
  return '<h3>'+(res.pairs.length===1?'兩組平均數比較':'多重比較｜平均差矩陣')+'</h3>'+
   table(['組/格',...labels],rows)+
   '<p class="note">平均差為列組平均數減欄組平均數。* 表示 Holm 校正後 p &lt; '+f(a)+'。'+method+'</p>'+
-  (effect.p==null||effect.p>=a?'<p class="note">整體 F 未達顯著或無法檢定。矩陣結果供教學或探索。</p>':'');
+  (effect.p==null||effect.p>=a?'<p class="note">整體 F 未達顯著或無法檢定。矩陣結果供教學或探索。</p>':'')
+  +'<details><summary>各組比較的中英文 APA 報告</summary>'+res.pairs.map(pair=>{
+   const magnitude=Math.sqrt(pair.f);
+   const t=pair.delta<0?-magnitude:magnitude;
+   return apaResult(pair.name+' 的平均數差異','The mean difference for '+pair.name,
+    '<i>t</i>('+pair.df+') = '+(Number.isFinite(t)?t.toFixed(2):f(t)),pair.adj,a,'Holm');
+  }).join('')+'</details>';
 }
 function simpleEffects(res,a){
  if(!res.slices?.length)return '';
@@ -122,8 +142,9 @@ function simpleEffects(res,a){
  (t.p==null||t.p>=a?'<p class="note">整體交互作用未達顯著或無法檢定；以下結果供教學或探索，不能因一個切片顯著而另一個不顯著就斷言存在交互作用。</p>':'')+
  '<p><strong>課本做法：</strong>使用整體設計相應的共用誤差項；將 '+m+' 項切片檢定當成同一族系，單次顯著水準為 α／'+m+' = '+f(a/m)+'（等價於用校正 p 與 α 比較）。</p>'+
  table([...heads,'Bonferroni p','判定'],rows(res.sharedSlices,'bonf'),'共用誤差項｜Bonferroni 校正')+
+ '<details><summary>單純主要效果的中英文 APA 報告</summary>'+res.sharedSlices.map(z=>apaResult(z.name+' 的單純主要效果','The simple main effect ('+z.name+')',apaF(z.df,z.df2,z.f),z.p==null?null:Math.min(1,z.p*m),a,'Bonferroni')).join('')+'</details>'+
  '<details><summary>對照：各切片重估誤差與 Holm 校正</summary><p>此方法在各切片內重估誤差均方，因此與課本共用誤差的 F 值可能不同。</p>'+
- table([...heads,'Holm p','判定'],rows(res.slices,'holm'),'各切片重估誤差｜Holm 校正')+'</details>';
+ table([...heads,'Holm p','判定'],rows(res.slices,'holm'),'各切片重估誤差｜Holm 校正')+res.slices.map(z=>apaResult(z.name+' 的單純主要效果','The simple main effect ('+z.name+')',apaF(z.df,z.df2,z.f),z.adj,a,'Holm')).join('')+'</details>';
 }
 function sumsOfSquares(res){
  const tests=res.terms.filter(z=>z.err);
@@ -167,6 +188,7 @@ function show(res,a){
  const overview='<div class="descriptive-layout"><div class="descriptive-summary">'+desc+'</div><div class="descriptive-plot">'+plot+'</div></div>';
  if(res.ratio){
   let z=res.ratio;
+  const [first,second]=res.desc.map(([name])=>name);
   const ratioCases=[
    ['A／B','右尾',z.f,z.d,z.e,upper(z.f,z.d,z.e),q=>critical(z.d,z.e,q)],
    ['B／A','左尾',1/z.f,z.e,z.d,lower(1/z.f,z.e,z.d),q=>1/critical(z.d,z.e,q)]
@@ -175,15 +197,21 @@ function show(res,a){
    [order,tail,f(q),df1,df2,f(obs),p(prob),f(cutoff(q)),prob<q?'拒絕 H₀':'不拒絕 H₀']));
   const caseTable=table(['變異數比','尾端','每尾水準','df₁','df₂','F','單尾 p','臨界值','判定'],caseRows,'課本的四欄比較')+
    '<p>每尾水準 α 用於方向性單尾檢定。每尾水準 α／2 用於雙尾檢定，表中的 B／A 左尾臨界值取倒數後，即為 A／B 雙尾檢定的左尾臨界值。</p>';
-  return overview+'<h3>F 檢定</h3>'+caseTable+'<h4>A／B 的雙尾檢定</h4><p class="note">F('+z.d+', '+z.e+') = '+f(z.f)+'，雙尾 p '+(z.p<.0001?'':'= ')+esc(p(z.p))+'；'+(z.p<a?'拒絕':'未拒絕')+'兩母體變異數相等。雙尾臨界值：'+f(z.lo)+'、'+f(z.hi)+'。</p>'+fchart(z.d,z.e,z.f,z.lo,z.hi,'both');
+  return overview+'<h3>F 檢定</h3>'+caseTable+'<h4>A／B 的雙尾檢定</h4><p class="note">F('+z.d+', '+z.e+') = '+f(z.f)+'，雙尾 p '+(z.p<.0001?'':'= ')+esc(p(z.p))+'；'+(z.p<a?'拒絕':'未拒絕')+'兩母體變異數相等。雙尾臨界值：'+f(z.lo)+'、'+f(z.hi)+'。</p>'+fchart(z.d,z.e,z.f,z.lo,z.hi,'both')+
+   apaResult(first+' 與 '+second+' 的變異數差異（雙尾）','The difference in variances between '+first+' and '+second+' (two-tailed)',apaF(z.d,z.e,z.f),z.p,a)+
+   apaResult(first+' 的變異數大於 '+second+' 的方向性檢定','The one-tailed test for greater variance in '+first+' than in '+second,apaF(z.d,z.e,z.f),upper(z.f,z.d,z.e),a);
  }
  const tested=res.terms.filter(t=>t.err);
- const conclusion=tested.map(x=>'<li>'+esc(x.name)+'：F('+x.df+', '+x.df2+') = '+f(x.f)+'，p '+(x.p!==null&&x.p<.0001?'':'= ')+esc(p(x.p))+'；'+(x.p===null?'無法檢定（誤差與效果均為零）':x.p<a?'<strong class="sig">達顯著</strong>':'未達顯著')+'。</li>').join('');
+ const interpretation=tested.map((z,i)=>{
+  const zh=res.profile?(i===2?'A × B 交互作用':z.name+' 的主要效果'):'各組或條件的平均數差異';
+  const en=res.profile?(i===2?'The A × B interaction':'The main effect of factor '+(i===0?'A':'B')):'The overall difference among the means';
+  return apaResult(zh,en,apaF(z.df,z.df2,z.f),z.p,a,'',z.eta);
+ }).join('');
  const summary=table(['變異來源','SS','df','MS','F','p','F 臨界值','偏 η²'],
   res.terms.map(z=>[z.name==='組內誤差'?'組內（誤差）':z.name,f(z.s),z.df,f(z.ms),f(z.f),p(z.p),f(z.crit),f(z.eta)]),'變異數分析摘要表');
  let html=overview;
  if(res.profile)html+=table(['A 水準',...res.profile.bs,'A 邊際平均'],[...res.profile.M.map((r,i)=>[res.profile.as[i],...r.map(f),f(avg(r))]),['B 邊際平均',...res.profile.bs.map((_,j)=>f(avg(res.profile.M.map(r=>r[j])))),f(avg(res.profile.M.flat()))]],'細格與邊際平均');
- html+=(res.methodNote??'')+sumsOfSquares(res)+'<h3>F 檢定</h3>'+fSteps(res,a)+'<ul class="note">'+conclusion+'</ul>'+summary;
+ html+=(res.methodNote??'')+sumsOfSquares(res)+'<h3>F 檢定</h3>'+fSteps(res,a)+interpretation+summary;
  const plottable=tested.filter(z=>z.p!=null);
  if(plottable.length)html+='<h3>F 分配圖</h3>'+plottable.map((z,i)=>
   '<details'+(i===0?' open':'')+'><summary>'+esc(z.name)+'｜F 分配圖</summary>'+
