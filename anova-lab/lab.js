@@ -36,6 +36,12 @@ function fchart(d,e,obs,lo,hi,tail='right',a=upper(hi,d,e)*(tail==='both'?2:1)){
  const fill=(regions,color,opacity)=>regions.map(([a,b])=>'<path d="'+path(a,b)+'" fill="'+color+'" opacity="'+opacity+'"/>').join('');
  const mode=d<=2?0:((d-2)/d)*(e/(e+2));
  const peakX=x(mode), peakY=y(mode);
+ // Keep the entire label between the critical boundaries and below the curve.
+ const labelHalf=Math.min(46,(x(hi)-x(lo))*.43);
+ const labelX=Math.max(x(lo)+labelHalf,Math.min(x(hi)-labelHalf,peakX));
+ const labelTop=Math.max(y((labelX-labelHalf-48)*X/598),y((labelX+labelHalf-48)*X/598));
+ const labelY=143-Math.max(3,(143-labelTop)*.33);
+ const labelSize=Math.min(13,labelHalf/3.5,Math.max(5,(143-labelTop)*.6));
  const pValue=tail==='both'?Math.min(1,2*Math.min(lower(obs,d,e),upper(obs,d,e))):upper(obs,d,e);
  return '<figure><svg viewBox="0 0 680 207" role="img" aria-label="H₀ 下的 F 分配、α 拒絕域與 p 值尾域">'+
   '<defs><pattern id="'+hatch+'" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><path d="M0 0V5" stroke="#2265a5" stroke-width="2"/></pattern></defs>'+
@@ -44,7 +50,7 @@ function fchart(d,e,obs,lo,hi,tail='right',a=upper(hi,d,e)*(tail==='both'?2:1)){
   line(hi,'#a24a14')+(lo>0?line(lo,'#a24a14'):'')+line(obs,'#4c3c86')+
   '<text x="'+peakX+'" y="'+(peakY-7)+'" text-anchor="'+(mode===0?'start':'middle')+'" font-size="14" font-weight="bold" fill="#255661">H₀</text>'+
   Array.from({length:6},(_,i)=>'<text x="'+x(i*X/5)+'" y="163" text-anchor="middle" font-size="12">'+f(i*X/5)+'</text>').join('')+
-  '<text x="'+((x(lo)+x(hi))/2)+'" y="16" text-anchor="middle" font-size="13" fill="#255661">1 − α = '+f(1-a)+'</text>'+
+  '<text x="'+labelX+'" y="'+labelY+'" text-anchor="middle" font-size="'+labelSize+'" font-weight="bold" fill="#255661">1 − α = '+f(1-a)+'</text>'+
   '<text x="'+((x(hi)+646)/2)+'" y="16" text-anchor="middle" font-size="13" fill="#a24a14">'+(lo?'每尾 α/2 = '+f(a/2):'α = '+f(a))+'</text>'+
   '<text x="48" y="190" font-size="13" fill="#a24a14">Fcv('+d+', '+e+') = '+(lo?f(lo)+' / ':'')+f(hi)+'</text>'+
   '<text x="646" y="190" text-anchor="end" font-size="13" fill="#4c3c86">Fobt = '+f(obs)+'</text></svg>'+
