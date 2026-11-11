@@ -104,6 +104,12 @@ function apaResult(zh,en,stat,pv,alpha,adjustment='',effectSize=null){
 function apaF(df1,df2,value){
  return '<i>F</i>('+df1+', '+df2+') = '+(Number.isFinite(value)?value.toFixed(2):f(value));
 }
+const englishGroups={
+ 水瓶座:'Aquarius',雙魚座:'Pisces',牡羊座:'Aries',金牛座:'Taurus',
+ 雙子座:'Gemini',巨蟹座:'Cancer',獅子座:'Leo',處女座:'Virgo',
+ 天秤座:'Libra',天蠍座:'Scorpio',射手座:'Sagittarius',摩羯座:'Capricorn',
+ 日常:'usual activity',慢跑:'jogging',有氧:'aerobic exercise',男性:'men',女性:'women'
+};
 function comparisons(res,a){
  if(!res.pairs?.length)return '';
  const effect=res.terms.find(z=>z.err);
@@ -111,6 +117,9 @@ function comparisons(res,a){
  const comparisonP=pair=>paired?pair.adj:pair.scheffe;
  const pMethod=paired?'Holm 校正後':'Scheffé 檢定的';
  const labels=res.desc.map(([name])=>name);
+ const englishLabels=labels.map((label,i)=>Object.hasOwn(englishGroups,label)?englishGroups[label]:
+  /\p{Script=Han}/u.test(label)?(paired?'Condition ':'Group ')+(i+1):label);
+ const englishPairs=englishLabels.flatMap((first,i)=>englishLabels.slice(i+1).map(second=>first+' and '+second));
  const rows=labels.map((label,i)=>[label,...labels.map((_,j)=>{
   if(j>=i)return j===i?'—':'';
   const pairIndex=j*(2*labels.length-j-1)/2+i-j-1;
@@ -125,10 +134,10 @@ function comparisons(res,a){
   table(['組/格',...labels],rows)+
   '<p class="note">平均差為列組平均數減欄組平均數。括號內為 '+pMethod+' p 值。* 表示該 p 值 &lt; '+f(a)+'。'+method+'</p>'+
   (effect.p==null||effect.p>=a?'<p class="note">整體 F 未達顯著或無法檢定。矩陣結果供教學或探索。</p>':'')
-  +'<details><summary>各組比較的中英文 APA 報告</summary>'+res.pairs.map(pair=>{
+  +'<details><summary>各組比較的中英文 APA 報告</summary>'+res.pairs.map((pair,i)=>{
    const magnitude=Math.sqrt(pair.f);
    const t=pair.delta<0?-magnitude:magnitude;
-   return apaResult(pair.name+' 的平均數差異','The mean difference for '+pair.name,
+   return apaResult(pair.name+' 的平均數差異','The mean difference between '+englishPairs[i],
     paired?'<i>t</i>('+pair.df+') = '+(Number.isFinite(t)?t.toFixed(2):f(t)):apaF(effect.df,pair.df,pair.f/effect.df),comparisonP(pair),a,paired?'Holm':'Scheffé');
   }).join('')+'</details>';
 }
