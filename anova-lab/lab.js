@@ -56,6 +56,7 @@ function fchart(d,e,obs,lo,hi,tail='right',a=upper(hi,d,e)*(tail==='both'?2:1)){
   '<text x="646" y="190" text-anchor="end" font-size="13" fill="#4c3c86">Fobt = '+f(obs)+'</text></svg>'+
   '<figcaption>H₀ 下的 F('+d+', '+e+') 分配。<strong style="color:#a24a14">橙色底：α 拒絕域</strong>；<strong style="color:#2265a5">藍色斜線：p 值尾域（p '+(pValue<.0001?'':'= ')+esc(p(pValue))+'）</strong>。'+(obs>X?' Fobt 超出圖域。':'')+'</figcaption></figure>';
 }
+const formatCI=value=>Number.isFinite(value)?value.toFixed(2):f(value);
 function profile({as,bs,M,ci,groups=false}){
  let extent=ci?[...M.flat(),...ci.flat(2)]:M.flat();
  let min=Math.min(...extent),max=Math.max(...extent),pad=(max-min||1)*.17;
@@ -63,17 +64,21 @@ function profile({as,bs,M,ci,groups=false}){
  const bottom=groups?174:206, right=groups?width-12:620;
  const axisSize=groups?14:11, groupSize=groups?15:12, meanSize=groups?15:11;
  let x=j=>groups?55+(j+.5)*(right-55)/bs.length:78+j*514/Math.max(1,bs.length-1);
- let y=v=>bottom-(v-min+pad)/(max-min+2*pad)*(groups?150:163);
+ const step=Math.max(1,Math.ceil((max-min+2*pad)/4));
+ const lower=Math.floor((min-pad)/step)*step;
+ const upper=Math.ceil((max+pad)/step)*step;
+ const ticks=Array.from({length:Math.round((upper-lower)/step)+1},(_,i)=>lower+i*step);
+ let y=v=>bottom-(v-lower)/(upper-lower)*(groups?150:163);
  const col=['#266b80','#a44827','#5c518f','#367343','#81651a','#a04271'];
  const point=(i,j)=>x(j)+(ci&&as.length>1?((i/(as.length-1))-.5)*Math.min(24,200/(bs.length-1)):0);
  return '<h3>'+(groups?'各組平均數圖':'細格平均數圖')+(ci?'｜95% 信賴區間':'')+'</h3><figure><div class="profile-chart"><svg '+(groups?'style="width:'+width+'px" ':'')+'viewBox="0 0 '+width+' '+(bottom+44)+'" role="img" aria-label="'+(ci?'各細格平均數與 95% 信賴區間':'各細格平均數示意圖，無信賴區間')+'">'+
- Array.from({length:5},(_,i)=>{let v=min-pad+(max-min+2*pad)*i/4;return '<path d="M55 '+y(v)+'H'+right+'" stroke="#d5e3e1"/><text x="50" y="'+(y(v)+4)+'" text-anchor="end" font-size="'+axisSize+'">'+f(v)+'</text>';}).join('')+
+ ticks.map(v=>{return '<path d="M55 '+y(v)+'H'+right+'" stroke="#d5e3e1"/><text x="50" y="'+(y(v)+4)+'" text-anchor="end" font-size="'+axisSize+'">'+f(v)+'</text>';}).join('')+
  bs.map((v,j)=>'<text x="'+x(j)+'" y="'+(bottom+24)+'" text-anchor="middle" font-size="'+groupSize+'">'+esc(v)+'</text>').join('')+
  M.map((r,i)=>{
   const color=col[i%6];
   return (groups?'':'<polyline fill="none" stroke="'+color+'" stroke-width="2.5" stroke-dasharray="'+(i%2?'6 3':'none')+'" points="'+r.map((v,j)=>point(i,j)+','+y(v)).join(' ')+'"/>')+
    r.map((v,j)=>{
-    const X=point(i,j),Y=y(v),lim=ci?.[i]?.[j],tip=(groups?'':as[i]+' × ')+bs[j]+'：平均數 '+f(v)+(lim?'；95% CI ['+lim.map(f).join(', ')+']':'');
+    const X=point(i,j),Y=y(v),lim=ci?.[i]?.[j],tip=(groups?'':as[i]+' × ')+bs[j]+'：平均數 '+f(v)+(lim?'；95% CI ['+lim.map(formatCI).join(', ')+']':'');
     const near=M.some((other,k)=>k!==i&&Math.abs(y(other[j])-Y)<18);
     const offset=near?(i%2?15:-9):-9;
     const bars=lim?'<path d="M'+X+' '+y(lim[0])+'V'+y(lim[1])+' M'+(X-4)+' '+y(lim[0])+'h8 M'+(X-4)+' '+y(lim[1])+'h8" fill="none" stroke="'+color+'" stroke-width="1.5"/>':'';
@@ -82,7 +87,7 @@ function profile({as,bs,M,ci,groups=false}){
  }).join('')+
  '</svg></div><figcaption>'+(groups?'點旁數字為各組平均數；誤差線是未校正的 95% t 信賴區間。相依資料的區間描述各條件平均，並非配對差值的區間。</figcaption></figure>':as.map((v,i)=>'<strong style="color:'+col[i%6]+'">● '+esc(v)+'</strong>').join('　')+
  (ci?'。點旁數字為細格平均數，誤差線為各細格未校正的 95% t 信賴區間：平均數 ± t × s／√n。相依設計的誤差線不是配對差值的區間；不可依區間是否重疊判定交互作用。':'。點旁數字為示意平均數；原資料未提供細格樣本數與變異，無法估計 95% CI。')+'</figcaption></figure>')+
- (ci?'<details><summary>查看平均數與 95% CI 數值</summary>'+table([...(groups?['組別']:['A 水準','B 水準']),'平均數','95% CI 下限','95% CI 上限'],M.flatMap((row,i)=>row.map((v,j)=>[...(groups?[bs[j]]:[as[i],bs[j]]),f(v),...ci[i][j].map(f)])))+'</details>':'');
+ (ci?'<details><summary>查看平均數與 95% CI 數值</summary>'+table([...(groups?['組別']:['A 水準','B 水準']),'平均數','95% CI 下限','95% CI 上限'],M.flatMap((row,i)=>row.map((v,j)=>[...(groups?[bs[j]]:[as[i],bs[j]]),f(v),...ci[i][j].map(formatCI)])))+'</details>':'');
 }
 const decision=(pv,a)=>pv==null?'無法檢定':pv<a?'達顯著':'未達顯著';
 function comparisons(res,a){
@@ -145,7 +150,7 @@ function show(res,a){
   return {name,n,mean,sd,se,ci:[mean-margin,mean+margin]};
  });
  const desc=table(['組別／細格','n','平均數','SD','SE','95% CI'],
-  summaries.map(({name,n,mean,sd,se,ci})=>[name,n,f(mean),f(sd),f(se),'['+ci.map(f).join(', ')+']']),'敘述統計');
+  summaries.map(({name,n,mean,sd,se,ci})=>[name,n,f(mean),f(sd),f(se),'['+ci.map(formatCI).join(', ')+']']),'敘述統計');
  const plot=res.profile?profile(res.profile):profile({groups:true,as:[''],bs:summaries.map(r=>r.name),M:[summaries.map(r=>r.mean)],ci:[summaries.map(r=>r.ci)]});
  const overview='<div class="descriptive-layout"><div class="descriptive-summary">'+desc+'</div><div class="descriptive-plot">'+plot+'</div></div>';
  if(res.ratio){
