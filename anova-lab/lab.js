@@ -149,7 +149,7 @@ function show(res,a){
   const margin=Math.sqrt(critical(1,n-1,.05))*se;
   return {name,n,mean,sd,se,ci:[mean-margin,mean+margin]};
  });
- const desc=table(['組別／細格','n','平均數','SD','SE','95% CI'],
+ const desc=table(['組/格','n','平均數','SD','SE','95% CI'],
   summaries.map(({name,n,mean,sd,se,ci})=>[name,n,f(mean),f(sd),f(se),'['+ci.map(formatCI).join(', ')+']']),'敘述統計');
  const plot=res.profile?profile(res.profile):profile({groups:true,as:[''],bs:summaries.map(r=>r.name),M:[summaries.map(r=>r.mean)],ci:[summaries.map(r=>r.ci)]});
  const overview='<div class="descriptive-layout"><div class="descriptive-summary">'+desc+'</div><div class="descriptive-plot">'+plot+'</div></div>';
