@@ -371,11 +371,35 @@ function selectedSurvey(variable,first,second,container){
 function survey(){
  const vars=Object.keys(data.survey);
  return heading('調查研究')+'<p>以 '+data.surveyN+' 筆問卷的公開分組摘要，探索星座、性別、手機、上網方案、個性、課外活動或學院別與數值變項的關係。</p><div class="grid survey-layout"><details class="card controls survey-controls" open><summary>分析設定</summary><div class="survey-fields">'+
- field('variable','結果變項',options(vars.map(v=>[v,v])))+field('group','分組因子 A',options(Object.keys(data.survey[vars[0]]).map(v=>[v,v])))+field('group-b','分組因子 B（選填）','')+alpha()+
- '<p>第二因子只列出交叉細格皆至少 5 人的組合。</p><h3>納入組別</h3><div id="survey-groups" class="check"></div><p><a href="#r-code/survey">前往調查研究 R 與 Python 語法</a></p></div></details><div class="card" id="results" aria-live="polite"></div></div><p class="note">這是觀察性調查。分析排除所選變項或因子缺失的資料，保留 0。新增因子只顯示有效樣本至少 5 人的類別；群組差異不能解釋為因果效果。</p>';
+ field('survey-sample','分析樣本',options([['','全體樣本'],...data.survey[vars[0]]['星座'].map(([name])=>[name,name])]))+field('variable','結果變項',options(vars.map(v=>[v,v])))+field('group','分組因子 A',options(Object.keys(data.survey[vars[0]]).map(v=>[v,v])))+field('group-b','分組因子 B（選填）','')+alpha()+
+ '<p>選擇單一星座時，可用該星座的公開交叉摘要做單因子分析。全體樣本的第二因子只列出交叉細格皆至少 5 人的組合。</p><h3>納入組別</h3><div id="survey-groups" class="check"></div><p id="survey-code-link"><a href="#r-code/survey">前往調查研究 R 與 Python 語法</a></p></div></details><div class="card" id="results" aria-live="polite"></div></div><p class="note">這是觀察性調查。分析排除所選變項或因子缺失的資料，保留 0。新增因子只顯示有效樣本至少 5 人的類別；群組差異不能解釋為因果效果。</p>';
 }
 function surveyUpdate(rebuild=false,rebuildOptions=true){
  const variable=$('variable').value,first=$('group').value, second=$('group-b'),groups=$('survey-groups'), a=+$('alpha').value;
+ if(sample){
+  const summaries=new Map();
+  for(const {factors,cells} of globalThis.SURVEY_FACTORIAL[variable]??[]){
+   const axis=factors.indexOf('星座');
+   if(axis<0)continue;
+   const rows=cells.filter(row=>row[axis]===sample).map(row=>[row[1-axis],...row.slice(2)]);
+   if(rows.length>=2)summaries.set(factors[1-axis],rows);
+  }
+  if(rebuild){
+   $('group').innerHTML=options([...summaries.keys()].map(name=>[name,name]));
+   if(summaries.has(first))$('group').value=first;
+   second.innerHTML=options([['','無（單因子）']]);
+   second.disabled=true;
+   groups.innerHTML=(summaries.get($('group').value)??[]).map(([name,n])=>
+    '<label><input type="checkbox" value="'+esc(name)+'" checked> '+esc(name)+'（n='+n+'）</label>').join('');
+  }
+  safe($('results'),()=>{
+   const selected=new Set([...groups.querySelectorAll('input:checked')].map(input=>input.value));
+   const rows=(summaries.get($('group').value)??[]).filter(([name])=>selected.has(name));
+   check(rows.length>=2,'請選擇至少兩組。若無可用組別，請改選其他結果變項或分析樣本。');
+   return '<h3>'+esc(sample)+'｜單因子變異數分析</h3>'+show(oneSummary(rows,a),a);
+  });
+  return;
+ }
  if(rebuild)refreshSurveyGroups(variable,first,second,groups,rebuildOptions);
  safe($('results'),()=>{
   const z=selectedSurvey(variable,first,second.value,groups);
@@ -498,6 +522,15 @@ function mount(route){
   $('case').onchange=()=>exampleUpdate(id);$('alpha').onchange=()=>exampleUpdate(id,false);exampleUpdate(id);
  }else if(id==='survey'){
   $('variable').value='手機遊戲成癮';
+  $('survey-sample').onchange=()=>{
+   const filtered=Boolean($('survey-sample').value);
+   $('group-b').disabled=filtered;
+   $('survey-code-link').hidden=filtered;
+   if(!filtered){
+    $('group').innerHTML=options(Object.keys(data.survey[$('variable').value]).map(name=>[name,name]));
+   }
+   surveyUpdate(true);
+  };
   for(let x of ['variable','group'])$(x).onchange=()=>surveyUpdate(true);
   $('group-b').onchange=()=>surveyUpdate(true,false);
   $('survey-groups').onchange=()=>surveyUpdate();
