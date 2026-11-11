@@ -17,6 +17,7 @@ P = json.loads((ROOT / 'data/profile.json').read_text(encoding='utf-8-sig'))
 R = P['jointAppointment']
 D = P['education'][0]
 BOOKS = json.loads((ROOT / 'data/books.json').read_text(encoding='utf-8-sig'))
+BOOK_ARCHIVE = json.loads((ROOT / 'data/books-archive.json').read_text(encoding='utf-8'))
 PROJECTS = json.loads((ROOT / 'data/projects.json').read_text(encoding='utf-8-sig'))
 RESOURCES = json.loads((ROOT / 'data/resources.json').read_text(encoding='utf-8-sig'))
 E = lambda value: escape(str(value or ''), quote=True)
@@ -121,10 +122,16 @@ def toolbar(categories, unit, placeholder):
     buttons = '<button type="button" data-filter="all" aria-pressed="true">全部</button>'+''.join(f'<button type="button" data-filter="{E(c)}" aria-pressed="false">{E(c)}</button>' for c in categories)
     return f'<div class="catalog-toolbar"><div class="filter-row" data-filters data-unit="{E(unit)}" role="group" aria-label="依主題篩選">{buttons}</div><div class="search-row"><div class="search-field"><label for="catalog-search" class="search-label">搜尋</label><input id="catalog-search" type="search" placeholder="{E(placeholder)}" autocomplete="off"></div><p id="result-count" class="result-count" role="status" aria-live="polite"></p></div></div><noscript><p class="no-js-note">以下列出完整內容。搜尋與主題篩選需啟用 JavaScript。</p></noscript>'
 
+def archive_book_card(b):
+    cover = f'assets/images/{E(Path(b["cover"]).name)}'
+    return f'''<article class="book-card" data-category="{E(b['category'])}"><div class="book-art"><span class="book-year">{E(b['year'])}</span><img src="{cover}" alt="《{E(b['title'])}》封面" width="230" height="320" loading="lazy"></div><div class="book-info"><div class="book-meta"><span>{E(b['publisher'])}</span><span>{E(b['edition'])}</span></div><h3>{E(b['title'])}</h3><p class="book-author">{E(b['authors'])}</p><div class="book-links">{ext(b['url'],b['label'],'')}</div></div></article>'''
+
 def books_page():
-    cats = list(dict.fromkeys(b['category'] for b in BOOKS))
+    catalog = sorted([(b, book_card) for b in BOOKS] + [(b, archive_book_card) for b in BOOK_ARCHIVE],
+                     key=lambda entry: (entry[0]['year'], entry[0].get('date', '')), reverse=True)
+    cats = list(dict.fromkeys(b['category'] for b, _ in catalog))
     body = heading('Books & prefaces','專書著作','Books, methods & the stories behind them',S['bookIntro'])
-    body += f'<div class="container">{toolbar(cats,"本書","書名、出版社、作者或分析方法")}<div class="catalog-content"><div class="books-grid">'+''.join(book_card(b) for b in BOOKS)+f'</div><p id="empty-results" class="empty-results" hidden>沒有符合的書目，請更換關鍵字或選擇「全部」。</p><aside class="reading-guide"><h2>怎麼選一本適合自己的書？</h2><p>初次接觸量化研究，可從統計學與量化研究法開始；已有分析經驗，則依研究問題選擇結構方程、多層次、潛在異質性或貝氏統計。各書序言說明了寫作緣起、內容安排與讀者對象，可先讀序言再決定。</p></aside><p class="source-note">書目依版本出版年排列。重印日期另列，避免與新版混淆。來源：{ext(S["oldSite"]+"books.htm","原網站專書清單","")}、各出版社產品頁。資料核對：{E(S["updated"])}。</p></div></div>'
+    body += f'<div class="container">{toolbar(cats,"筆書目","書名、出版社、作者或分析方法")}<div class="catalog-content"><div class="books-grid">'+''.join(render(b) for b, render in catalog)+f'</div><p id="empty-results" class="empty-results" hidden>沒有符合的書目，請更換關鍵字或選擇「全部」。</p><aside class="reading-guide"><h2>怎麼選一本適合自己的書？</h2><p>初次接觸量化研究，可從統計學與量化研究法開始；已有分析經驗，則依研究問題選擇結構方程、多層次、潛在異質性或貝氏統計。各書序言說明了寫作緣起、內容安排與讀者對象，可先讀序言再決定。</p></aside><p class="source-note">書目依出版年由新到舊排列。舊站的不同版本、譯本與專題一併列出；重印與早期書頁另作標註。來源：{ext(S["oldSite"]+"books.htm","原網站專書清單","")}、各出版社產品頁。資料核對：{E(S["updated"])}。</p></div></div>'
     return page('books.html','專書著作與序言','邱皓政統計學、量化研究法、結構方程、多層次、潛在異質性與貝氏統計專書，附出版社、版次與原文序言。',body)
 
 def research_page():
