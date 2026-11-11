@@ -53,17 +53,40 @@ def footer(prefix):
 <div><div class="eyebrow">Book information</div><h2 id="contact-title">專書資訊查詢</h2><p>專書著作與購買資訊，請直接至各出版社網站檢索。本站「專書著作」頁提供各書的出版社連結。</p></div>
 </div></section><footer class="site-footer"><div class="container footer-inner"><div>© 2026 邱皓政 Hawjeng Chiou <span class="footer-date">· 資料核對 {E(S['updated'])}</span></div><div class="footer-links">{ext(S['github'],'GitHub','')}{ext(S['oldSite'],'師大原網站','')}<a href="{prefix}sources.html">資料來源</a><a href="#top">回到頂端</a></div></div></footer>'''
 
+def public_path(path):
+    return '' if path == 'index.html' else path
+
+
 def page(path, title, description, body, active=None):
+    page_title = (
+        '邱皓政 Hawjeng Chiou｜國立臺灣師範大學特聘教授'
+        if path == 'index.html' else f'{title}｜邱皓政 Hawjeng Chiou'
+    )
     prefix = '../' if path.startswith('books/') else ''
     if path == '404.html' and S['siteUrl']:
         prefix = S['siteUrl'].rstrip('/')+'/'
     canonical = ''
     if S['siteUrl']:
-        canonical = f'<link rel="canonical" href="{url(S["siteUrl"].rstrip("/")+"/"+path)}"><meta property="og:url" content="{url(S["siteUrl"].rstrip("/")+"/"+path)}">'
+        canonical = f'<link rel="canonical" href="{url(S["siteUrl"].rstrip("/")+"/"+public_path(path))}"><meta property="og:url" content="{url(S["siteUrl"].rstrip("/")+"/"+public_path(path))}">'
     schema = {'@context':'https://schema.org','@type':'ProfilePage','dateModified':S['updated'],'mainEntity':{'@type':'Person','name':'邱皓政','alternateName':'Hawjeng Chiou','jobTitle':['特聘教授','合聘教授',R['title']],'affiliation':[{'@type':'CollegeOrUniversity','name':'國立臺灣師範大學'},{'@type':'Organization','name':R['institution'],'url':R['institutionUrl']}],'alumniOf':{'@type':'CollegeOrUniversity','name':'University of Southern California',**({'url':D['institutionUrl']} if D.get('institutionUrl') else {})},'email':S['email'],'knowsAbout':['Psychometrics','Structural Equation Modeling','Multilevel Modeling','Latent Class Analysis','Bayesian Statistics']}}
     schema_json = json.dumps(schema,ensure_ascii=False).replace('</','<\\/')
+    structured_data = ''
+    if path in ('index.html', 'about.html'):
+        if S['siteUrl']:
+            home_url = S['siteUrl'].rstrip('/') + '/'
+            schema['mainEntity'].update({
+                '@id': home_url + '#person',
+                'url': home_url,
+                'sameAs': [S['oldSite']],
+            })
+            if path == 'index.html':
+                website = {'@type': 'WebSite', 'url': home_url, 'name': '邱皓政 Hawjeng Chiou'}
+                schema_json = json.dumps({'@context': 'https://schema.org', '@graph': [website, schema]}, ensure_ascii=False).replace('</', '<\\/')
+            else:
+                schema_json = json.dumps(schema, ensure_ascii=False).replace('</', '<\\/')
+        structured_data = f'<script type="application/ld+json">{schema_json}</script>'
     return f'''<!doctype html>
-<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{E(title)}｜邱皓政 Hawjeng Chiou</title><meta name="description" content="{E(description)}"><meta name="theme-color" content="#163b44"><meta property="og:type" content="website"><meta property="og:locale" content="zh_TW"><meta property="og:title" content="{E(title)}｜邱皓政"><meta property="og:description" content="{E(description)}">{canonical}<link rel="icon" type="image/svg+xml" href="{prefix}assets/favicon.svg"><link rel="stylesheet" href="{prefix}assets/style.css?v={CSS_VERSION}"><noscript><style>.menu-toggle,.catalog-toolbar{{display:none}}@media(max-width:760px){{.header-inner{{flex-wrap:wrap;padding-block:14px}}.primary-nav{{display:grid;position:static;width:100%;padding:0;box-shadow:none;border:0}}}}</style></noscript><script defer src="{prefix}assets/site.js"></script><script type="application/ld+json">{schema_json}</script></head>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{E(page_title)}</title><meta name="description" content="{E(description)}"><meta name="theme-color" content="#163b44"><meta property="og:type" content="website"><meta property="og:locale" content="zh_TW"><meta property="og:title" content="{E(page_title)}"><meta property="og:description" content="{E(description)}">{canonical}<link rel="icon" type="image/svg+xml" href="{prefix}assets/favicon.svg"><link rel="stylesheet" href="{prefix}assets/style.css?v={CSS_VERSION}"><noscript><style>.menu-toggle,.catalog-toolbar{{display:none}}@media(max-width:760px){{.header-inner{{flex-wrap:wrap;padding-block:14px}}.primary-nav{{display:grid;position:static;width:100%;padding:0;box-shadow:none;border:0}}}}</style></noscript><script defer src="{prefix}assets/site.js"></script>{structured_data}</head>
 <body id="top">{header(active or path,prefix)}<main id="main">{body}</main>{footer(prefix)}</body></html>'''
 
 def heading(label, title, en, intro):
@@ -212,7 +235,9 @@ def build():
     (target/'.nojekyll').write_text('',encoding='utf-8')
     if S['siteUrl']:
         base = S['siteUrl'].rstrip('/')
-        xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join(f'<url><loc>{E(base+"/"+p)}</loc><lastmod>{S["updated"]}</lastmod></url>' for p in pages if p != '404.html')+'</urlset>'
+        discoverable = [public_path(p) for p in pages if p != '404.html']
+        discoverable += ['anova-lab/', 'mean-difference-lab/', 'statistical-inference-lab/', 'teaching/probability-distributions/', 'teaching/central-limit-theorem/']
+        xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join(f'<url><loc>{E(base+"/"+p)}</loc></url>' for p in discoverable)+'</urlset>'
         (target/'sitemap.xml').write_text(xml,encoding='utf-8')
         (target/'robots.txt').write_text('User-agent: *\nAllow: /\nSitemap: '+base+'/sitemap.xml\n',encoding='utf-8')
     print(f'Built {len(pages)} pages; {len(BOOKS)} books, {sum(len(prefaces(b)) for b in BOOKS)} prefaces, {len(P["papers"])} papers. Output: {target}')
