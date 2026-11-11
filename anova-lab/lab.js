@@ -108,7 +108,7 @@ function simpleEffects(res,a){
  '<details><summary>對照：各切片重估誤差與 Holm 校正</summary><p>此方法在各切片內重估誤差均方，因此與課本共用誤差的 F 值可能不同。</p>'+
  table([...heads,'Holm p','判定'],rows(res.slices,'holm'),'各切片重估誤差｜Holm 校正')+'</details>';
 }
-function fSteps(res,a){
+function sumsOfSquares(res){
  const tests=res.terms.filter(z=>z.err);
  let ssDetail='';
  if(tests.length===1&&tests[0].name==='組間'){
@@ -117,9 +117,17 @@ function fSteps(res,a){
   const groups=res.desc.map(([name,n,mean,v])=>[name,n,f(mean),f(v),f(n*(mean-grand)**2),f((n-1)*v)]);
   ssDetail='<p>加權總平均 Ȳ = Σ(nᵢ × Ȳᵢ)／N = '+f(grand)+'；N = '+N+'，k = '+k+'。各組對平方和的貢獻如下：</p>'+
    table(['組別','nᵢ','Ȳᵢ','sᵢ²','nᵢ(Ȳᵢ − Ȳ)²','(nᵢ − 1)sᵢ²'],groups,'組間與組內平方和的計算')+
-   '<p>逐欄加總：SS 組間 = '+f(tests[0].s)+'；SS 組內 = '+f(res.terms[1].s)+'。自由度：df₁ = k−1 = '+(k-1)+'；df₂ = N−k = '+(N-k)+'。</p>';
+   '<p>逐欄加總：SS 組間 = '+f(tests[0].s)+'，SS 組內 = '+f(res.terms[1].s)+'。SS 全體 = SS 組間 + SS 組內 = '+f(res.terms.at(-1).s)+'。</p>'+
+   '<h4>自由度（df）的計算</h4><ul><li>組間 df₁ = k − 1 = '+k+' − 1 = '+(k-1)+'。</li>'+
+   '<li>組內 df₂ = N − k = '+N+' − '+k+' = '+(N-k)+'。</li>'+
+   '<li>全體 df = N − 1 = '+N+' − 1 = '+(N-1)+'。</li></ul>';
+ }else{
+  ssDetail=table(['變異來源','平方和（SS）','自由度（df）'],res.terms.map(z=>[z.name,f(z.s),z.df]));
  }
- return '<h3>計算過程與 F 分配圖</h3>'+ssDetail+tests.map((z,i)=>{
+ return '<h3>平方和（SS）與自由度（df）</h3>'+ssDetail;
+}
+function fSteps(res,a){
+ return res.terms.filter(z=>z.err).map((z,i)=>{
   let err=res.terms.find(x=>x.name===z.err);
   let h0=res.profile?(i===2?'A × B 無交互作用':esc(z.name)+'各水準的母體邊際平均數相等'):'各組／條件的母體平均數相等';
   let calc='<p><strong>H₀：</strong>'+h0+'。在 H₀ 下，使用 F('+z.df+', '+z.df2+') 分配。</p>'+
@@ -127,7 +135,7 @@ function fSteps(res,a){
    '<li>'+esc(z.err)+'均方 = SS／df₂ = '+f(err.s)+'／'+z.df2+' ≈ '+f(err.ms)+'。</li>'+
    '<li>F<sub>obt</sub> = MS<sub>效果</sub>／MS<sub>誤差</sub> ≈ '+f(z.ms)+'／'+f(err.ms)+' → '+f(z.f)+'（以未四捨五入的均方計算）。</li>'+
    '<li>右尾臨界值 F<sub>CV</sub>('+z.df+', '+z.df2+') = '+f(z.crit)+'，α = '+f(a)+'；p '+(z.p!=null&&z.p<.0001?'':'= ')+esc(p(z.p))+'。'+(z.p==null?'無法判定。':z.p<a?'拒絕 H₀。':'不拒絕 H₀。')+'</li></ol>';
-  return '<details'+(i===0?' open':'')+'><summary>'+esc(z.name)+'｜計算步驟與 F 分配</summary>'+calc+(z.p==null?'':fchart(z.df,z.df2,z.f,0,z.crit,'right',a))+'</details>';
+  return '<details'+(i===0?' open':'')+'><summary>'+esc(z.name)+'｜計算步驟</summary>'+calc+'</details>';
  }).join('');
 }
 function show(res,a){
@@ -146,11 +154,15 @@ function show(res,a){
  }
  const tested=res.terms.filter(t=>t.err);
  const conclusion=tested.map(x=>'<li>'+esc(x.name)+'：F('+x.df+', '+x.df2+') = '+f(x.f)+'，p '+(x.p!==null&&x.p<.0001?'':'= ')+esc(p(x.p))+'；'+(x.p===null?'無法檢定（誤差與效果均為零）':x.p<a?'<strong class="sig">達顯著</strong>':'未達顯著')+'。</li>').join('');
- let tests='<h3>F 檢定</h3><ul class="note">'+conclusion+'</ul>'+table(['變異來源','SS','df','MS','F','p','F 臨界值','偏 η²'],
+ const summary=table(['變異來源','SS','df','MS','F','p','F 臨界值','偏 η²'],
   res.terms.map(z=>[z.name==='組內誤差'?'組內（誤差）':z.name,f(z.s),z.df,f(z.ms),f(z.f),p(z.p),f(z.crit),f(z.eta)]),'變異數分析摘要表');
  let html=overview;
  if(res.profile)html+=table(['A 水準',...res.profile.bs,'A 邊際平均'],[...res.profile.M.map((r,i)=>[res.profile.as[i],...r.map(f),f(avg(r))]),['B 邊際平均',...res.profile.bs.map((_,j)=>f(avg(res.profile.M.map(r=>r[j])))),f(avg(res.profile.M.flat()))]],'細格與邊際平均');
- html+=(res.methodNote??'')+tests+fSteps(res,a);
+ html+=(res.methodNote??'')+sumsOfSquares(res)+'<h3>F 檢定</h3>'+fSteps(res,a)+'<ul class="note">'+conclusion+'</ul>'+summary;
+ const plottable=tested.filter(z=>z.p!=null);
+ if(plottable.length)html+='<h3>F 分配圖</h3>'+plottable.map((z,i)=>
+  '<details'+(i===0?' open':'')+'><summary>'+esc(z.name)+'｜F 分配圖</summary>'+
+  fchart(z.df,z.df2,z.f,0,z.crit,'right',a)+'</details>').join('');
  html+=comparisons(res,a)+simpleEffects(res,a);
  return html;
 }
