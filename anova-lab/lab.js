@@ -117,8 +117,8 @@ function comparisons(res,a){
   return f(-pair.delta)+(pair.adj!=null&&pair.adj<a?'*':'')+' ('+probability+')';
  })]);
  const df=res.pairs[0].df;
- const method=paired?'採配對 t 檢定，df = 配對數 − 1 = '+df+'。':
-  '採整體 ANOVA 的組內均方，df = 總樣本數 − 組數 = '+df+'。';
+ const method=paired?'採配對 t 檢定。df = 配對數 − 1 = '+df+'。':
+  '採 LSD 型兩兩 t 檢定，使用整體 ANOVA 的組內均方。df = 總樣本數 − 組數 = '+df+'。';
  return '<h3>'+(res.pairs.length===1?'兩組平均數比較':'多重比較｜平均差矩陣')+'</h3>'+
   table(['組/格',...labels],rows)+
   '<p class="note">平均差為列組平均數減欄組平均數。括號內為 Holm 校正後的 p 值。* 表示 Holm 校正後 p &lt; '+f(a)+'。'+method+'</p>'+
