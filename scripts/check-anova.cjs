@@ -28,6 +28,22 @@ LAB_DATA.items.forEach((z,i)=>{
 for(const groups of Object.values(LAB_DATA.survey)){
  for(const rows of Object.values(groups))assert.ok(Number.isFinite(oneSummary(rows,.05).terms[0].f));
 }
+const run = i => {const z=LAB_DATA.items[i];return compute(z.model,z.headers,z.rows,.05);};
+const exercise=run(1);
+near(exercise.pairs[1].p,.005204981068142);
+near(exercise.pairs[1].adj,.015614943204426);
+near(exercise.pairs[1].scheffe,.019029421758132);
+const independent=run(5), mixed=run(6), repeated=run(7);
+assert.equal(independent.sharedSlices.length,5);
+assert.equal(independent.sharedSlices[1].df2,30);
+near(independent.sharedSlices[1].f,16.08786610878658);
+assert.equal(mixed.sharedSlices[0].df2,24);
+assert.equal(mixed.sharedSlices[2].df2,32);
+near(repeated.sharedSlices[2].f,10.465116279069768);
+assert.equal(repeated.sharedSlices[2].df2,20);
+const [lo,hi]=independent.profile.ci[0][0], n=6, mean=independent.profile.M[0][0];
+near(mean-lo,2.570581835636314*Math.sqrt(independent.desc[0][3]/n));
+near(hi-mean,mean-lo);
 const coffee=LAB_DATA.items.slice(-3).map(z=>compute(z.model,z.headers,z.rows,.05).desc.map(x=>x[2]));
 coffee.forEach(m=>assert.deepEqual(m,[7,6,9,5]));
 let z=LAB_DATA.items.at(-1),bad=z.rows.map(r=>r.slice());bad[0][0]='missing pair';

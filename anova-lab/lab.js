@@ -34,15 +34,53 @@ function fchart(d,e,obs,lo,hi,tail='right'){
  const draw=(regions,color,name)=>'<figure><svg viewBox="0 0 680 175" role="img" aria-label="'+esc(name)+'"><path d="M48 143H646" stroke="#657f82"/>'+regions.map(([a,b])=>'<path d="'+path(a,b)+'" fill="'+color+'" opacity=".28"/>').join('')+'<polyline fill="none" stroke="#255661" stroke-width="2" points="'+grid.map(v=>x(v)+','+y(v)).join(' ')+'"/>'+line(hi,'#a24a14')+(lo>0?line(lo,'#a24a14'):'')+line(obs,'#4c3c86')+Array.from({length:6},(_,i)=>'<text x="'+x(i*X/5)+'" y="163" text-anchor="middle" font-size="12">'+f(i*X/5)+'</text>').join('')+'</svg><figcaption>'+name+'｜橙虛線：臨界值；紫虛線：觀察 F'+(obs>X?'（超出圖域）':'')+'</figcaption></figure>';
  return '<div class="pair">'+draw(rr,'#cf7030','α 拒絕域')+draw(pp,'#397dcc','p 值尾域')+'</div>';
 }
-function profile({as,bs,M}){
- let min=Math.min(...M.flat()),max=Math.max(...M.flat()),pad=(max-min||1)*.14;
- let x=j=>64+j*544/(bs.length-1),y=v=>174-(v-min+pad)/(max-min+2*pad)*143;
+function profile({as,bs,M,ci}){
+ let extent=ci?[...M.flat(),...ci.flat(2)]:M.flat();
+ let min=Math.min(...extent),max=Math.max(...extent),pad=(max-min||1)*.17;
+ let x=j=>78+j*514/(bs.length-1),y=v=>206-(v-min+pad)/(max-min+2*pad)*163;
  const col=['#266b80','#a44827','#5c518f','#367343','#81651a','#a04271'];
- return '<h3>細格平均數圖</h3><figure><svg viewBox="0 0 670 220" role="img" aria-label="各因子水準的平均數折線圖">'+
- Array.from({length:5},(_,i)=>{let v=min-pad+(max-min+2*pad)*i/4;return '<path d="M64 '+y(v)+'H608" stroke="#d5e3e1"/><text x="58" y="'+(y(v)+4)+'" text-anchor="end" font-size="11">'+f(v)+'</text>';}).join('')+
- bs.map((v,j)=>'<text x="'+x(j)+'" y="199" text-anchor="middle" font-size="12">'+esc(v)+'</text>').join('')+
- M.map((r,i)=>'<polyline fill="none" stroke="'+col[i%6]+'" stroke-width="3" stroke-dasharray="'+(i%2?'6 3':'none')+'" points="'+r.map((v,j)=>x(j)+','+y(v)).join(' ')+'"/>'+r.map((v,j)=>'<circle cx="'+x(j)+'" cy="'+y(v)+'" r="4" fill="'+col[i%6]+'"/>').join('')).join('')+
- '</svg><figcaption>'+as.map((v,i)=>'<strong style="color:'+col[i%6]+'">● '+esc(v)+'</strong>').join('　')+'。線條不平行是交互作用的線索，是否顯著仍以 F 檢定為準。</figcaption></figure>';
+ const point=(i,j)=>x(j)+(ci&&as.length>1?((i/(as.length-1))-.5)*Math.min(24,200/(bs.length-1)):0);
+ return '<h3>細格平均數圖'+(ci?'｜95% 信賴區間':'')+'</h3><figure><svg viewBox="0 0 670 250" role="img" aria-label="'+(ci?'各細格平均數與 95% 信賴區間':'各細格平均數示意圖，無信賴區間')+'">'+
+ Array.from({length:5},(_,i)=>{let v=min-pad+(max-min+2*pad)*i/4;return '<path d="M55 '+y(v)+'H620" stroke="#d5e3e1"/><text x="50" y="'+(y(v)+4)+'" text-anchor="end" font-size="11">'+f(v)+'</text>';}).join('')+
+ bs.map((v,j)=>'<text x="'+x(j)+'" y="233" text-anchor="middle" font-size="12">'+esc(v)+'</text>').join('')+
+ M.map((r,i)=>{
+  const color=col[i%6];
+  return '<polyline fill="none" stroke="'+color+'" stroke-width="2.5" stroke-dasharray="'+(i%2?'6 3':'none')+'" points="'+r.map((v,j)=>point(i,j)+','+y(v)).join(' ')+'"/>'+
+   r.map((v,j)=>{
+    const X=point(i,j),Y=y(v),lim=ci?.[i]?.[j],tip=as[i]+' × '+bs[j]+'：平均數 '+f(v)+(lim?'；95% CI ['+lim.map(f).join(', ')+']':'');
+    const near=M.some((other,k)=>k!==i&&Math.abs(y(other[j])-Y)<18);
+    const offset=near?(i%2?15:-9):-9;
+    const bars=lim?'<path d="M'+X+' '+y(lim[0])+'V'+y(lim[1])+' M'+(X-4)+' '+y(lim[0])+'h8 M'+(X-4)+' '+y(lim[1])+'h8" fill="none" stroke="'+color+'" stroke-width="1.5"/>':'';
+    return '<g><title>'+esc(tip)+'</title>'+bars+'<circle cx="'+X+'" cy="'+Y+'" r="4" fill="'+color+'"/><text class="plot-label" x="'+X+'" y="'+(Y+offset)+'" fill="'+color+'" text-anchor="middle" font-size="11" font-weight="700">'+f(v)+'</text></g>';
+   }).join('');
+ }).join('')+
+ '</svg><figcaption>'+as.map((v,i)=>'<strong style="color:'+col[i%6]+'">● '+esc(v)+'</strong>').join('　')+
+ (ci?'。點旁數字為細格平均數，誤差線為各細格未校正的 95% t 信賴區間：平均數 ± t × s／√n。相依設計的誤差線不是配對差值的區間；不可依區間是否重疊判定交互作用。':'。點旁數字為示意平均數；原資料未提供細格樣本數與變異，無法估計 95% CI。')+'</figcaption></figure>'+
+ (ci?'<details><summary>查看平均數與 95% CI 數值</summary>'+table(['A 水準','B 水準','平均數','95% CI 下限','95% CI 上限'],M.flatMap((row,i)=>row.map((v,j)=>[as[i],bs[j],f(v),...ci[i][j].map(f)])))+'</details>':'');
+}
+const decision=(pv,a)=>pv==null?'無法檢定':pv<a?'達顯著':'未達顯著';
+function comparisons(res,a){
+ if(!res.pairs?.length)return '';
+ let t=res.terms.find(z=>z.err), paired=res.terms.some(z=>z.name==='受試者／區組'), n=res.pairs.length;
+ let rows=res.pairs.map(z=>[z.name,f(z.delta),z.df,p(z.p),p(z.p==null?null:Math.min(1,z.p*n)),p(z.adj),...(!paired?[p(z.scheffe)]:[]),decision(z.adj,a)]);
+ return '<h3>'+ (n===1?'兩組平均數比較':'多重比較：各組平均數的差異')+'</h3><p>'+ (paired?'同一受試者的成對差值使用配對 t。':'各對比較使用整體 ANOVA 的組內均方。原始 p 即未校正的 LSD 型比較。')+' 平均差為前組減後組；判定欄採 Holm 校正。</p>'+
+ (t.p==null||t.p>=a?'<p class="note">整體 F 未達顯著或無法檢定。下列比較僅供教學或探索；事先規劃的對比另依原定方案判讀。</p>':'')+
+ table(['比較','平均差','df','原始 p','Bonferroni p','Holm p',...(!paired?['Scheffé p']:[]),'Holm 判定'],rows);
+}
+function simpleEffects(res,a){
+ if(!res.slices?.length)return '';
+ let t=res.terms.filter(z=>z.err).at(-1),m=res.slices.length;
+ let rows=(zs,adjust)=>zs.map(z=>{
+  let pv=adjust==='holm'?z.adj:z.p==null?null:Math.min(1,z.p*m);
+  return [z.name,z.design,f(z.delta),f(z.s),z.err,z.df,z.df2,f(z.f),p(z.p),p(pv),decision(pv,a)];
+ });
+ let heads=['固定條件下的效果','設計','平均差（兩水準）','SS','誤差項','df₁','df₂','F','原始 p'];
+ return '<h3>單純主要效果</h3><p>固定 A 的每個水準檢驗 B，再固定 B 的每個水準檢驗 A。兩水準時列出前者減後者的平均差；三個以上水準的 F 只回答是否至少一組不同。</p>'+
+ (t.p==null||t.p>=a?'<p class="note">整體交互作用未達顯著或無法檢定；以下結果供教學或探索，不能因一個切片顯著而另一個不顯著就斷言存在交互作用。</p>':'')+
+ '<p><strong>課本做法：</strong>使用整體設計相應的共用誤差項；將 '+m+' 項切片檢定當成同一族系，單次顯著水準為 α／'+m+' = '+f(a/m)+'（等價於用校正 p 與 α 比較）。</p>'+
+ table([...heads,'Bonferroni p','判定'],rows(res.sharedSlices,'bonf'),'共用誤差項｜Bonferroni 校正')+
+ '<details><summary>對照：各切片重估誤差與 Holm 校正</summary><p>此方法在各切片內重估誤差均方，因此與課本共用誤差的 F 值可能不同。</p>'+
+ table([...heads,'Holm p','判定'],rows(res.slices,'holm'),'各切片重估誤差｜Holm 校正')+'</details>';
 }
 function show(res,a){
  const desc=table(['組別／細格','n','平均數','樣本變異數'],res.desc.map(([n,k,m,v])=>[n,k,f(m),f(v)]),'敘述統計');
@@ -57,8 +95,7 @@ function show(res,a){
  if(res.profile)html+=profile(res.profile)+table(['A 水準',...res.profile.bs,'A 邊際平均'],[...res.profile.M.map((r,i)=>[res.profile.as[i],...r.map(f),f(avg(r))]),['B 邊際平均',...res.profile.bs.map((_,j)=>f(avg(res.profile.M.map(r=>r[j])))),f(avg(res.profile.M.flat()))]],'細格與邊際平均');
  if(t.p!==null)html+='<details><summary>查看 '+esc(t.name)+' 的 F 分配與兩種尾域</summary>'+fchart(t.df,t.df2,t.f,0,t.crit)+'</details>';
  html+=desc;
- if(res.pairs?.length&&tested[0].p<a)html+=table(['比較','平均差','df','原始 p','Holm p'],res.pairs.map(z=>[z.name,f(z.delta),z.df,p(z.p),p(z.adj)]),'事後比較｜'+(res.terms.some(z=>z.name==='受試者／區組')?'配對 t':'以組內 MS 為共用誤差的 t')+'，Holm 校正');
- if(res.slices?.length&&t.p<a)html+=table(['固定條件下的效果','df₁','df₂','F','原始 p','Holm p'],res.slices.map(z=>[z.name,z.df,z.df2,f(z.f),p(z.p),p(z.adj)]),'單純主要效果｜各切片依其設計重估誤差，Holm 校正');
+ html+=comparisons(res,a)+simpleEffects(res,a);
  return html;
 }
 function safe(out,fn){try{out.innerHTML=fn();}catch(e){out.innerHTML='<p class="warning" role="alert">'+esc(e.message)+'</p>';}}
@@ -71,11 +108,40 @@ const concepts=[
  ['二因子｜混合','A 是受試者間因子，B 是同一受試者反覆測量的條件。A 用組內受試者差異當分母；B 與 A×B 用 B×受試者（A 內）當分母。重複條件多於兩個時須評估球面性。','A：MS受試者（A 內）；B、A×B：MSB×受試者（A 內）'],
  ['二因子｜完全相依','每位受試者完成全部 A×B 組合。可用各效果對應的受試者交互作用作分母；課本另示範把三項殘差合併，需額外假定它們可共用同一誤差均方。兩法可能得出不同結論。','A：MSA×受試者；B：MSB×受試者；A×B：MSA×B×受試者']
 ];
+const models=[
+ null,
+ ['Y<sub>ij</sub> = μ + α<sub>i</sub> + ε<sub>ij</sub>','i 是組別，j 是組內觀測。μ 是總體截距，αᵢ 是第 i 組的固定效果，εᵢⱼ 是組內誤差。H₀：μ₁＝⋯＝μₖ。','SS<sub>A</sub> = ∑ n<sub>i</sub>(Ȳ<sub>i·</sub> − Ȳ<sub>··</sub>)²；SS<sub>W</sub> = ∑∑(Y<sub>ij</sub> − Ȳ<sub>i·</sub>)²','F = MS<sub>A</sub> / MS<sub>W</sub>；df = (k−1, N−k)。'],
+ ['Y<sub>ij</sub> = μ + α<sub>i</sub> + π<sub>j</sub> + ε<sub>ij</sub>','i 是條件，j 是受試者或區組；πⱼ 是受試者或區組效果。從觀測值扣掉條件平均與個人平均，再加回總平均，即為殘差。','SS<sub>T</sub> = SS<sub>A</sub> + SS<sub>P</sub> + SS<sub>R</sub>','F = MS<sub>A</sub> / MS<sub>R</sub>；df = (k−1, (k−1)(n−1))。同一人重複測量不能當成獨立觀測。'],
+ ['Y<sub>ijk</sub> = μ + α<sub>i</sub> + β<sub>j</sub> + (αβ)<sub>ij</sub> + ε<sub>ijk</sub>','i、j 是 A、B 的水準，k 是細格內觀測。αᵢ 和 βⱼ 表示邊際平均的偏差；(αβ)ᵢⱼ 是細格平均扣除兩個邊際平均後加回總平均的偏差。','SS<sub>T</sub> = SS<sub>A</sub> + SS<sub>B</sub> + SS<sub>A×B</sub> + SS<sub>W</sub>','三項效果各用自己的 MS 作分子，細格內 MS 作共同分母。平衡設計有 a×b 個細格，每格 n 人，誤差 df = ab(n−1)。'],
+ ['Y<sub>ijk</sub> = μ + α<sub>i</sub> + β<sub>j</sub> + (αβ)<sub>ij</sub> + π<sub>k(i)</sub> + ε<sub>ijk</sub>','A 是獨立因子，B 是重複因子；πₖ₍ᵢ₎ 是巢套在 A 組內的受試者效果。εᵢⱼₖ 是受試者在 B 各條件中的剩餘變異，即 B×受試者（A 內）。','SS<sub>T</sub> = SS<sub>A</sub> + SS<sub>P(A)</sub> + SS<sub>B</sub> + SS<sub>A×B</sub> + SS<sub>B×P(A)</sub>','A 的分母是 MS<sub>P(A)</sub>；B 與 A×B 的分母是 MS<sub>B×P(A)</sub>。若每個 A 組有 n 人，兩種誤差 df 分別為 a(n−1) 與 a(n−1)(b−1)。'],
+ ['Y<sub>ijk</sub> = μ + α<sub>i</sub> + β<sub>j</sub> + (αβ)<sub>ij</sub> + π<sub>k</sub> + (απ)<sub>ik</sub> + (βπ)<sub>jk</sub> + (αβπ)<sub>ijk</sub>','所有受試者都接受 A×B 的全部組合。πₖ 是受試者效果；最後三項表示各效果在受試者之間的變異。','SS<sub>R</sub> = SS<sub>A×P</sub> + SS<sub>B×P</sub> + SS<sub>A×B×P</sub>','分開估計時，A、B、A×B 各用對應受試者交互作用的 MS；課本的合併法使用 MS<sub>R</sub> = SS<sub>R</sub> / [(ab−1)(n−1)]。須能合理假定三項誤差可合併。']
+];
+const tutorialExamples=()=>'<div class="card"><h3>多重比較：整體顯著後，找出哪些平均數不同</h3><p>整體 F 的 H₀ 是所有母體平均相等。拒絕 H₀ 後，還要靠對比或兩兩比較找出差異。若有 k 組，所有兩兩比較共有 k(k−1)/2 項；重複使用 .05 會提高至少犯一次第一類錯誤的機率。</p>'+
+ '<p><strong>事前比較：</strong>先依研究假設指定對比 L = ∑ cᵢμᵢ，且 ∑ cᵢ = 0，例如有氧組對照其他兩組的平均。若一族有 m 個檢定，Bonferroni 將單次 α 設為 α/m；Holm 按 p 值由小到大，依序比較 α/m、α/(m−1)⋯，首次未通過就停止拒絕。</p>'+
+ '<p><strong>事後比較：</strong>Fisher LSD 在整體 F 顯著後，以共同組內均方比較兩組，但不另校正每一對；Tukey HSD 以學生化全距控制所有兩兩比較，不等樣本數用 Tukey–Kramer；Scheffé 可同時檢定所有線性對比，不限兩兩比較。相依資料應用配對差值或符合設計的誤差項。</p>'+
+ '<span class="math model">t<sub>ij</sub> = (Ȳ<sub>i</sub> − Ȳ<sub>j</sub>) / √[MS<sub>W</sub>(1/n<sub>i</sub> + 1/n<sub>j</sub>)]；F<sub>Scheffé</sub> = t<sub>ij</sub>² / (k−1)</span>'+
+ '<div id="theory-pairs"></div></div>'+
+ '<div class="card"><h3>單純主要效果：在特定條件下比較</h3><p>主要效果比較的是跨另一因子水準的<strong>邊際平均數</strong>。交互作用檢驗一個因子的效果是否隨另一因子的水準改變。若 A×B 達顯著，先看細格平均與平均數圖，再考驗單純主要效果。例如固定 B 在 b₁，比較 μₐ₁ᵦ₁、μₐ₂ᵦ₁；再固定 A 在 a₁，檢驗 B 的各水準。</p>'+
+ '<span class="math model">SS<sub>A∣B=j</sub> = n ∑<sub>i</sub>(Ȳ<sub>ij·</sub> − Ȳ<sub>·j·</sub>)²；F<sub>A∣B=j</sub> = [SS<sub>A∣B=j</sub>/(a−1)] / MS<sub>誤差</sub></span>'+
+ '<p>若 A 有 a 個水準、B 有 b 個水準，兩個方向全部檢驗共 a+b 項。課本以相應的整體誤差均方作分母：完全獨立用細格內均方；混合設計中，獨立因子的切片用細格內均方，相依因子的切片用受試者內殘差；完全相依用合併殘差。三個以上水準的單純效果達顯著後，可再對該切片內的水準作多重比較，並事先界定校正族系。</p>'+
+ '<p class="note">判讀順序：整體交互作用 → 觀察平均數與方向 → 單純主要效果 → 必要時才做切片內的兩兩比較。某切片顯著、另一切片不顯著，不能取代對交互作用本身的檢定。</p>'+
+ '<div id="theory-slices"></div></div>';
+function updateTutorial(a){
+ let one=data.items.find(z=>z.title==='運動型態（獨立分組）');
+ let ro=compute(one.model,one.headers,one.rows,a),F=ro.terms[0];
+ let tw=data.items.find(z=>z.title==='時段 × 運動型態');
+ let rt=compute(tw.model,tw.headers,tw.rows,a),interaction=rt.terms[2];
+ let summary=(r)=>'F('+r.df+', '+r.df2+') = '+f(r.f)+'，p = '+esc(p(r.p))+'。';
+ $('theory-pairs').innerHTML='<h4>課本範例｜運動型態與睡眠時數</h4><p>整體 '+summary(F)+' 以 α = .05 比較，LSD 將有氧與日常、有氧與慢跑兩對判為顯著；Holm 與 Scheffé 都只保留有氧與日常的差異。</p>'+
+ comparisons(ro,a)+table(['兩兩比較','Tukey HSD p'],[['日常 − 慢跑','0.7151'],['日常 − 有氧','0.0140'],['慢跑 − 有氧','0.0846']],'同一範例的 Tukey HSD（R 計算）');
+ $('theory-slices').innerHTML='<h4>課本範例｜時段 × 運動型態</h4><p>整體交互作用 '+summary(interaction)+' 在 α = .05 下，五項切片各以 .01 為門檻：夜晚的運動型態差異顯著，白天不顯著；日常與有氧組的白天與夜晚有差異，慢跑組未通過校正門檻。</p>'+
+ simpleEffects(rt,a);
+}
 function theory(){
- return heading('原理說明')+card(concepts.map(([t,b,m],i)=>'<details'+(!i?' open':'')+'><summary>'+t+'</summary><p>'+b+'</p><span class="math">'+m+'</span></details>').join('')+
- card('<details><summary>比較交互作用的型態</summary><p>切換課本示意平均數，觀察線條交叉、差距改變或逐漸收斂。只有細格平均數，沒有個別觀測值，不能用這張圖作 F 檢定。</p><label for="sketch">示意圖：</label><select id="sketch">'+options(sketches.map((_,i)=>[i,'示意圖 '+(i+1)]))+'</select><div id="sketch-out"></div></details>')+
+ return heading('原理說明')+card('<h3>從一般線性模型到 F 檢定</h3><p>ANOVA 將依變數拆為可解釋的因子效果與誤差；每項均方 MS = SS／df。F 的分母要符合實際受試者安排。下列 μ 是總體截距，αᵢ 是 A 的效果，βⱼ 是 B 的效果，π 是受試者或區組效果；此處的 αᵢ 不是顯著水準 α。</p>'+concepts.map(([t,b,m],i)=>'<details'+(!i?' open':'')+'><summary>'+t+'</summary><p>'+b+'</p><span class="math">'+m+'</span>'+(models[i]?'<span class="math model">'+models[i][0]+'</span><p class="model-notation">'+models[i][1]+'</p><span class="math model">'+models[i][2]+'</span><p>'+models[i][3]+'</p>':'')+'</details>').join('')+
+ card('<details><summary>比較交互作用的型態</summary><p>切換課本示意圖或有原始觀測值的實際案例，觀察線條交叉或差距改變。示意圖只顯示平均數；實際案例也顯示 95% CI。</p><label for="sketch">示意圖：</label><select id="sketch">'+options([['actual','實際案例｜時段 × 運動型態（含 95% CI）'],...sketches.map((_,i)=>[i,'示意圖 '+(i+1)])])+'</select><div id="sketch-out"></div></details>')+
  '<p class="muted">本教材使用傳統未校正 F，不代做球面性或等變異檢查。實際研究應先檢查設計及殘差；違反球面性時，可考慮 Greenhouse–Geisser 校正或混合模型。</p>')+
- '<div class="grid"><div class="card controls"><h3>F 分配與查表</h3>'+alpha()+'<label>分子自由度 df₁<input id="d1" type="number" value="3" min="1" max="1000" step="1"></label><label>分母自由度 df₂<input id="d2" type="number" value="18" min="1" max="10000" step="1"></label><label>觀察 F<input id="obs" type="number" value="8.99" min="0" max="10000000" step="any"></label>'+field('tail','用途',options([['right','右尾｜ANOVA'],['both','雙尾｜變異數比']]))+'</div><div class="card" id="f-out" aria-live="polite"></div></div>';
+ '<div class="grid"><div class="card controls"><h3>F 分配與查表</h3>'+alpha()+'<label>分子自由度 df₁<input id="d1" type="number" value="3" min="1" max="1000" step="1"></label><label>分母自由度 df₂<input id="d2" type="number" value="18" min="1" max="10000" step="1"></label><label>觀察 F<input id="obs" type="number" value="8.99" min="0" max="10000000" step="any"></label>'+field('tail','用途',options([['right','右尾｜ANOVA'],['both','雙尾｜變異數比']]))+'</div><div class="card" id="f-out" aria-live="polite"></div></div>'+tutorialExamples();
 }
 function theoryUpdate(){safe($('f-out'),()=>{
  let d=+$('d1').value,e=+$('d2').value,obs=+$('obs').value,a=+$('alpha').value,tail=$('tail').value;
@@ -222,9 +288,10 @@ function mount(route){
  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{if(location.hash==='#'+b.dataset.tab)mount(b.dataset.tab);else location.hash=b.dataset.tab;});
  $('panel').innerHTML=id==='theory'?theory():id==='book'||id==='exercise'?examples(id):id==='survey'?survey():id==='manual'?manual():id==='r-code'?rCode():downloads();
  if(id==='theory'){
-  for(let x of ['d1','d2','obs','alpha','tail'])$(x).oninput=theoryUpdate;
-  const sketch=()=>$('sketch-out').innerHTML=profile({as:['a1','a2'],bs:['b1','b2','b3'],M:sketches[+$('sketch').value]});
-  $('sketch').onchange=sketch;sketch();theoryUpdate();
+  for(let x of ['d1','d2','obs','tail'])$(x).oninput=theoryUpdate;
+  $('alpha').onchange=()=>{theoryUpdate();updateTutorial(+$('alpha').value);};
+  const sketch=()=>{const value=$('sketch').value,z=data.items.find(x=>x.title==='時段 × 運動型態');$('sketch-out').innerHTML=profile(value==='actual'?compute(z.model,z.headers,z.rows,.05).profile:{as:['a1','a2'],bs:['b1','b2','b3'],M:sketches[+value]});};
+  $('sketch').onchange=sketch;sketch();theoryUpdate();updateTutorial(+$('alpha').value);
  }else if(id==='book'||id==='exercise'){
   $('case').onchange=()=>exampleUpdate(id);$('alpha').onchange=()=>exampleUpdate(id,false);exampleUpdate(id);
  }else if(id==='survey'){

@@ -51,7 +51,12 @@ function oneSummary(desc,a){
  let n=total(desc.map(r=>r[1])),m=total(desc.map(r=>r[1]*r[2]))/n;
  let effect=term('組間',total(desc.map(r=>r[1]*sq(r[2]-m))),desc.length-1);
  let err=term('組內誤差',total(desc.map(r=>(r[1]-1)*r[3])),n-desc.length);
- return {terms:[test(effect,err,a),err,term('全體',effect.s+err.s,n-1)],desc};
+ let pairs=pairwise(desc.map(r=>r[0]),desc.map(r=>r[2]),(i,j)=>
+  [Math.sqrt(err.ms*(1/desc[i][1]+1/desc[j][1])),err.df]);
+ for(const pair of pairs){
+  pair.scheffe=pair.f===null?null:upper(pair.f/effect.df,effect.df,err.df);
+ }
+ return {terms:[test(effect,err,a),err,term('全體',effect.s+err.s,n-1)],desc,pairs};
 }
 function posthoc(pairs){
  const ordered=pairs.filter(x=>x.p!==null).sort((a,b)=>a.p-b.p);let last=0;
@@ -61,7 +66,8 @@ function posthoc(pairs){
 function pairwise(names,means,calc){
  return posthoc(names.flatMap((x,i)=>names.slice(i+1).map((y,k)=>{
   let j=i+k+1,[se,df]=calc(i,j),delta=means[i]-means[j];
-  return {name:x+' − '+y,delta,df,p:se?upper(sq(delta/se),1,df):delta===0?null:0};
+  let f=se?sq(delta/se):delta===0?null:Infinity;
+  return {name:x+' − '+y,delta,df,f,p:f===null?null:upper(f,1,df)};
  })));
 }
 function compute(model,h,r,a,pooled=false){
@@ -69,10 +75,7 @@ function compute(model,h,r,a,pooled=false){
  check(r.length>0&&r.every(row=>row.length===h.length&&row.slice(numericStart).every(Number.isFinite)),'資料欄位不完整，或有遺漏／非數值觀測。');
  if(model==='ratio'||model==='one'){
   let g=groups(r),names=[...g.keys()],vs=[...g.values()],desc=names.map((x,i)=>{let s=stats(vs[i]);return [x,s.n,s.m,s.v]});
-  if(model==='one'){
-   let result=oneSummary(desc,a),err=result.terms[1];
-   result.pairs=pairwise(names,desc.map(x=>x[2]),(i,j)=>[Math.sqrt(err.ms*(1/desc[i][1]+1/desc[j][1])),err.df]);return result;
-  }
+  if(model==='one')return oneSummary(desc,a);
   check(desc.length===2&&desc.every(x=>x[1]>=2&&x[3]>0),'變異數比需要兩組、每組至少兩筆，且樣本變異數皆須大於零。');
   let d=desc[0][1]-1,e=desc[1][1]-1,f=desc[0][3]/desc[1][3],hi=critical(d,e,a/2),lo=1/critical(e,d,a/2);
   return {desc,ratio:{f,d,e,lo,hi,p:Math.min(1,2*Math.min(upper(f,d,e),lower(f,d,e)))}};
@@ -97,14 +100,15 @@ function compute(model,h,r,a,pooled=false){
  let tb=term(model==='mixed'?'條件（B）':h[model==='within'?2:1],n*A*ss(mb,m),B-1);
  let ti=term('A × B',n*total(M.flatMap((row,i)=>row.map((v,j)=>sq(v-ma[i]-mb[j]+m)))),(A-1)*(B-1));
  let resid=total(cells.flatMap((row,i)=>row.map((c,j)=>ss(c.map(x=>x[3]),M[i][j]))));
- let ea,eb,ei,errs;
+ let ea,eb,ei,errs,sharedA,sharedB;
  if(model==='two'){
-  ea=eb=ei=term('細格內誤差',resid,A*B*(n-1));errs=[ea];
+  ea=eb=ei=term('細格內誤差',resid,A*B*(n-1));errs=[ea];sharedA=sharedB=ea;
  }else if(model==='mixed'){
   check(unique(r.map(x=>x[1])).length===r.length,'混合設計的受試者 ID 不得重複。');
   let nested=total(as.map((g,i)=>B*ss(r.filter(x=>x[0]===g).map(x=>avg(x.slice(2))),ma[i])));
   ea=term('受試者（A 內）',nested,A*(n-1));
   eb=ei=term('B × 受試者（A 內）',resid-nested,A*(n-1)*(B-1));errs=[ea,eb];
+  sharedA=term('細格內誤差',resid,A*B*(n-1));sharedB=eb;
  }else{
   const ids=unique(long.map(x=>x[0]));
   check(ids.length===n&&cells.flat().every(c=>unique(c.map(x=>x[0])).length===n),'每位受試者必須在每個 A×B 組合各有一筆；不能有缺格或重複。');
@@ -119,7 +123,8 @@ function compute(model,h,r,a,pooled=false){
   }
   ea=term('A × 受試者',sA,(A-1)*(n-1));eb=term('B × 受試者',sB,(B-1)*(n-1));ei=term('A × B × 受試者',sI,(A-1)*(B-1)*(n-1));
   let person=term('受試者',sP,n-1);
-  if(pooled){ea=eb=ei=term('合併殘差（課本）',sA+sB+sI,(A*B-1)*(n-1));errs=[person,ea];}
+  sharedA=sharedB=term('合併殘差（課本）',sA+sB+sI,(A*B-1)*(n-1));
+  if(pooled){ea=eb=ei=sharedA;errs=[person,ea];}
   else errs=[person,ea,eb,ei];
  }
  let terms=[test(ta,ea,a),test(tb,eb,a),test(ti,ei,a),...errs,term('全體',ss(long.map(x=>x[3]),m),long.length-1)];
@@ -130,15 +135,22 @@ function compute(model,h,r,a,pooled=false){
   for(let i=0;i<A;i++){
    let z=model==='two'?compute('one',['B','分數'],cells[i].flat().map(x=>[x[2],x[3]]),a):
     compute('repeat',['ID',...bs],unique(cells[i][0].map(x=>x[0])).map(id=>[id,...cells[i].map(c=>c.find(x=>x[0]===id)[3])]),a);
-   slices.push({...z.terms[0],name:'B｜'+as[i]});
+   slices.push({...z.terms[0],name:bs.length===2?bs.join(' − ')+'｜'+as[i]:'B｜'+as[i],
+    delta:bs.length===2?M[i][0]-M[i][1]:null, design:model==='two'?'獨立':'相依'});
   }
   for(let j=0;j<B;j++){
    let c=cells.map(row=>row[j]);
    let z=model==='within'?compute('repeat',['ID',...as],unique(c[0].map(x=>x[0])).map(id=>[id,...c.map(q=>q.find(x=>x[0]===id)[3])]),a):
     compute('one',['A','分數'],c.flat().map(x=>[x[1],x[3]]),a);
-   slices.push({...z.terms[0],name:'A｜'+bs[j]});
+   slices.push({...z.terms[0],name:as.length===2?as.join(' − ')+'｜'+bs[j]:'A｜'+bs[j],
+    delta:as.length===2?M[0][j]-M[1][j]:null, design:model==='within'?'相依':'獨立'});
   }
  }
- return {terms,desc,profile:{as,bs,M},slices:posthoc(slices)};
+ let sharedSlices=slices.map((z,i)=>({...z,...test(term(z.name,z.s,z.df),i<A?sharedB:sharedA,a)}));
+ let ci=M.map((row,i)=>row.map((mean,j)=>{
+  const margin=Math.sqrt(critical(1,n-1,.05)*desc[i*B+j][3]/n);
+  return [mean-margin,mean+margin];
+ }));
+ return {terms,desc,profile:{as,bs,M,ci},slices:posthoc(slices),sharedSlices};
 }
 if(typeof module!=='undefined')module.exports={compute,oneSummary,upper,lower,critical,labels,density};

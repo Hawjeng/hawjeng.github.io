@@ -37,6 +37,16 @@ function rCase(z,a=.05,pooled=false){
    '# 若整體顯著，以共同組內均方進行逐對 t 檢定，並以 Holm 校正。',
    'if (tab["group", "Pr(>F)"] < alpha) {',
    '  print(pairwise.t.test(d$y, d$group, pool.sd = TRUE, p.adjust.method = "holm"))',
+   '  print(pairwise.t.test(d$y, d$group, pool.sd = TRUE, p.adjust.method = "bonferroni"))',
+   '  print(TukeyHSD(aov(y ~ group, data = d), conf.level = 1-alpha))',
+   '  means <- tapply(d$y, d$group, mean); n <- table(d$group)',
+   '  pairs <- combn(seq_along(means), 2, simplify = FALSE)',
+   '  scheffe <- sapply(pairs, function(g) {',
+   '    stat <- diff(means[g])^2 / (tab["Residuals", "Mean Sq"] * sum(1/n[g]))',
+   '    pf(stat / tab$Df[1], tab$Df[1], tab$Df[2], lower.tail = FALSE)',
+   '  })',
+   '  names(scheffe) <- vapply(pairs, function(g) paste(names(means)[g], collapse = " - "), "")',
+   '  print(scheffe)',
    '}', ''
   ].join('\n');
  }
@@ -53,7 +63,7 @@ function rCase(z,a=.05,pooled=false){
  }
  if(model==='mixed')rows=rows.flatMap(([A,id,...v])=>v.map((value,j)=>[id,A,z.headers[j+2],value]));
  let setup=rFrame(model==='two'?[['A',g(0)],['B',g(1)],['y',y(2)]]:[['id',g(0)],['A',g(1)],['B',g(2)],['y',y(3)]]);
- let plot='# 檢視各細格平均與交互作用圖。\nprint(with(d, tapply(y, list(A, B), mean)))\nif (interactive()) with(d, interaction.plot(B, A, y, type = "b"))\n';
+ let plot='# 各細格的平均數與未校正 95% t 信賴區間。\ncell_ci <- function(y) {\n  m <- mean(y); w <- qt(.975, length(y)-1) * sd(y)/sqrt(length(y))\n  c(mean = m, lower = m-w, upper = m+w)\n}\nprint(lapply(with(d, split(y, list(A, B))), cell_ci))\nif (interactive()) with(d, interaction.plot(B, A, y, type = "b"))\n';
  let fit={
   two:'print(anova(lm(y ~ A * B, data = d)))',
   mixed:'# A 為受試者間因子，B 為受試者內因子。\nprint(summary(aov(y ~ A * B + Error(id / B), data = d)))',
@@ -64,7 +74,7 @@ function rCase(z,a=.05,pooled=false){
  '# 主要解讀交互作用顯著時的結果；對整組切片檢定做 Holm 校正。',
  'effect <- function(s, formula, term) {',
  '  t <- anova(lm(formula, data = s))',
- '  c(df1 = t[term, "Df"], df2 = t["Residuals", "Df"], F = t[term, "F value"], p = t[term, "Pr(>F)"])',
+ '  c(SS = t[term, "Sum Sq"], df1 = t[term, "Df"], df2 = t["Residuals", "Df"], F = t[term, "F value"], p = t[term, "Pr(>F)"])',
  '}',
  'by_A <- lapply(split(d, d$A), effect, formula = y ~ '+(model==='two'?'B':'id + B')+', term = "B")',
  'by_B <- lapply(split(d, d$B), effect, formula = y ~ '+(model==='within'?'id + A':'A')+', term = "A")',
@@ -72,7 +82,20 @@ function rCase(z,a=.05,pooled=false){
  'names(by_B) <- paste("A |", names(by_B))',
  'simple <- as.data.frame(do.call(rbind, c(by_A, by_B)))',
  'simple$holm <- p.adjust(simple$p, "holm")',
- 'print(simple)', ''
+ 'print(simple)',
+ '',
+ '# 課本做法：共用誤差均方，對所有切片做 Bonferroni 校正。',
+ 'cell_model <- lm(y ~ A * B, data = d)',
+ 'mse <- function(model) deviance(model) / df.residual(model)',
+ model==='two'?'error_B <- error_A <- cell_model':
+  model==='mixed'?'error_A <- cell_model\nerror_B <- lm(y ~ id + A * B, data = d)':
+  'error_B <- error_A <- lm(y ~ id + A * B, data = d)',
+ 'shared <- simple[c("SS", "df1")]',
+ 'shared$df2 <- c(rep(df.residual(error_B), length(by_A)), rep(df.residual(error_A), length(by_B)))',
+ 'shared$F <- shared$SS / shared$df1 / c(rep(mse(error_B), length(by_A)), rep(mse(error_A), length(by_B)))',
+ 'shared$p <- pf(shared$F, shared$df1, shared$df2, lower.tail = FALSE)',
+ 'shared$bonferroni <- p.adjust(shared$p, "bonferroni")',
+ 'print(shared)', ''
  ].join('\n');
  return start+setup+fit+'\n\n'+plot+'\n'+simple;
 }
@@ -92,7 +115,19 @@ function rSurvey(variable,group,rows,a=.05){
   'print(data.frame(row.names = c("Between", "Within", "Total"),',
   '  SS = c(ss, sum(ss)), df = c(df, sum(df)), MS = c(ms, sum(ss)/sum(df)),',
   '  F = c(F_obs, NA, NA), p = c(p, NA, NA)))',
-  'print(c(F_critical = F_critical, partial_eta_sq = ss[1]/sum(ss)))',''
+  'print(c(F_critical = F_critical, partial_eta_sq = ss[1]/sum(ss)))',
+  '# 以共同組內均方比較兩組，並校正整組比較。',
+  'pairs <- combn(nrow(d), 2, simplify = FALSE)',
+  'post <- as.data.frame(t(sapply(pairs, function(g) {',
+  '  delta <- d$mean[g[1]] - d$mean[g[2]]',
+  '  t <- delta / sqrt(ms[2] * sum(1/d$n[g]))',
+  '  c(difference = delta, p = 2 * pt(-abs(t), df[2]),',
+  '    scheffe = pf(t^2/df[1], df[1], df[2], lower.tail = FALSE))',
+  '})))',
+  'rownames(post) <- vapply(pairs, function(g) paste(d$group[g], collapse = " - "), "")',
+  'post$holm <- p.adjust(post$p, "holm")',
+  'post$bonferroni <- p.adjust(post$p, "bonferroni")',
+  'print(post)',''
  ].join('\n');
 }
 if(typeof module!=='undefined')module.exports={rCase,rSurvey};
