@@ -160,7 +160,22 @@ function updateTutorial(a){
  simpleEffects(rt,a);
 }
 function theory(){
- return heading('原理說明')+card('<h3>一般線性模型（GLM）公式總覽</h3><dl class="glm-overview">'+models.slice(1).map(([formula],i)=>'<dt>'+concepts[i+1][0]+'</dt><dd class="math model">'+formula+'</dd>').join('')+'</dl><h3>從模型到 F 檢定</h3><p>ANOVA 將依變數拆為可解釋的因子效果與誤差；每項均方 MS = SS／df。F 的分母要符合實際受試者安排。下列 μ 是總體截距，αᵢ 是 A 的效果，βⱼ 是 B 的效果，π 是受試者或區組效果；此處的 αᵢ 不是顯著水準 α。</p>'+concepts.map(([t,b,m],i)=>'<details'+(!i?' open':'')+'><summary>'+t+'</summary><p>'+b+'</p><span class="math">'+m+'</span>'+(models[i]?'<span class="math model">'+models[i][0]+'</span><p class="model-notation">'+models[i][1]+'</p><span class="math model">'+models[i][2]+'</span><p>'+models[i][3]+'</p>':'')+'</details>').join('')+
+ const overview='<h3>變異數分析的原理</h3>'+
+  '<p>變異數分析（ANOVA）要回答的是：各組平均數的差距，相對於同組觀測值的波動，是否大到難以用隨機誤差解釋？以運動型態與睡眠時數為例，日常、慢跑、有氧三組的平均睡眠時數可能不同，但每組內的人也不會睡一樣久。因此，我們比較組間的變異與組內的變異。</p>'+
+  '<p>先將總變異拆成模型效果與誤差，再把各項平方和（SS）除以對應自由度（df），得到均方（MS）。F 是效果均方除以對應的誤差均方。在虛無假設成立時，兩個均方估計同一個誤差量；若 F 大到超過右尾臨界值，就拒絕虛無假設。整體 F 顯著只表示至少有一組平均數不同，仍須用多重比較找出差異。</p>'+
+  '<h3>一般線性模型（GLM）公式與解讀</h3>'+
+  '<p>等號左邊的 Y 是一次觀測值；右邊的 μ 是整體基準，αᵢ、βⱼ 分別是因子 A、B 的水準效果，(αβ)ᵢⱼ 是交互作用，π 是受試者或區組效果，ε 是該設計的剩餘誤差。αᵢ 的下標表示因子水準，與顯著水準 α 不同。</p>'+
+  '<dl class="glm-overview">'+models.slice(1).map(([formula,notation,decomp,denom],i)=>{
+   const notes=[
+    '例如每人只參加一種運動，εᵢⱼ 是該人的睡眠時數與所屬組平均的差。',
+    '例如同一人接受多種運動條件，πⱼ 表示這個人平時睡得較長或較短；扣除這個差異後，才比較條件。',
+    '例如運動與時段各自分派給不同人；交互作用問的是「運動組之間的差距，是否因時段而改變？」',
+    '例如每人只屬於一個運動組，但同一人測量白天和夜晚。πₖ₍ᵢ₎ 的括號表示第 k 位受試者隸屬於 A 的第 i 組。',
+    '例如每人都體驗所有運動與時段的組合。三個含 π 的交互作用項，分別描述 A、B、A×B 的效果在人與人之間如何變動。'
+   ];
+   return '<dt>'+concepts[i+1][0]+'</dt><dd><span class="math model">'+formula+'</span><p>'+notation+'</p><p>'+notes[i]+'</p><span class="math model">'+decomp+'</span><p><strong>F 檢定：</strong>'+denom+'</p></dd>';
+  }).join('')+'</dl>';
+ return heading('原理說明')+card(overview+'<h3>各設計的判讀重點</h3>'+concepts.map(([t,b,m],i)=>'<details'+(!i?' open':'')+'><summary>'+t+'</summary><p>'+b+'</p><span class="math">'+m+'</span></details>').join('')+
  card('<details><summary>比較交互作用的型態</summary><p>切換課本示意圖或有原始觀測值的實際案例，觀察線條交叉或差距改變。示意圖只顯示平均數；實際案例也顯示 95% CI。</p><label for="sketch">示意圖：</label><select id="sketch">'+options([['actual','實際案例｜時段 × 運動型態（含 95% CI）'],...sketches.map((_,i)=>[i,'示意圖 '+(i+1)])])+'</select><div id="sketch-out"></div></details>')+
  '<p class="muted">本教材使用傳統未校正 F，不代做球面性或等變異檢查。實際研究應先檢查設計及殘差；違反球面性時，可考慮 Greenhouse–Geisser 校正或混合模型。</p>')+
  '<div class="grid"><div class="card controls"><h3>F 分配與查表</h3>'+alpha()+'<label>分子自由度 df₁<input id="d1" type="number" value="3" min="1" max="1000" step="1"></label><label>分母自由度 df₂<input id="d2" type="number" value="18" min="1" max="10000" step="1"></label><label>觀察 F<input id="obs" type="number" value="8.99" min="0" max="10000000" step="any"></label>'+field('tail','用途',options([['right','右尾｜ANOVA'],['both','雙尾｜變異數比']]))+'</div><div class="card" id="f-out" aria-live="polite"></div></div>'+tutorialExamples();
