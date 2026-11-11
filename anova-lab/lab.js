@@ -15,6 +15,7 @@ const csv=(h,r)=>[h,...r].map(row=>row.map(x=>'"'+String(x).replace(/"/g,'""')+'
 function save(name,body,type,bom=true){
  let u=URL.createObjectURL(new Blob([bom?'\ufeff':'',body],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);
 }
+let fChartSerial=0;
 function fchart(d,e,obs,lo,hi,tail='right',a=upper(hi,d,e)*(tail==='both'?2:1)){
  const X=Math.max(hi*1.24,critical(d,e,.015),obs===Infinity?0:Math.min(obs*1.06,hi*4));
  const x=v=>48+v/X*598, dx=X/260;
@@ -31,8 +32,23 @@ function fchart(d,e,obs,lo,hi,tail='right',a=upper(hi,d,e)*(tail==='both'?2:1)){
    let left=lower(obs,d,e)<=upper(obs,d,e);
    pp=left?[[0,obs],[critical(d,e,lower(obs,d,e)),X]]:[[0,1/critical(e,d,upper(obs,d,e))],[obs,X]];
  }else pp=[[obs,X]];
- const draw=(regions,color,name,decisionPlot=false)=>'<figure><svg viewBox="0 0 680 207" role="img" aria-label="'+esc(name)+'"><path d="M48 143H646" stroke="#657f82"/>'+regions.map(([a,b])=>'<path d="'+path(a,b)+'" fill="'+color+'" opacity=".28"/>').join('')+'<polyline fill="none" stroke="#255661" stroke-width="2" points="'+grid.map(v=>x(v)+','+y(v)).join(' ')+'"/>'+line(hi,'#a24a14')+(lo>0?line(lo,'#a24a14'):'')+line(obs,'#4c3c86')+Array.from({length:6},(_,i)=>'<text x="'+x(i*X/5)+'" y="163" text-anchor="middle" font-size="12">'+f(i*X/5)+'</text>').join('')+(decisionPlot?'<text x="'+((x(lo)+x(hi))/2)+'" y="20" text-anchor="middle" font-size="13" fill="#255661">1 − α = '+f(1-a)+'</text><text x="'+((x(hi)+646)/2)+'" y="20" text-anchor="middle" font-size="13" fill="#a24a14">'+(lo?'α/2 = '+f(a/2):'α = '+f(a))+'</text>':'')+'<text x="48" y="190" font-size="13" fill="#a24a14">Fcv('+d+', '+e+') = '+(lo?f(lo)+' / ':'')+f(hi)+'</text><text x="646" y="190" text-anchor="end" font-size="13" fill="#4c3c86">Fobt = '+f(obs)+'</text></svg><figcaption>'+name+'｜H₀ 下的 F('+d+', '+e+') 分配。'+(decisionPlot?'橙色為拒絕域；其餘區域不拒絕 H₀。':'藍色為計算 p 值的尾域。')+(obs>X?' Fobt 超出圖域。':'')+'</figcaption></figure>';
- return '<div class="pair">'+draw(rr,'#cf7030','α 拒絕域',true)+draw(pp,'#397dcc','p 值尾域')+'</div>';
+ const hatch='f-p-tail-'+(++fChartSerial);
+ const fill=(regions,color,opacity)=>regions.map(([a,b])=>'<path d="'+path(a,b)+'" fill="'+color+'" opacity="'+opacity+'"/>').join('');
+ const mode=d<=2?0:((d-2)/d)*(e/(e+2));
+ const peakX=x(mode), peakY=y(mode);
+ const pValue=tail==='both'?Math.min(1,2*Math.min(lower(obs,d,e),upper(obs,d,e))):upper(obs,d,e);
+ return '<figure><svg viewBox="0 0 680 207" role="img" aria-label="H₀ 下的 F 分配、α 拒絕域與 p 值尾域">'+
+  '<defs><pattern id="'+hatch+'" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><path d="M0 0V5" stroke="#2265a5" stroke-width="2"/></pattern></defs>'+
+  fill(rr,'#eb9b43',.52)+fill(pp,'#397dcc',.20)+fill(pp,'url(#'+hatch+')',1)+
+  '<path d="M48 143H646" stroke="#657f82"/><polyline fill="none" stroke="#255661" stroke-width="2" points="'+grid.map(v=>x(v)+','+y(v)).join(' ')+'"/>'+
+  line(hi,'#a24a14')+(lo>0?line(lo,'#a24a14'):'')+line(obs,'#4c3c86')+
+  '<text x="'+peakX+'" y="'+(peakY-7)+'" text-anchor="'+(mode===0?'start':'middle')+'" font-size="14" font-weight="bold" fill="#255661">H₀</text>'+
+  Array.from({length:6},(_,i)=>'<text x="'+x(i*X/5)+'" y="163" text-anchor="middle" font-size="12">'+f(i*X/5)+'</text>').join('')+
+  '<text x="'+((x(lo)+x(hi))/2)+'" y="16" text-anchor="middle" font-size="13" fill="#255661">1 − α = '+f(1-a)+'</text>'+
+  '<text x="'+((x(hi)+646)/2)+'" y="16" text-anchor="middle" font-size="13" fill="#a24a14">'+(lo?'每尾 α/2 = '+f(a/2):'α = '+f(a))+'</text>'+
+  '<text x="48" y="190" font-size="13" fill="#a24a14">Fcv('+d+', '+e+') = '+(lo?f(lo)+' / ':'')+f(hi)+'</text>'+
+  '<text x="646" y="190" text-anchor="end" font-size="13" fill="#4c3c86">Fobt = '+f(obs)+'</text></svg>'+
+  '<figcaption>H₀ 下的 F('+d+', '+e+') 分配。<strong style="color:#a24a14">橙色底：α 拒絕域</strong>；<strong style="color:#2265a5">藍色斜線：p 值尾域（p '+(pValue<.0001?'':'= ')+esc(p(pValue))+'）</strong>。'+(obs>X?' Fobt 超出圖域。':'')+'</figcaption></figure>';
 }
 function profile({as,bs,M,ci}){
  let extent=ci?[...M.flat(),...ci.flat(2)]:M.flat();
