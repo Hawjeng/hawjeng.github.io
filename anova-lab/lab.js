@@ -92,11 +92,23 @@ function profile({as,bs,M,ci,groups=false}){
 const decision=(pv,a)=>pv==null?'無法檢定':pv<a?'達顯著':'未達顯著';
 function comparisons(res,a){
  if(!res.pairs?.length)return '';
- let t=res.terms.find(z=>z.err), paired=res.terms.some(z=>z.name==='受試者／區組'), n=res.pairs.length;
- let rows=res.pairs.map(z=>[z.name,f(z.delta),z.df,p(z.p),p(z.p==null?null:Math.min(1,z.p*n)),p(z.adj),...(!paired?[p(z.scheffe)]:[]),decision(z.adj,a)]);
- return '<h3>'+ (n===1?'兩組平均數比較':'多重比較：各組平均數的差異')+'</h3><p>'+ (paired?'同一受試者的成對差值使用配對 t。':'各對比較使用整體 ANOVA 的組內均方。原始 p 即未校正的 LSD 型比較。')+' 平均差為前組減後組；判定欄採 Holm 校正。</p>'+
- (t.p==null||t.p>=a?'<p class="note">整體 F 未達顯著或無法檢定。下列比較僅供教學或探索；事先規劃的對比另依原定方案判讀。</p>':'')+
- table(['比較','平均差','df','原始 p','Bonferroni p','Holm p',...(!paired?['Scheffé p']:[]),'Holm 判定'],rows);
+ const effect=res.terms.find(z=>z.err);
+ const paired=res.terms.some(z=>z.name==='受試者／區組');
+ const labels=res.desc.map(([name])=>name);
+ // Pairwise results are ordered by row, then by column above the diagonal.
+ let nextPair=0;
+ const rows=labels.map((label,i)=>[label,...labels.map((_,j)=>{
+  if(j<=i)return j===i?'—':'';
+  const pair=res.pairs[nextPair++];
+  return f(pair.delta)+(pair.adj!=null&&pair.adj<a?'*':'');
+ })]);
+ const df=res.pairs[0].df;
+ const method=paired?'採配對 t 檢定，df = 配對數 − 1 = '+df+'。':
+  '採整體 ANOVA 的組內均方，df = 總樣本數 − 組數 = '+df+'。';
+ return '<h3>'+(res.pairs.length===1?'兩組平均數比較':'多重比較｜平均差矩陣')+'</h3>'+
+  table(['組/格',...labels],rows)+
+  '<p class="note">平均差為列組平均數減欄組平均數。* 表示 Holm 校正後 p &lt; '+f(a)+'。'+method+'</p>'+
+  (effect.p==null||effect.p>=a?'<p class="note">整體 F 未達顯著或無法檢定。矩陣結果供教學或探索。</p>':'');
 }
 function simpleEffects(res,a){
  if(!res.slices?.length)return '';
