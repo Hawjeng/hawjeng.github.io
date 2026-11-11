@@ -169,7 +169,8 @@ def detail_page(b):
         if not paragraphs and pre.get('url'):
             paragraphs = '<p>'+ext(pre['url'],'閱讀完整序言 PDF','')+'</p>'
         note = f'<p class="preface-note">{E(pre["note"])}</p>' if pre.get('note') else ''
-        preface_sections += f'<details class="preface-section" id="preface-{idx+1}"><summary><h2>{E(pre.get("title","序言"))}<span>展開閱讀完整原文</span></h2></summary><div class="preface-body">{note}{paragraphs}<p class="preface-source">原文來源：{ext(pre.get("source",b["source"]),"邱皓政原網站","")}</p></div></details>'
+        source = E(pre['sourceLabel']) if pre.get('sourceLabel') else ext(pre.get('source', b['source']), '邱皓政原網站', '')
+        preface_sections += f'<details class="preface-section" id="preface-{idx+1}"><summary><h2>{E(pre.get("title","序言"))}<span>展開閱讀完整原文</span></h2></summary><div class="preface-body">{note}{paragraphs}<p class="preface-source">原文來源：{source}</p></div></details>'
     if not preface_sections:
         raise ValueError(f'Book {b["id"]} lacks a verified preface')
     jump = ''.join(f'<a href="#preface-{i+1}">{E(pre.get("title","作者序"))}</a>' for i,pre in enumerate(prefaces(b)))
