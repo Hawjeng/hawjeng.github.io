@@ -59,12 +59,16 @@ function fchart(d,e,obs,lo,hi,tail='right',a=upper(hi,d,e)*(tail==='both'?2:1)){
 function profile({as,bs,M,ci,groups=false}){
  let extent=ci?[...M.flat(),...ci.flat(2)]:M.flat();
  let min=Math.min(...extent),max=Math.max(...extent),pad=(max-min||1)*.17;
- let x=j=>78+j*514/(bs.length-1),y=v=>206-(v-min+pad)/(max-min+2*pad)*163;
+ const width=groups?Math.max(320,64+bs.length*72):670;
+ const bottom=groups?174:206, right=groups?width-12:620;
+ const axisSize=groups?14:11, groupSize=groups?15:12, meanSize=groups?15:11;
+ let x=j=>groups?55+(j+.5)*(right-55)/bs.length:78+j*514/Math.max(1,bs.length-1);
+ let y=v=>bottom-(v-min+pad)/(max-min+2*pad)*(groups?150:163);
  const col=['#266b80','#a44827','#5c518f','#367343','#81651a','#a04271'];
  const point=(i,j)=>x(j)+(ci&&as.length>1?((i/(as.length-1))-.5)*Math.min(24,200/(bs.length-1)):0);
- return '<h3>'+(groups?'各組平均數圖':'細格平均數圖')+(ci?'｜95% 信賴區間':'')+'</h3><figure><svg viewBox="0 0 670 250" role="img" aria-label="'+(ci?'各細格平均數與 95% 信賴區間':'各細格平均數示意圖，無信賴區間')+'">'+
- Array.from({length:5},(_,i)=>{let v=min-pad+(max-min+2*pad)*i/4;return '<path d="M55 '+y(v)+'H620" stroke="#d5e3e1"/><text x="50" y="'+(y(v)+4)+'" text-anchor="end" font-size="11">'+f(v)+'</text>';}).join('')+
- bs.map((v,j)=>'<text x="'+x(j)+'" y="233" text-anchor="middle" font-size="12">'+esc(v)+'</text>').join('')+
+ return '<h3>'+(groups?'各組平均數圖':'細格平均數圖')+(ci?'｜95% 信賴區間':'')+'</h3><figure><div class="profile-chart"><svg '+(groups?'style="width:'+width+'px" ':'')+'viewBox="0 0 '+width+' '+(bottom+44)+'" role="img" aria-label="'+(ci?'各細格平均數與 95% 信賴區間':'各細格平均數示意圖，無信賴區間')+'">'+
+ Array.from({length:5},(_,i)=>{let v=min-pad+(max-min+2*pad)*i/4;return '<path d="M55 '+y(v)+'H'+right+'" stroke="#d5e3e1"/><text x="50" y="'+(y(v)+4)+'" text-anchor="end" font-size="'+axisSize+'">'+f(v)+'</text>';}).join('')+
+ bs.map((v,j)=>'<text x="'+x(j)+'" y="'+(bottom+24)+'" text-anchor="middle" font-size="'+groupSize+'">'+esc(v)+'</text>').join('')+
  M.map((r,i)=>{
   const color=col[i%6];
   return (groups?'':'<polyline fill="none" stroke="'+color+'" stroke-width="2.5" stroke-dasharray="'+(i%2?'6 3':'none')+'" points="'+r.map((v,j)=>point(i,j)+','+y(v)).join(' ')+'"/>')+
@@ -73,10 +77,10 @@ function profile({as,bs,M,ci,groups=false}){
     const near=M.some((other,k)=>k!==i&&Math.abs(y(other[j])-Y)<18);
     const offset=near?(i%2?15:-9):-9;
     const bars=lim?'<path d="M'+X+' '+y(lim[0])+'V'+y(lim[1])+' M'+(X-4)+' '+y(lim[0])+'h8 M'+(X-4)+' '+y(lim[1])+'h8" fill="none" stroke="'+color+'" stroke-width="1.5"/>':'';
-    return '<g><title>'+esc(tip)+'</title>'+bars+'<circle cx="'+X+'" cy="'+Y+'" r="4" fill="'+color+'"/><text class="plot-label" x="'+X+'" y="'+(Y+offset)+'" fill="'+color+'" text-anchor="middle" font-size="11" font-weight="700">'+f(v)+'</text></g>';
+    return '<g><title>'+esc(tip)+'</title>'+bars+'<circle cx="'+X+'" cy="'+Y+'" r="4" fill="'+color+'"/><text class="plot-label" x="'+X+'" y="'+(Y+offset)+'" fill="'+color+'" text-anchor="middle" font-size="'+meanSize+'" font-weight="700">'+f(v)+'</text></g>';
    }).join('');
  }).join('')+
- '</svg><figcaption>'+(groups?'點旁數字為各組平均數；誤差線是未校正的 95% t 信賴區間。相依資料的區間描述各條件平均，並非配對差值的區間。</figcaption></figure>':as.map((v,i)=>'<strong style="color:'+col[i%6]+'">● '+esc(v)+'</strong>').join('　')+
+ '</svg></div><figcaption>'+(groups?'點旁數字為各組平均數；誤差線是未校正的 95% t 信賴區間。相依資料的區間描述各條件平均，並非配對差值的區間。</figcaption></figure>':as.map((v,i)=>'<strong style="color:'+col[i%6]+'">● '+esc(v)+'</strong>').join('　')+
  (ci?'。點旁數字為細格平均數，誤差線為各細格未校正的 95% t 信賴區間：平均數 ± t × s／√n。相依設計的誤差線不是配對差值的區間；不可依區間是否重疊判定交互作用。':'。點旁數字為示意平均數；原資料未提供細格樣本數與變異，無法估計 95% CI。')+'</figcaption></figure>')+
  (ci?'<details><summary>查看平均數與 95% CI 數值</summary>'+table([...(groups?['組別']:['A 水準','B 水準']),'平均數','95% CI 下限','95% CI 上限'],M.flatMap((row,i)=>row.map((v,j)=>[...(groups?[bs[j]]:[as[i],bs[j]]),f(v),...ci[i][j].map(f)])))+'</details>':'');
 }
