@@ -11,7 +11,7 @@ const expected=[
  [48.4160191273,12.786909743,4.6040047818],
  [8.3936324168,21.4313689267,6.7112506928],
  [2.2325581395,9.5968992248,10.3720930233],
- [9],[15.75],[64,100,16],[49.2307692308,142.8571428571,22.8571428571],[640,200,17.7777777778]
+ [9],[15.75],[10/11,250/11,90/11],[.5,125,45],[10/11,250/3,90]
 ];
 assert.equal(LAB_DATA.items.length,expected.length);
 LAB_DATA.items.forEach((z,i)=>{
@@ -28,6 +28,10 @@ LAB_DATA.items.forEach((z,i)=>{
 for(const groups of Object.values(LAB_DATA.survey)){
  for(const rows of Object.values(groups))assert.ok(Number.isFinite(oneSummary(rows,.05).terms[0].f));
 }
+const coffee=LAB_DATA.items.slice(-3).map(z=>compute(z.model,z.headers,z.rows,.05).desc.map(x=>x[2]));
+coffee.forEach(m=>assert.deepEqual(m,[7,6,9,5]));
 let z=LAB_DATA.items.at(-1),bad=z.rows.map(r=>r.slice());bad[0][0]='missing pair';
 assert.throws(()=>compute(z.model,z.headers,bad,.05),/每位受試者/);
+bad=z.rows.map(r=>r.slice());bad[0][3]=null;
+assert.throws(()=>compute(z.model,z.headers,bad,.05),/非數值/);
 console.log('PASS: F distribution, 13 chapter datasets, decomposition, 48 survey analyses and missing-pair validation.');

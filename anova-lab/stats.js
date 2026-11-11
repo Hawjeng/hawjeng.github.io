@@ -65,6 +65,8 @@ function pairwise(names,means,calc){
  })));
 }
 function compute(model,h,r,a,pooled=false){
+ const numericStart={ratio:1,one:1,repeat:1,two:2,mixed:2,within:3}[model];
+ check(r.length>0&&r.every(row=>row.length===h.length&&row.slice(numericStart).every(Number.isFinite)),'資料欄位不完整，或有遺漏／非數值觀測。');
  if(model==='ratio'||model==='one'){
   let g=groups(r),names=[...g.keys()],vs=[...g.values()],desc=names.map((x,i)=>{let s=stats(vs[i]);return [x,s.n,s.m,s.v]});
   if(model==='one'){
