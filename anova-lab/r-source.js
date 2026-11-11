@@ -1,5 +1,5 @@
 'use strict';
-const rQuote = s => JSON.stringify(String(s)).replace(/[^\x00-\x7f]/g, c => '\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));
+const rQuote = s => JSON.stringify(String(s));
 const rVec = (xs, format = rQuote) => 'c('+xs.map(format).join(', ')+')';
 const rFactor = xs => 'factor('+rVec(xs)+', levels = '+rVec([...new Set(xs.map(String))])+')';
 function rFrame(cols){
