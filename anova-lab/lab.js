@@ -384,12 +384,12 @@ function surveyUpdate(rebuild=false,rebuildOptions=true){
    if(Object.hasOwn(summaries,first))$('group').value=first;
    second.innerHTML=options([['','無（單因子）']]);
    second.disabled=true;
-   groups.innerHTML=(summaries.get($('group').value)??[]).map(([name,n])=>
+   groups.innerHTML=(summaries[$('group').value]??[]).map(([name,n])=>
     '<label><input type="checkbox" value="'+esc(name)+'" checked> '+esc(name)+'（n='+n+'）</label>').join('');
   }
   safe($('results'),()=>{
    const selected=new Set([...groups.querySelectorAll('input:checked')].map(input=>input.value));
-   const rows=(summaries.get($('group').value)??[]).filter(([name])=>selected.has(name));
+   const rows=(summaries[$('group').value]??[]).filter(([name])=>selected.has(name));
    check(rows.length>=2,'請選擇至少兩組。若無可用組別，請改選其他結果變項或分析樣本。');
    return '<h3>'+esc(selectedSign)+'｜單因子變異數分析</h3>'+show(oneSummary(rows,a),a);
   });
