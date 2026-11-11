@@ -113,7 +113,7 @@ function comparisons(res,a){
   if(j>=i)return j===i?'—':'';
   const pairIndex=j*(2*labels.length-j-1)/2+i-j-1;
   const pair=res.pairs[pairIndex];
-  const probability=pair.adj==null?'p —':pair.adj<.0001?'p < .0001':'p = '+p(pair.adj);
+  const probability=p(pair.adj);
   return f(-pair.delta)+(pair.adj!=null&&pair.adj<a?'*':'')+' ('+probability+')';
  })]);
  const df=res.pairs[0].df;
@@ -121,7 +121,7 @@ function comparisons(res,a){
   '採整體 ANOVA 的組內均方，df = 總樣本數 − 組數 = '+df+'。';
  return '<h3>'+(res.pairs.length===1?'兩組平均數比較':'多重比較｜平均差矩陣')+'</h3>'+
   table(['組/格',...labels],rows)+
-  '<p class="note">平均差為列組平均數減欄組平均數。* 表示 Holm 校正後 p &lt; '+f(a)+'。'+method+'</p>'+
+  '<p class="note">平均差為列組平均數減欄組平均數。括號內為 Holm 校正後的 p 值。* 表示 Holm 校正後 p &lt; '+f(a)+'。'+method+'</p>'+
   (effect.p==null||effect.p>=a?'<p class="note">整體 F 未達顯著或無法檢定。矩陣結果供教學或探索。</p>':'')
   +'<details><summary>各組比較的中英文 APA 報告</summary>'+res.pairs.map(pair=>{
    const magnitude=Math.sqrt(pair.f);
