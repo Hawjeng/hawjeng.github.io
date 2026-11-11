@@ -15,7 +15,7 @@ const csv=(h,r)=>[h,...r].map(row=>row.map(x=>'"'+String(x).replace(/"/g,'""')+'
 function save(name,body,type,bom=true){
  let u=URL.createObjectURL(new Blob([bom?'\ufeff':'',body],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);
 }
-function fchart(d,e,obs,lo,hi,tail='right'){
+function fchart(d,e,obs,lo,hi,tail='right',a=upper(hi,d,e)*(tail==='both'?2:1)){
  const X=Math.max(hi*1.24,critical(d,e,.015),obs===Infinity?0:Math.min(obs*1.06,hi*4));
  const x=v=>48+v/X*598, dx=X/260;
  const grid=Array.from({length:260},(_,i)=>(i+.35)*dx);
@@ -31,8 +31,8 @@ function fchart(d,e,obs,lo,hi,tail='right'){
    let left=lower(obs,d,e)<=upper(obs,d,e);
    pp=left?[[0,obs],[critical(d,e,lower(obs,d,e)),X]]:[[0,1/critical(e,d,upper(obs,d,e))],[obs,X]];
  }else pp=[[obs,X]];
- const draw=(regions,color,name)=>'<figure><svg viewBox="0 0 680 175" role="img" aria-label="'+esc(name)+'"><path d="M48 143H646" stroke="#657f82"/>'+regions.map(([a,b])=>'<path d="'+path(a,b)+'" fill="'+color+'" opacity=".28"/>').join('')+'<polyline fill="none" stroke="#255661" stroke-width="2" points="'+grid.map(v=>x(v)+','+y(v)).join(' ')+'"/>'+line(hi,'#a24a14')+(lo>0?line(lo,'#a24a14'):'')+line(obs,'#4c3c86')+Array.from({length:6},(_,i)=>'<text x="'+x(i*X/5)+'" y="163" text-anchor="middle" font-size="12">'+f(i*X/5)+'</text>').join('')+'</svg><figcaption>'+name+'｜橙虛線：臨界值；紫虛線：觀察 F'+(obs>X?'（超出圖域）':'')+'</figcaption></figure>';
- return '<div class="pair">'+draw(rr,'#cf7030','α 拒絕域')+draw(pp,'#397dcc','p 值尾域')+'</div>';
+ const draw=(regions,color,name,decisionPlot=false)=>'<figure><svg viewBox="0 0 680 207" role="img" aria-label="'+esc(name)+'"><path d="M48 143H646" stroke="#657f82"/>'+regions.map(([a,b])=>'<path d="'+path(a,b)+'" fill="'+color+'" opacity=".28"/>').join('')+'<polyline fill="none" stroke="#255661" stroke-width="2" points="'+grid.map(v=>x(v)+','+y(v)).join(' ')+'"/>'+line(hi,'#a24a14')+(lo>0?line(lo,'#a24a14'):'')+line(obs,'#4c3c86')+Array.from({length:6},(_,i)=>'<text x="'+x(i*X/5)+'" y="163" text-anchor="middle" font-size="12">'+f(i*X/5)+'</text>').join('')+(decisionPlot?'<text x="'+((x(lo)+x(hi))/2)+'" y="20" text-anchor="middle" font-size="13" fill="#255661">1 − α = '+f(1-a)+'</text><text x="'+((x(hi)+646)/2)+'" y="20" text-anchor="middle" font-size="13" fill="#a24a14">'+(lo?'α/2 = '+f(a/2):'α = '+f(a))+'</text>':'')+'<text x="48" y="190" font-size="13" fill="#a24a14">Fcv('+d+', '+e+') = '+(lo?f(lo)+' / ':'')+f(hi)+'</text><text x="646" y="190" text-anchor="end" font-size="13" fill="#4c3c86">Fobt = '+f(obs)+'</text></svg><figcaption>'+name+'｜H₀ 下的 F('+d+', '+e+') 分配。'+(decisionPlot?'橙色為拒絕域；其餘區域不拒絕 H₀。':'藍色為計算 p 值的尾域。')+(obs>X?' Fobt 超出圖域。':'')+'</figcaption></figure>';
+ return '<div class="pair">'+draw(rr,'#cf7030','α 拒絕域',true)+draw(pp,'#397dcc','p 值尾域')+'</div>';
 }
 function profile({as,bs,M,ci}){
  let extent=ci?[...M.flat(),...ci.flat(2)]:M.flat();
@@ -82,18 +82,40 @@ function simpleEffects(res,a){
  '<details><summary>對照：各切片重估誤差與 Holm 校正</summary><p>此方法在各切片內重估誤差均方，因此與課本共用誤差的 F 值可能不同。</p>'+
  table([...heads,'Holm p','判定'],rows(res.slices,'holm'),'各切片重估誤差｜Holm 校正')+'</details>';
 }
+function fSteps(res,a){
+ const tests=res.terms.filter(z=>z.err);
+ let ssDetail='';
+ if(tests.length===1&&tests[0].name==='組間'){
+  const N=res.desc.reduce((acc,r)=>acc+r[1],0),k=res.desc.length;
+  const grand=res.desc.reduce((acc,r)=>acc+r[1]*r[2],0)/N;
+  const groups=res.desc.map(([name,n,mean,v])=>[name,n,f(mean),f(v),f(n*(mean-grand)**2),f((n-1)*v)]);
+  ssDetail='<p>加權總平均 Ȳ = Σ(nᵢ × Ȳᵢ)／N = '+f(grand)+'；N = '+N+'，k = '+k+'。各組對平方和的貢獻如下：</p>'+
+   table(['組別','nᵢ','Ȳᵢ','sᵢ²','nᵢ(Ȳᵢ − Ȳ)²','(nᵢ − 1)sᵢ²'],groups,'組間與組內平方和的計算')+
+   '<p>逐欄加總：SS 組間 = '+f(tests[0].s)+'；SS 組內 = '+f(res.terms[1].s)+'。自由度：df₁ = k−1 = '+(k-1)+'；df₂ = N−k = '+(N-k)+'。</p>';
+ }
+ return '<h3>計算過程與 F 分配圖</h3>'+ssDetail+tests.map((z,i)=>{
+  let err=res.terms.find(x=>x.name===z.err);
+  let h0=res.profile?(i===2?'A × B 無交互作用':esc(z.name)+'各水準的母體邊際平均數相等'):'各組／條件的母體平均數相等';
+  let calc='<p><strong>H₀：</strong>'+h0+'。在 H₀ 下，使用 F('+z.df+', '+z.df2+') 分配。</p>'+
+   '<ol><li>效果均方 = SS／df₁ = '+f(z.s)+'／'+z.df+' ≈ '+f(z.ms)+'。</li>'+
+   '<li>'+esc(z.err)+'均方 = SS／df₂ = '+f(err.s)+'／'+z.df2+' ≈ '+f(err.ms)+'。</li>'+
+   '<li>F<sub>obt</sub> = MS<sub>效果</sub>／MS<sub>誤差</sub> ≈ '+f(z.ms)+'／'+f(err.ms)+' → '+f(z.f)+'（以未四捨五入的均方計算）。</li>'+
+   '<li>右尾臨界值 F<sub>CV</sub>('+z.df+', '+z.df2+') = '+f(z.crit)+'，α = '+f(a)+'；p '+(z.p!=null&&z.p<.0001?'':'= ')+esc(p(z.p))+'。'+(z.p==null?'無法判定。':z.p<a?'拒絕 H₀。':'不拒絕 H₀。')+'</li></ol>';
+  return '<details'+(i===0?' open':'')+'><summary>'+esc(z.name)+'｜計算步驟與 F 分配</summary>'+calc+(z.p==null?'':fchart(z.df,z.df2,z.f,0,z.crit,'right',a))+'</details>';
+ }).join('');
+}
 function show(res,a){
  const desc=table(['組別／細格','n','平均數','樣本變異數'],res.desc.map(([n,k,m,v])=>[n,k,f(m),f(v)]),'敘述統計');
  if(res.ratio){
   let z=res.ratio;
   return '<p class="note">F('+z.d+', '+z.e+') = '+f(z.f)+'，雙尾 p '+(z.p<.0001?'':'= ')+esc(p(z.p))+'；'+(z.p<a?'拒絕':'未拒絕')+'兩母體變異數相等。雙尾臨界值：'+f(z.lo)+'、'+f(z.hi)+'。</p>'+fchart(z.d,z.e,z.f,z.lo,z.hi,'both')+desc;
  }
- const tested=res.terms.filter(t=>t.err),t=tested.at(-1);
+ const tested=res.terms.filter(t=>t.err);
  const conclusion=tested.map(x=>'<li>'+esc(x.name)+'：F('+x.df+', '+x.df2+') = '+f(x.f)+'，p '+(x.p!==null&&x.p<.0001?'':'= ')+esc(p(x.p))+'；'+(x.p===null?'無法檢定（誤差與效果均為零）':x.p<a?'<strong class="sig">達顯著</strong>':'未達顯著')+'。</li>').join('');
  let html='<ul class="note">'+conclusion+'</ul>'+table(['變異來源','SS','df','MS','分母誤差項','F','p','F 臨界值','偏 η²'],
   res.terms.map(z=>[z.name,f(z.s),z.df,f(z.ms),z.err??'—',f(z.f),p(z.p),f(z.crit),f(z.eta)]),'變異數分析摘要表');
  if(res.profile)html+=profile(res.profile)+table(['A 水準',...res.profile.bs,'A 邊際平均'],[...res.profile.M.map((r,i)=>[res.profile.as[i],...r.map(f),f(avg(r))]),['B 邊際平均',...res.profile.bs.map((_,j)=>f(avg(res.profile.M.map(r=>r[j])))),f(avg(res.profile.M.flat()))]],'細格與邊際平均');
- if(t.p!==null)html+='<details><summary>查看 '+esc(t.name)+' 的 F 分配與兩種尾域</summary>'+fchart(t.df,t.df2,t.f,0,t.crit)+'</details>';
+ html+=fSteps(res,a);
  html+=desc;
  html+=comparisons(res,a)+simpleEffects(res,a);
  return html;
