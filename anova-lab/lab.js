@@ -142,8 +142,8 @@ function show(res,a){
  }
  const tested=res.terms.filter(t=>t.err);
  const conclusion=tested.map(x=>'<li>'+esc(x.name)+'：F('+x.df+', '+x.df2+') = '+f(x.f)+'，p '+(x.p!==null&&x.p<.0001?'':'= ')+esc(p(x.p))+'；'+(x.p===null?'無法檢定（誤差與效果均為零）':x.p<a?'<strong class="sig">達顯著</strong>':'未達顯著')+'。</li>').join('');
- let tests='<h3>F 檢定</h3><ul class="note">'+conclusion+'</ul>'+table(['變異來源','SS','df','MS','分母誤差項','F','p','F 臨界值','偏 η²'],
-  res.terms.map(z=>[z.name,f(z.s),z.df,f(z.ms),z.err??'—',f(z.f),p(z.p),f(z.crit),f(z.eta)]),'變異數分析摘要表');
+ let tests='<h3>F 檢定</h3><ul class="note">'+conclusion+'</ul>'+table(['變異來源','SS','df','MS','F','p','F 臨界值','偏 η²'],
+  res.terms.map(z=>[z.name==='組內誤差'?'組內（誤差）':z.name,f(z.s),z.df,f(z.ms),f(z.f),p(z.p),f(z.crit),f(z.eta)]),'變異數分析摘要表');
  let html=overview;
  if(res.profile)html+=table(['A 水準',...res.profile.bs,'A 邊際平均'],[...res.profile.M.map((r,i)=>[res.profile.as[i],...r.map(f),f(avg(r))]),['B 邊際平均',...res.profile.bs.map((_,j)=>f(avg(res.profile.M.map(r=>r[j])))),f(avg(res.profile.M.flat()))]],'細格與邊際平均');
  html+=(res.methodNote??'')+tests+fSteps(res,a);
