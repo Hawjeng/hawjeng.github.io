@@ -375,13 +375,14 @@ function survey(){
  '<p>選擇單一星座時，可用該星座的公開交叉摘要做單因子分析。全體樣本的第二因子只列出交叉細格皆至少 5 人的組合。</p><h3>納入組別</h3><div id="survey-groups" class="check"></div><p id="survey-code-link"><a href="#r-code/survey">前往調查研究 R 與 Python 語法</a></p></div></details><div class="card" id="results" aria-live="polite"></div></div><p class="note">這是觀察性調查。分析排除所選變項或因子缺失的資料，保留 0。新增因子只顯示有效樣本至少 5 人的類別；群組差異不能解釋為因果效果。</p>';
 }
 function surveyUpdate(rebuild=false,rebuildOptions=true){
+ const selectedSign=document.getElementById('survey-sample').value;
  const variable=$('variable').value,first=$('group').value, second=$('group-b'),groups=$('survey-groups'), a=+$('alpha').value;
- if(sample){
+ if(selectedSign){
   const summaries=new Map();
   for(const {factors,cells} of globalThis.SURVEY_FACTORIAL[variable]??[]){
    const axis=factors.indexOf('星座');
    if(axis<0)continue;
-   const rows=cells.filter(row=>row[axis]===sample).map(row=>[row[1-axis],...row.slice(2)]);
+   const rows=cells.filter(row=>row[axis]===selectedSign).map(row=>[row[1-axis],...row.slice(2)]);
    if(rows.length>=2)summaries.set(factors[1-axis],rows);
   }
   if(rebuild){
@@ -396,7 +397,7 @@ function surveyUpdate(rebuild=false,rebuildOptions=true){
    const selected=new Set([...groups.querySelectorAll('input:checked')].map(input=>input.value));
    const rows=(summaries.get($('group').value)??[]).filter(([name])=>selected.has(name));
    check(rows.length>=2,'請選擇至少兩組。若無可用組別，請改選其他結果變項或分析樣本。');
-   return '<h3>'+esc(sample)+'｜單因子變異數分析</h3>'+show(oneSummary(rows,a),a);
+   return '<h3>'+esc(selectedSign)+'｜單因子變異數分析</h3>'+show(oneSummary(rows,a),a);
   });
   return;
  }
