@@ -408,11 +408,11 @@ function sample(){let m=$('model').value,z=data.items.find(x=>x.model===m);$('pa
 function rCode(){
  let vars=Object.keys(data.survey), groups=Object.keys(data.survey[vars[0]]);
  return heading('R 與 Python 語法')+'<p>選擇案例或調查組別，即可用同一份資料執行兩種語法。先列 R（不需安裝套件），再列 Python（需安裝 NumPy 和 SciPy）。</p>'+
- '<div class="grid"><div class="card controls">'+field('r-type','資料類型',options([['book','課本範例'],['exercise','習作計算題'],['survey','調查研究']]))+
+ '<div class="grid syntax-layout"><details class="card controls syntax-settings" open><summary>分析設定</summary>'+field('r-type','資料類型',options([['book','課本範例'],['exercise','習作計算題'],['survey','調查研究']]))+
  '<div id="r-cases">'+field('r-case','案例',options(data.items.map((z,i)=>[i,z.title])))+'</div>'+
  '<div id="r-survey" hidden>'+field('r-variable','結果變項',options(vars.map(x=>[x,x])))+
  field('r-group','分組因子 A',options(groups.map(x=>[x,x])))+field('r-group-b','分組因子 B（選填）','')+'<h3>納入組別</h3><div id="r-groups" class="check"></div></div>'+
- alpha()+'<div class="check" id="r-pool-control" hidden><label><input id="r-pool" type="checkbox"> 採用課本的合併殘差</label></div></div>'+
+ alpha()+'<div class="check" id="r-pool-control" hidden><label><input id="r-pool" type="checkbox"> 採用課本的合併殘差</label></div></details>'+
  '<div><section class="card"><h3>R</h3><div class="inline"><button class="primary" id="r-copy" type="button">複製 R 語法</button><button id="r-download" type="button">下載 .R</button></div><p id="r-status" role="status"></p><label for="r-output"><strong>可執行的 R 程式</strong></label><textarea id="r-output" rows="20" readonly spellcheck="false"></textarea></section><section class="card"><h3>Python</h3><div class="inline"><button class="primary" id="py-copy" type="button">複製 Python 語法</button><button id="py-download" type="button">下載 .py</button></div><p id="py-status" role="status"></p><label for="py-output"><strong>可執行的 Python 程式</strong></label><textarea id="py-output" rows="20" readonly spellcheck="false"></textarea></section></div></div>';
 }
 function mountR(caseIndex){

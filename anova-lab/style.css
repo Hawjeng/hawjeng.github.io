@@ -19,3 +19,5 @@
 .survey-fields{margin-top:.75rem}
 .grid.survey-layout:has(> .survey-controls:not([open])){grid-template-columns:minmax(0,1fr)}
 .survey-controls:not([open]){justify-self:start;padding-block:.5rem}
+
+.syntax-layout:has(>.syntax-settings:not([open])){grid-template-columns:minmax(0,1fr)} .syntax-settings[open]>summary{margin-bottom:12px}
