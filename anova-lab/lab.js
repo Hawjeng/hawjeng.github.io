@@ -108,26 +108,28 @@ function comparisons(res,a){
  if(!res.pairs?.length)return '';
  const effect=res.terms.find(z=>z.err);
  const paired=res.terms.some(z=>z.name==='受試者／區組');
+ const comparisonP=pair=>paired?pair.adj:pair.scheffe;
+ const pMethod=paired?'Holm 校正後':'Scheffé 檢定的';
  const labels=res.desc.map(([name])=>name);
  const rows=labels.map((label,i)=>[label,...labels.map((_,j)=>{
   if(j>=i)return j===i?'—':'';
   const pairIndex=j*(2*labels.length-j-1)/2+i-j-1;
   const pair=res.pairs[pairIndex];
-  const probability=p(pair.adj);
-  return f(-pair.delta)+(pair.adj!=null&&pair.adj<a?'*':'')+' ('+probability+')';
+  const pv=comparisonP(pair);
+  return f(-pair.delta)+(pv!=null&&pv<a?'*':'')+' ('+p(pv)+')';
  })]);
  const df=res.pairs[0].df;
  const method=paired?'採配對 t 檢定。df = 配對數 − 1 = '+df+'。':
-  '採 LSD 型兩兩 t 檢定，使用整體 ANOVA 的組內均方。df = 總樣本數 − 組數 = '+df+'。';
+  '採 Scheffé 檢定。分母自由度 = 總樣本數 − 組數 = '+df+'。';
  return '<h3>'+(res.pairs.length===1?'兩組平均數比較':'多重比較｜平均差矩陣')+'</h3>'+
   table(['組/格',...labels],rows)+
-  '<p class="note">平均差為列組平均數減欄組平均數。括號內為 Holm 校正後的 p 值。* 表示 Holm 校正後 p &lt; '+f(a)+'。'+method+'</p>'+
+  '<p class="note">平均差為列組平均數減欄組平均數。括號內為 '+pMethod+' p 值。* 表示該 p 值 &lt; '+f(a)+'。'+method+'</p>'+
   (effect.p==null||effect.p>=a?'<p class="note">整體 F 未達顯著或無法檢定。矩陣結果供教學或探索。</p>':'')
   +'<details><summary>各組比較的中英文 APA 報告</summary>'+res.pairs.map(pair=>{
    const magnitude=Math.sqrt(pair.f);
    const t=pair.delta<0?-magnitude:magnitude;
    return apaResult(pair.name+' 的平均數差異','The mean difference for '+pair.name,
-    '<i>t</i>('+pair.df+') = '+(Number.isFinite(t)?t.toFixed(2):f(t)),pair.adj,a,'Holm');
+    paired?'<i>t</i>('+pair.df+') = '+(Number.isFinite(t)?t.toFixed(2):f(t)):apaF(effect.df,pair.df,pair.f/effect.df),comparisonP(pair),a,paired?'Holm':'Scheffé');
   }).join('')+'</details>';
 }
 function simpleEffects(res,a){
