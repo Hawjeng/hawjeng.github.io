@@ -109,12 +109,12 @@ function comparisons(res,a){
  const effect=res.terms.find(z=>z.err);
  const paired=res.terms.some(z=>z.name==='受試者／區組');
  const labels=res.desc.map(([name])=>name);
- // Pairwise results are ordered by row, then by column above the diagonal.
- let nextPair=0;
  const rows=labels.map((label,i)=>[label,...labels.map((_,j)=>{
-  if(j<=i)return j===i?'—':'';
-  const pair=res.pairs[nextPair++];
-  return f(pair.delta)+(pair.adj!=null&&pair.adj<a?'*':'');
+  if(j>=i)return j===i?'—':'';
+  const pairIndex=j*(2*labels.length-j-1)/2+i-j-1;
+  const pair=res.pairs[pairIndex];
+  const probability=pair.adj==null?'p —':pair.adj<.0001?'p < .0001':'p = '+p(pair.adj);
+  return f(-pair.delta)+(pair.adj!=null&&pair.adj<a?'*':'')+' ('+probability+')';
  })]);
  const df=res.pairs[0].df;
  const method=paired?'採配對 t 檢定，df = 配對數 − 1 = '+df+'。':
