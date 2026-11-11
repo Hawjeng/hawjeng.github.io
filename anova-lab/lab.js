@@ -117,10 +117,10 @@ function sumsOfSquares(res){
   const groups=res.desc.map(([name,n,mean,v])=>[name,n,f(mean),f(v),f(n*(mean-grand)**2),f((n-1)*v)]);
   ssDetail='<p>加權總平均 Ȳ = Σ(nᵢ × Ȳᵢ)／N = '+f(grand)+'；N = '+N+'，k = '+k+'。各組對平方和的貢獻如下：</p>'+
    table(['組別','nᵢ','Ȳᵢ','sᵢ²','nᵢ(Ȳᵢ − Ȳ)²','(nᵢ − 1)sᵢ²'],groups,'組間與組內平方和的計算')+
-   '<p>逐欄加總：SS 組間 = '+f(tests[0].s)+'，SS 組內 = '+f(res.terms[1].s)+'。SS 全體 = SS 組間 + SS 組內 = '+f(res.terms.at(-1).s)+'。</p>'+
+   '<p>逐欄加總：SS 組間 = '+f(tests[0].s)+'，SS 組內 = '+f(res.terms[1].s)+'。SS<sub>t</sub> = SS<sub>b</sub> + SS<sub>w</sub> ≈ '+f(tests[0].s)+' + '+f(res.terms[1].s)+' ≈ '+f(res.terms.at(-1).s)+'。</p>'+
    '<h4>自由度（df）的計算</h4><ul><li>組間 df₁ = k − 1 = '+k+' − 1 = '+(k-1)+'。</li>'+
    '<li>組內 df₂ = N − k = '+N+' − '+k+' = '+(N-k)+'。</li>'+
-   '<li>全體 df = N − 1 = '+N+' − 1 = '+(N-1)+'。</li></ul>';
+   '<li>全體 df = N − 1 = '+N+' − 1 = '+(N-1)+'。</li></ul><p>df<sub>t</sub> = df<sub>b</sub> + df<sub>w</sub> = '+(k-1)+' + '+(N-k)+' = '+(N-1)+'。</p>';
  }else{
   ssDetail=table(['變異來源','平方和（SS）','自由度（df）'],res.terms.map(z=>[z.name,f(z.s),z.df]));
  }
