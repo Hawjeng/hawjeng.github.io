@@ -342,9 +342,9 @@ function selectedSurvey(variable,first,second,container){
 }
 function survey(){
  const vars=Object.keys(data.survey);
- return heading('調查研究')+'<p>以 '+data.surveyN+' 筆問卷的公開分組摘要，探索星座、性別、手機或上網方案與數值變項的關係。</p><div class="grid"><div class="card controls">'+
+ return heading('調查研究')+'<p>以 '+data.surveyN+' 筆問卷的公開分組摘要，探索星座、性別、手機或上網方案與數值變項的關係。</p><div class="grid survey-layout"><details class="card controls survey-controls" open><summary>分析設定</summary><div class="survey-fields">'+
  field('variable','結果變項',options(vars.map(v=>[v,v])))+field('group','分組因子 A',options(Object.keys(data.survey[vars[0]]).map(v=>[v,v])))+field('group-b','分組因子 B（選填）','')+alpha()+
- '<p>第二因子只列出交叉細格皆至少 5 人的組合。</p><h3>納入組別</h3><div id="survey-groups" class="check"></div><p><a href="#r-code/survey">前往調查研究 R 與 Python 語法</a></p></div><div class="card" id="results" aria-live="polite"></div></div><p class="note">這是觀察性調查。分析排除所選變項或因子缺失的資料，保留 0；群組差異不能解釋為因果效果。</p>';
+ '<p>第二因子只列出交叉細格皆至少 5 人的組合。</p><h3>納入組別</h3><div id="survey-groups" class="check"></div><p><a href="#r-code/survey">前往調查研究 R 與 Python 語法</a></p></div></details><div class="card" id="results" aria-live="polite"></div></div><p class="note">這是觀察性調查。分析排除所選變項或因子缺失的資料，保留 0；群組差異不能解釋為因果效果。</p>';
 }
 function surveyUpdate(rebuild=false,rebuildOptions=true){
  const variable=$('variable').value,first=$('group').value, second=$('group-b'),groups=$('survey-groups'), a=+$('alpha').value;
@@ -363,7 +363,7 @@ function parse(s){
  return lines.map(split);
 }
 function manual(){
- return heading('自行輸入')+'<div class="grid"><div class="card controls">'+field('model','選擇設計',options(Object.entries(labels)))+alpha()+
+ return heading('自行輸入')+'<div class="grid survey-layout"><details class="card controls survey-controls" open><summary>分析設定</summary><div class="survey-fields">'+field('model','選擇設計',options(Object.entries(labels)))+alpha()+
  '<div class="check" id="pool-control" hidden><label><input id="pool" type="checkbox"> 採用課本的合併殘差</label></div><p id="format" class="note"></p><button id="sample" type="button">帶入可編輯範例</button>'+
  '</div><div class="card"><label for="paste"><strong>貼上 CSV 或 Excel 的表格</strong></label><textarea id="paste" spellcheck="false"></textarea><div class="inline"><button class="primary" id="run">計算 ANOVA／F 檢定</button><button id="export">下載目前資料</button></div><p class="muted">資料在此瀏覽器計算，不會上傳。相依資料不得缺格；二因子計算限平衡設計。</p></div></div><div id="results" class="card" aria-live="polite"></div>';
 }
@@ -380,7 +380,7 @@ function sample(){let m=$('model').value,z=data.items.find(x=>x.model===m);$('pa
 function rCode(){
  let vars=Object.keys(data.survey), groups=Object.keys(data.survey[vars[0]]);
  return heading('R 與 Python 語法')+'<p>選擇案例或調查組別，即可用同一份資料執行兩種語法。先列 R（不需安裝套件），再列 Python（需安裝 NumPy 和 SciPy）。</p>'+
- '<div class="grid"><div class="card controls">'+field('r-type','資料類型',options([['book','課本範例'],['exercise','習作計算題'],['survey','調查研究']]))+
+ '<div class="grid survey-layout"><details class="card controls survey-controls" open><summary>分析設定</summary><div class="survey-fields">'+field('r-type','資料類型',options([['book','課本範例'],['exercise','習作計算題'],['survey','調查研究']]))+
  '<div id="r-cases">'+field('r-case','案例',options(data.items.map((z,i)=>[i,z.title])))+'</div>'+
  '<div id="r-survey" hidden>'+field('r-variable','結果變項',options(vars.map(x=>[x,x])))+
  field('r-group','分組因子 A',options(groups.map(x=>[x,x])))+field('r-group-b','分組因子 B（選填）','')+'<h3>納入組別</h3><div id="r-groups" class="check"></div></div>'+
