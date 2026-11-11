@@ -127,19 +127,25 @@ function fSteps(res,a){
  }).join('');
 }
 function show(res,a){
- const desc=table(['組別／細格','n','平均數','樣本變異數'],res.desc.map(([n,k,m,v])=>[n,k,f(m),f(v)]),'敘述統計');
- const groupPlot=()=>profile({groups:true,as:[''],bs:res.desc.map(r=>r[0]),M:[res.desc.map(r=>r[2])],ci:[res.desc.map(([,n,m,v])=>{const w=Math.sqrt(critical(1,n-1,.05)*v/n);return [m-w,m+w];})]});
+ const summaries=res.desc.map(([name,n,mean,variance])=>{
+  const sd=Math.sqrt(variance),se=sd/Math.sqrt(n);
+  const margin=Math.sqrt(critical(1,n-1,.05))*se;
+  return {name,n,mean,sd,se,ci:[mean-margin,mean+margin]};
+ });
+ const desc=table(['組別／細格','n','平均數','SD','SE','95% CI'],
+  summaries.map(({name,n,mean,sd,se,ci})=>[name,n,f(mean),f(sd),f(se),'['+ci.map(f).join(', ')+']']),'敘述統計');
+ const plot=res.profile?profile(res.profile):profile({groups:true,as:[''],bs:summaries.map(r=>r.name),M:[summaries.map(r=>r.mean)],ci:[summaries.map(r=>r.ci)]});
+ const overview='<div class="descriptive-layout"><div class="descriptive-summary">'+desc+'</div><div class="descriptive-plot">'+plot+'</div></div>';
  if(res.ratio){
   let z=res.ratio;
-  return desc+groupPlot()+'<h3>F 檢定</h3><p class="note">F('+z.d+', '+z.e+') = '+f(z.f)+'，雙尾 p '+(z.p<.0001?'':'= ')+esc(p(z.p))+'；'+(z.p<a?'拒絕':'未拒絕')+'兩母體變異數相等。雙尾臨界值：'+f(z.lo)+'、'+f(z.hi)+'。</p>'+fchart(z.d,z.e,z.f,z.lo,z.hi,'both');
+  return overview+'<h3>F 檢定</h3><p class="note">F('+z.d+', '+z.e+') = '+f(z.f)+'，雙尾 p '+(z.p<.0001?'':'= ')+esc(p(z.p))+'；'+(z.p<a?'拒絕':'未拒絕')+'兩母體變異數相等。雙尾臨界值：'+f(z.lo)+'、'+f(z.hi)+'。</p>'+fchart(z.d,z.e,z.f,z.lo,z.hi,'both');
  }
  const tested=res.terms.filter(t=>t.err);
  const conclusion=tested.map(x=>'<li>'+esc(x.name)+'：F('+x.df+', '+x.df2+') = '+f(x.f)+'，p '+(x.p!==null&&x.p<.0001?'':'= ')+esc(p(x.p))+'；'+(x.p===null?'無法檢定（誤差與效果均為零）':x.p<a?'<strong class="sig">達顯著</strong>':'未達顯著')+'。</li>').join('');
  let tests='<h3>F 檢定</h3><ul class="note">'+conclusion+'</ul>'+table(['變異來源','SS','df','MS','分母誤差項','F','p','F 臨界值','偏 η²'],
   res.terms.map(z=>[z.name,f(z.s),z.df,f(z.ms),z.err??'—',f(z.f),p(z.p),f(z.crit),f(z.eta)]),'變異數分析摘要表');
- let html=desc;
- if(res.profile)html+=profile(res.profile)+table(['A 水準',...res.profile.bs,'A 邊際平均'],[...res.profile.M.map((r,i)=>[res.profile.as[i],...r.map(f),f(avg(r))]),['B 邊際平均',...res.profile.bs.map((_,j)=>f(avg(res.profile.M.map(r=>r[j])))),f(avg(res.profile.M.flat()))]],'細格與邊際平均');
- else html+=groupPlot();
+ let html=overview;
+ if(res.profile)html+=table(['A 水準',...res.profile.bs,'A 邊際平均'],[...res.profile.M.map((r,i)=>[res.profile.as[i],...r.map(f),f(avg(r))]),['B 邊際平均',...res.profile.bs.map((_,j)=>f(avg(res.profile.M.map(r=>r[j])))),f(avg(res.profile.M.flat()))]],'細格與邊際平均');
  html+=(res.methodNote??'')+tests+fSteps(res,a);
  html+=comparisons(res,a)+simpleEffects(res,a);
  return html;

@@ -3,3 +3,11 @@
 .source-credit{padding-top:14px}.source-credit+.bar{padding-top:6px}#r-output{min-height:24rem}
 .plot-label{paint-order:stroke;stroke:white;stroke-width:3px;stroke-linejoin:round}.model{display:block;margin:.65rem 0;overflow:auto}.model-notation{color:var(--muted)}
 .glm-overview dt{font-weight:700}.glm-overview dd{margin:.25rem 0 .85rem;overflow-wrap:anywhere}
+
+.descriptive-layout{display:grid;gap:1rem;align-items:start;margin-bottom:1rem}
+.descriptive-summary,.descriptive-plot{min-width:0}
+.descriptive-summary th,.descriptive-summary td{padding-inline:.35rem}
+.descriptive-plot{width:100%;max-width:32rem;justify-self:end}
+@media (min-width: 62rem){
+ .descriptive-layout{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+}
