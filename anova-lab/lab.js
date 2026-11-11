@@ -80,9 +80,9 @@ function profile({as,bs,M,ci,groups=false}){
    r.map((v,j)=>{
     const X=point(i,j),Y=y(v),lim=ci?.[i]?.[j],tip=(groups?'':as[i]+' × ')+bs[j]+'：平均數 '+f(v)+(lim?'；95% CI ['+lim.map(formatCI).join(', ')+']':'');
     const near=M.some((other,k)=>k!==i&&Math.abs(y(other[j])-Y)<18);
-    const offset=near?(i%2?15:-9):-9;
+    const offset=groups?5:near?(i%2?15:-9):-9;
     const bars=lim?'<path d="M'+X+' '+y(lim[0])+'V'+y(lim[1])+' M'+(X-4)+' '+y(lim[0])+'h8 M'+(X-4)+' '+y(lim[1])+'h8" fill="none" stroke="'+color+'" stroke-width="1.5"/>':'';
-    return '<g><title>'+esc(tip)+'</title>'+bars+'<circle cx="'+X+'" cy="'+Y+'" r="4" fill="'+color+'"/><text class="plot-label" x="'+X+'" y="'+(Y+offset)+'" fill="'+color+'" text-anchor="middle" font-size="'+meanSize+'" font-weight="700">'+f(v)+'</text></g>';
+    return '<g><title>'+esc(tip)+'</title>'+bars+'<circle cx="'+X+'" cy="'+Y+'" r="4" fill="'+color+'"/><text class="plot-label" x="'+(groups?X+8:X)+'" y="'+(Y+offset)+'" fill="'+color+'" text-anchor="'+(groups?'start':'middle')+'" font-size="'+meanSize+'" font-weight="700">'+f(v)+'</text></g>';
    }).join('');
  }).join('')+
  '</svg></div><figcaption>'+(groups?'點旁數字為各組平均數；誤差線是未校正的 95% t 信賴區間。相依資料的區間描述各條件平均，並非配對差值的區間。</figcaption></figure>':as.map((v,i)=>'<strong style="color:'+col[i%6]+'">● '+esc(v)+'</strong>').join('　')+
