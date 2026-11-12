@@ -115,3 +115,108 @@ byId('reset').addEventListener('click',() => {
   renderPosterior();
 });
 renderCase();
+
+
+const syntaxCases = {
+  patient: {classes: 3, items: 3, dataLabel: '下載病患反應型態資料'},
+  'tcs-demo': {classes: 5, items: 6, dataLabel: '下載 TCS 模擬反應型態資料'},
+  tcs: {classes: 5, items: 6}
+};
+const syntaxExample = byId('syntax-example');
+const syntaxClasses = byId('syntax-classes');
+const syntaxStatus = byId('syntax-status');
+const syntaxButtons = document.querySelectorAll('[data-copy], [data-save]');
+const syntaxCache = new Map();
+const syntaxFiles = {mplus: '', r: 'lca.R', python: 'lca.py'};
+let syntaxRevision = 0;
+
+function loadSyntaxFile(file) {
+  if (!syntaxCache.has(file)) {
+    const request = fetch('downloads/' + file).then(response => {
+      if (!response.ok) throw new Error(file);
+      return response.text();
+    }).catch(error => {
+      syntaxCache.delete(file);
+      throw error;
+    });
+    syntaxCache.set(file, request);
+  }
+  return syntaxCache.get(file);
+}
+
+function setCommand(language, command) {
+  const code = document.createElement('code');
+  code.textContent = command;
+  byId(language+'-command').replaceChildren(code);
+}
+
+async function renderSyntax() {
+  const revision = ++syntaxRevision;
+  const example = syntaxExample.value;
+  const classes = Number(syntaxClasses.value);
+  const selected = syntaxCases[example];
+  const mplusFile = example + '.inp';
+  const data = byId('syntax-data');
+  const link = document.createElement('a');
+  link.href = 'downloads/' + (selected.dataLabel ? example+'-patterns.dat' : 'prepare-tcs.py');
+  link.download = '';
+  link.textContent = selected.dataLabel || '下載 TCS 資料整理程式';
+  data.replaceChildren(link);
+  if (!selected.dataLabel) data.append('。先用已獲准的課堂檔在本機產生 tcs-patterns.dat。');
+  const free = (selected.items+1)*classes-1;
+  const available = 2**selected.items-1;
+  const identification = byId('syntax-identification');
+  identification.hidden = free <= available;
+  identification.textContent = '此設定有 '+free+' 個自由參數，超過反應型態可提供的 '+available+' 個獨立機率。';
+  syntaxButtons.forEach(button => button.disabled = true);
+  for (const language of Object.keys(syntaxFiles)) byId(language+'-source').value = '';
+  setCommand('mplus','在 Mplus 開啟 '+mplusFile+'，與資料檔放在同一資料夾。');
+  setCommand('r','Rscript lca.R '+example+' '+classes);
+  setCommand('python','python lca.py '+example+' '+classes);
+  syntaxStatus.textContent = '載入語法中…';
+  try {
+    const [mplus, r, python] = await Promise.all([mplusFile, 'lca.R', 'lca.py'].map(loadSyntaxFile));
+    if (revision !== syntaxRevision) return;
+    syntaxFiles.mplus = mplusFile;
+    byId('mplus-source').value = mplus.replace(/(CLASSES\s*=\s*c\()\d+(\))/i, (_, prefix, suffix) => prefix + classes + suffix);
+    byId('r-source').value = '# Rscript lca.R '+example+' '+classes+'\n\n'+r;
+    byId('python-source').value = '# python lca.py '+example+' '+classes+'\n\n'+python;
+    syntaxButtons.forEach(button => button.disabled = false);
+    syntaxStatus.textContent = '';
+  } catch {
+    if (revision === syntaxRevision) syntaxStatus.textContent = '載入語法失敗。請重新選擇設定，或從下方「下載與來源」取得檔案。';
+  }
+}
+
+syntaxExample.addEventListener('change', () => {
+  syntaxClasses.value = String(syntaxCases[syntaxExample.value].classes);
+  renderSyntax();
+});
+syntaxClasses.addEventListener('change',renderSyntax);
+
+syntaxButtons.forEach(button => button.addEventListener('click',async () => {
+  const language = button.dataset.copy || button.dataset.save;
+  const source = byId(language+'-source');
+  if (!source.value) return;
+  if (button.dataset.copy) {
+    const revision = syntaxRevision;
+    try {
+      await navigator.clipboard.writeText(source.value);
+      if (revision === syntaxRevision) syntaxStatus.textContent = '已複製語法。';
+    } catch {
+      if (revision !== syntaxRevision) return;
+      source.focus();
+      source.select();
+      syntaxStatus.textContent = '已選取語法，可按 Ctrl+C 或 ⌘C 複製。';
+    }
+    return;
+  }
+  const url = URL.createObjectURL(new Blob([source.value],{type:'text/plain;charset=utf-8'}));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = syntaxFiles[language];
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url),1000);
+}));
+
+renderSyntax();
