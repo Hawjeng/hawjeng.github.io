@@ -15,18 +15,10 @@
 .descriptive-plot .profile-chart{overflow-x:auto}
 .descriptive-plot .profile-chart svg[style]{display:block;max-width:none;margin-inline:auto}
 
-.survey-controls > summary{cursor:pointer;font-weight:700}
-.survey-fields{margin-top:.75rem}
-.grid.survey-layout:has(> .survey-controls:not([open])){grid-template-columns:minmax(0,1fr)}
-.survey-controls:not([open]){justify-self:start;padding-block:.5rem}
-
-.syntax-layout:has(>.syntax-settings:not([open])){grid-template-columns:minmax(0,1fr)} .syntax-settings[open]>summary{margin-bottom:12px}
-
-.exercise-controls > summary { cursor: pointer; font-weight: 700; }
-.exercise-controls[open] > summary { margin-bottom: 12px; }
-.exercise-controls:not([open]) { justify-self: start; padding-block: .5rem; }
+.settings-layout > details[open] > summary { margin-bottom: 12px; }
+.settings-layout > details:not([open]) { justify-self: start; padding-block: .5rem; }
+.grid.settings-layout:has(> details:not([open])) { grid-template-columns: minmax(0, 1fr); }
 .chart-download { display: inline-block; margin-top: .5rem; }
 @media (min-width: 761px) {
- .grid.exercise-layout { grid-template-columns: 220px minmax(0, 1fr); }
- .grid.exercise-layout:has(> .exercise-controls:not([open])) { grid-template-columns: minmax(0, 1fr); }
+ .grid.settings-layout { grid-template-columns: 220px minmax(0, 1fr); }
 }
