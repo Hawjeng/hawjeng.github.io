@@ -26,12 +26,12 @@ const models = {
 };
 
 const fits = [
-  [1,-6819.36,13650.73,13683.89,13664.83],
-  [2,-6076.55,12179.10,12250.95,12209.65],
-  [3,-6035.32,12110.64,12221.17,12157.64],
-  [4,-6025.28,12104.57,12253.79,12168.01],
-  [5,-5992.09,12052.18,12240.09,12132.07],
-  [6,-5984.91,12051.82,12278.42,12148.16]
+  [1, 6, -6819.36, 13650.73, 13683.89, 13664.83, '—', '100.00%', '—', '—', '—'],
+  [2, 13, -6076.55, 12179.10, 12250.95, 12209.65, '.757', '42.90%', '1485.63', '<.0001', '<.0001'],
+  [3, 20, -6035.32, 12110.64, 12221.17, 12157.64, '.688', '20.34%', '82.46', '<.0001', '<.0001'],
+  [4, 27, -6025.28, 12104.57, 12253.79, 12168.01, '.715', '15.48%', '20.07', '.0144', '<.0001'],
+  [5, 34, -5992.09, 12052.18, 12240.09, 12132.07, '.739', '3.68%', '35.86', '.1474', '<.0001'],
+  [6, 41, -5984.91, 12051.82, 12278.42, 12148.16, '.631', '7.85%', '14.36', '.2641', '.2273']
 ];
 
 const byId = id => document.getElementById(id);
@@ -39,14 +39,25 @@ const percent = value => (100 * value).toFixed(1) + '%';
 const colors = ['#097d77','#9b592e','#44549a','#8b447b','#567031'];
 let current = 'patient';
 
-function renderFit(metric) {
-  const best = Math.min(...fits.map(row => row[metric]));
+function renderFit() {
+  const maxClasses = byId('fit-classes').valueAsNumber;
+  const metric = Number(byId('fit-metric').value);
+  const visibleFits = fits.slice(0, maxClasses);
+  const best = Math.min(...visibleFits.map(row => row[metric]));
+  const bestClasses = visibleFits.find(row => row[metric] === best)[0];
+  const metricName = byId('fit-metric').selectedOptions[0].textContent;
+
+  byId('fit-count').textContent = maxClasses + ' 類';
+  byId('fit-result').textContent = '目前比較 1 至 ' + maxClasses + ' 類，' +
+    metricName + ' 最低的是 ' + bestClasses + ' 類模型（' + best.toFixed(2) + '）。';
   byId('fit-table').innerHTML = '<table><thead><tr>' +
-    ['類別數 K','對數概似','AIC','BIC','saBIC'].map(label => '<th scope="col">'+label+'</th>').join('') +
-    '</tr></thead><tbody>' + fits.map(row => '<tr>' + row.map((value,i) => i === 0
-      ? '<th scope="row">'+value+'</th>'
-      : '<td'+(i === metric && value === best ? ' class="best"':'')+'>'+value.toFixed(2)+'</td>'
-    ).join('') + '</tr>').join('') + '</tbody></table>';
+    ['類別數 K','參數數 P','對數概似 LL','AIC','BIC','SaBIC','Entropy','最小組 %','ΔG²','LMR p','BLRT p']
+      .map(label => '<th scope="col">'+label+'</th>').join('') +
+    '</tr></thead><tbody>' + visibleFits.map(row => '<tr>' + row.map((value,i) => {
+      if (i === 0) return '<th scope="row">'+value+'</th>';
+      const display = i >= 2 && i <= 5 ? value.toFixed(2) : String(value).replace('<', '&lt;');
+      return '<td'+(i === metric && value === best ? ' class="best"':'')+'>'+display+'</td>';
+    }).join('') + '</tr>').join('') + '</tbody></table>';
 }
 
 function renderCase() {
@@ -56,12 +67,17 @@ function renderCase() {
     '<dl class="metrics">'+model.metrics.map((value,i) => '<div><dt>'+names[i]+'</dt><dd>'+value+'</dd></div>').join('')+
     '</dl><p class="note">'+model.diagnosis+'</p>';
   if (current === 'tcs') {
-    byId('case-description').insertAdjacentHTML('beforeend','<details><summary>比較 TCS 的 1–6 類模型</summary>'+
-      '<p>以下是課堂簡報中的 Mplus 模型比較。不同準則偏好的 K 不同。四類的獨立估計與五類輸出中 TECH11／14 的基準概似不同，應檢查隨機起始值與最佳解的重現。</p>'+
-      '<label for="fit-metric">標示最小值 <select id="fit-metric"><option value="2">AIC</option><option value="3" selected>BIC</option><option value="4">saBIC</option></select></label>'+
-      '<div class="table" id="fit-table"></div></details>');
-    byId('fit-metric').onchange = event => renderFit(Number(event.target.value));
-    renderFit(3);
+    byId('case-description').insertAdjacentHTML('beforeend','<details open><summary>逐步比較 TCS 的 1–6 類模型</summary>'+
+      '<p>拖曳滑桿，從 1 類開始逐一加入模型。數值來自課堂的 Mplus 輸出。</p>'+
+      '<label for="fit-classes">最多比較到 <output id="fit-count" for="fit-classes">1 類</output></label> '+
+      '<input id="fit-classes" type="range" min="1" max="6" step="1" value="1" style="accent-color:var(--accent)"> '+
+      '<label for="fit-metric">標示最小值 <select id="fit-metric"><option value="3">AIC</option><option value="4" selected>BIC</option><option value="5">SaBIC</option></select></label>'+
+      '<p id="fit-result" role="status"></p><div class="table" role="region" aria-label="TCS 模型適配度" tabindex="0" id="fit-table"></div>'+
+      '<p>ΔG² 是相鄰模型的兩倍對數概似差。LMR 與 BLRT 的 p 值沿用 Mplus 輸出，兩者比較 K 類與 K − 1 類。四類的獨立估計與五類輸出中 TECH11／14 的基準概似不同，應檢查隨機起始值與最佳解的重現。</p>'+
+      '<p>展開到 6 類後，BIC 偏好 3 類，SaBIC 偏好 5 類，AIC 偏好 6 類。選擇類別數時也要看分類品質、最小組比例與各類能否解釋。</p></details>');
+    byId('fit-classes').addEventListener('input', renderFit);
+    byId('fit-metric').addEventListener('change', renderFit);
+    renderFit();
   }
   byId('pattern').innerHTML = model.indicators.map((label,i) => '<label for="item-'+i+'">'+
     (label === 'Y'+(i+1) ? label : 'Y'+(i+1)+'｜'+label)+
