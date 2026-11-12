@@ -188,7 +188,6 @@ nav[aria-label="課程單元"] a[aria-current="location"],
   color: var(--accent);
 }
 .lesson-frame {
-  margin-top: 1.4rem;
   padding: clamp(.75rem, 2.6vw, 1.8rem);
   background: var(--white);
   border: 1px solid var(--line);
@@ -311,14 +310,13 @@ nav[aria-label="課程單元"] a:not([aria-current]),
 .lesson-links a { font-size: .94rem; font-weight: 600; }
 .lesson-links a[aria-current] { font-weight: 600; }
 main > section:not(#principles) {
-  margin-top: clamp(.8rem, 2vw, 1.4rem);
   padding: clamp(.75rem, 2.6vw, 1.8rem);
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: .7rem;
 }
-main > section { margin-bottom: 1.4rem; }
-#principles { padding-bottom: 0; border-bottom: 0; }
+main > section { margin-block: clamp(.8rem, 2vw, 1.4rem) 1.4rem; }
+#principles { padding: 0; border: 0; }
 
 .history-portraits {
   display: flex;
