@@ -247,7 +247,10 @@ function show(res,a){
  html+=comparisons(res,a)+simpleEffects(res,a);
  return html;
 }
-function safe(out,fn){try{out.innerHTML=fn();}catch(e){out.innerHTML='<p class="warning" role="alert">'+esc(e.message)+'</p>';}}
+function safe(out,fn,title=$('panel').querySelector('h2').textContent){
+ try{out.innerHTML=fn();}catch(e){out.innerHTML='<p class="warning" role="alert">'+esc(e.message)+'</p>';}
+ addChartDownloads(out,title);
+}
 const sketches=[[[5,3,2],[1,2,5]],[[5,4.5,2],[4.5,1.5,1]],[[5,4,3],[1,2,2.5]]];
 const concepts=[
  ['F 分配與查表','F 是兩個獨立的卡方量各除以其自由度後的比值，取值非負，分配形狀取決於分子 df₁ 與分母 df₂。下方表格的欄是 df₁，列是 df₂，交會處為右尾面積 α 對應的 F 臨界值。ANOVA 只看右尾；檢驗兩母體變異數是否相等時，雙尾各用 α／2，左尾臨界值可交換自由度後取倒數。','F = MS效果 ÷ MS誤差'],
@@ -305,7 +308,7 @@ function theory(){
  return heading('原理說明')+card(overview+'<h3>各設計的判讀重點</h3>'+concepts.map(([t,b,m],i)=>'<details'+(!i?' open':'')+'><summary>'+t+'</summary><p>'+b+'</p><span class="math">'+m+'</span></details>').join('')+
  card('<details><summary>比較交互作用的型態</summary><p>切換課本示意圖或有原始觀測值的實際案例，觀察線條交叉或差距改變。示意圖只顯示平均數；實際案例也顯示 95% CI。</p><label for="sketch">示意圖：</label><select id="sketch">'+options([['actual','實際案例｜時段 × 運動型態（含 95% CI）'],...sketches.map((_,i)=>[i,'示意圖 '+(i+1)])])+'</select><div id="sketch-out"></div></details>')+
  '<p class="muted">本教材使用傳統未校正 F，不代做球面性或等變異檢查。實際研究應先檢查設計及殘差；違反球面性時，可考慮 Greenhouse–Geisser 校正或混合模型。</p>')+
- '<div class="grid"><div class="card controls"><h3>F 分配與查表</h3>'+alpha()+'<label>分子自由度 df₁<input id="d1" type="number" value="3" min="1" max="1000" step="1"></label><label>分母自由度 df₂<input id="d2" type="number" value="18" min="1" max="10000" step="1"></label><label>觀察 F<input id="obs" type="number" value="8.99" min="0" max="10000000" step="any"></label>'+field('tail','用途',options([['right','右尾｜ANOVA'],['both','雙尾｜變異數比']]))+'</div><div class="card" id="f-out" aria-live="polite"></div></div>'+tutorialExamples();
+ '<div class="grid settings-layout"><details class="card controls" open><summary>F 分配與查表</summary>'+alpha()+'<label>分子自由度 df₁<input id="d1" type="number" value="3" min="1" max="1000" step="1"></label><label>分母自由度 df₂<input id="d2" type="number" value="18" min="1" max="10000" step="1"></label><label>觀察 F<input id="obs" type="number" value="8.99" min="0" max="10000000" step="any"></label>'+field('tail','用途',options([['right','右尾｜ANOVA'],['both','雙尾｜變異數比']]))+'</details><div class="card" id="f-out" aria-live="polite"></div></div>'+tutorialExamples();
 }
 function theoryUpdate(){safe($('f-out'),()=>{
  let d=+$('d1').value,e=+$('d2').value,obs=+$('obs').value,a=+$('alpha').value,tail=$('tail').value;
@@ -327,9 +330,8 @@ const exercises='<details><summary>辨識獨立與相依設計</summary>'+table(
 function examples(kind){
  let items=data.items.filter(x=>x.kind===kind);
  return heading(kind==='book'?'課本範例':'習作詳解')+(kind==='exercise'?card(exercises+'<p>下方可查看計算題的完整摘要表、判讀及事後比較。</p>'):'')+
- '<div class="grid'+(kind==='exercise'?' exercise-layout':'')+'">'+
- (kind==='exercise'?'<details class="card controls exercise-controls" open><summary>案例設定</summary>':'<div class="card controls">')+
- field('case','選擇案例',options(items.map((x,i)=>[i,x.title])))+alpha()+'<div id="case-notes"></div><div id="pool-control"></div>'+(kind==='exercise'?'</details>':'</div>')+'<div class="card" id="results" aria-live="polite"></div></div>';
+ '<div class="grid settings-layout"><details class="card controls" open><summary>案例設定</summary>'+
+ field('case','選擇案例',options(items.map((x,i)=>[i,x.title])))+alpha()+'<div id="case-notes"></div><div id="pool-control"></div>'+'</details>'+'<div class="card" id="results" aria-live="polite"></div></div>';
 }
 function exampleUpdate(kind,change=true){
  let z=data.items.filter(x=>x.kind===kind)[+$('case').value],a=+$('alpha').value;
@@ -349,17 +351,22 @@ function exampleUpdate(kind,change=true){
     extra='<h3>比較三種咖啡實驗安排</h3>'+table(['設計','效果','F','df₁','df₂','p'],models.flatMap(x=>compute(x.model,x.headers,x.rows,a,$('pool')?.checked).terms.slice(0,3).map(t=>[labels[x.model],t.name,f(t.f),t.df,t.df2,p(t.p)])))+'<p>完全獨立用了 20 人；混合用了 10 人，各人只在一種溫度下評兩種容量；完全相依用了 5 人，每人評四種組合。分數雖相同，三種安排的誤差項不同。</p>';
   }
   return '<h3>'+esc(z.title)+'</h3>'+show(r,a)+extra+'<details><summary>展開原始觀測值</summary>'+table(z.headers,z.rows)+'</details>';
- });
- if(kind==='exercise')addExerciseChartDownloads(z.title);
+ },z.title);
 }
-function addExerciseChartDownloads(title){
- $('results').querySelectorAll('figure svg').forEach((chart,index)=>{
+function addChartDownloads(container,title){
+ container.querySelectorAll('figure svg').forEach((chart,index)=>{
   const svg=chart.cloneNode(true);
   const {width,height}=chart.viewBox.baseVal;
   svg.removeAttribute('style');
   svg.setAttribute('width',width);
   svg.setAttribute('height',height);
-  svg.setAttribute('font-family','system-ui, sans-serif');
+  svg.setAttribute('font-family','system-ui, Microsoft JhengHei, sans-serif');
+  svg.querySelectorAll('.plot-label').forEach(label=>{
+   label.setAttribute('paint-order','stroke');
+   label.setAttribute('stroke','white');
+   label.setAttribute('stroke-width','3');
+   label.setAttribute('stroke-linejoin','round');
+  });
 
   const link=document.createElement('a');
   link.className='chart-download';
@@ -392,7 +399,7 @@ function selectedSurvey(variable,first,second,container){
 }
 function survey(){
  const vars=Object.keys(data.survey);
- return heading('調查研究')+'<p>以 '+data.surveyN+' 筆問卷的公開分組摘要，探索星座、性別、手機、上網方案、個性、課外活動或學院別與數值變項的關係。</p><div class="grid survey-layout"><details class="card controls survey-controls" open><summary>分析設定</summary><div class="survey-fields">'+
+ return heading('調查研究')+'<p>以 '+data.surveyN+' 筆問卷的公開分組摘要，探索星座、性別、手機、上網方案、個性、課外活動或學院別與數值變項的關係。</p><div class="grid settings-layout"><details class="card controls" open><summary>分析設定</summary><div class="survey-fields">'+
  field('survey-sample','分析樣本',options([['','全體樣本'],...data.survey[vars[0]]['星座'].map(([name])=>[name,name])]))+field('variable','結果變項',options(vars.map(v=>[v,v])))+field('group','分組因子 A',options(Object.keys(data.survey[vars[0]]).map(v=>[v,v])))+field('group-b','分組因子 B（選填）','')+alpha()+
  '<p>選擇單一星座時，可用該星座內有效樣本至少 5 人的組別做單因子分析。全體樣本的第二因子只列出交叉細格皆至少 5 人的組合。</p><h3>納入組別</h3><div id="survey-groups" class="check"></div><p id="survey-code-link"><a href="#r-code/survey">前往調查研究 R 與 Python 語法</a></p></div></details><div class="card" id="results" aria-live="polite"></div></div><p class="note">這是觀察性調查。分析排除所選變項或因子缺失的資料，保留 0。新增因子只顯示有效樣本至少 5 人的類別；群組差異不能解釋為因果效果。</p>';
 }
@@ -432,9 +439,9 @@ function parse(s){
  return lines.map(split);
 }
 function manual(){
- return heading('自行輸入')+'<div class="grid"><div class="card controls">'+field('model','選擇設計',options(Object.entries(labels)))+alpha()+
+ return heading('自行輸入')+'<div class="grid settings-layout"><details class="card controls" open><summary>分析設定</summary>'+field('model','選擇設計',options(Object.entries(labels)))+alpha()+
  '<div class="check" id="pool-control" hidden><label><input id="pool" type="checkbox"> 採用課本的合併殘差</label></div><p id="format" class="note"></p><button id="sample" type="button">帶入可編輯範例</button>'+
- '</div><div class="card"><label for="paste"><strong>貼上 CSV 或 Excel 的表格</strong></label><textarea id="paste" spellcheck="false"></textarea><div class="inline"><button class="primary" id="run">計算 ANOVA／F 檢定</button><button id="export">下載目前資料</button></div><p class="muted">資料在此瀏覽器計算，不會上傳。相依資料不得缺格；二因子計算限平衡設計。</p></div></div><div id="results" class="card" aria-live="polite"></div>';
+ '</details><div class="card"><label for="paste"><strong>貼上 CSV 或 Excel 的表格</strong></label><textarea id="paste" spellcheck="false"></textarea><div class="inline"><button class="primary" id="run">計算 ANOVA／F 檢定</button><button id="export">下載目前資料</button></div><p class="muted">資料在此瀏覽器計算，不會上傳。相依資料不得缺格；二因子計算限平衡設計。</p></div></div><div id="results" class="card" aria-live="polite"></div>';
 }
 const formats={ratio:'組別,數值。第一個出現的組別作分子，只能有兩組。',one:'組別,數值。每列是一筆獨立觀測。',repeat:'受試者,條件1,條件2,…。每人一列。',two:'A 因子,B 因子,數值。每列一位獨立受試者。',mixed:'A 組別,受試者,B 條件1,B 條件2,…。每人一列，ID 必須唯一。',within:'受試者,A 因子,B 因子,數值。每人每個細格各一列。'};
 function readManual(){
@@ -449,7 +456,7 @@ function sample(){let m=$('model').value,z=data.items.find(x=>x.model===m);$('pa
 function rCode(){
  let vars=Object.keys(data.survey), groups=Object.keys(data.survey[vars[0]]);
  return heading('R 與 Python 語法')+'<p>選擇案例或調查組別，即可用同一份資料執行兩種語法。先列 R（不需安裝套件），再列 Python（需安裝 NumPy 和 SciPy）。</p>'+
- '<div class="grid syntax-layout"><details class="card controls syntax-settings" open><summary>分析設定</summary>'+field('r-type','資料類型',options([['book','課本範例'],['exercise','習作計算題'],['survey','調查研究']]))+
+ '<div class="grid settings-layout"><details class="card controls" open><summary>分析設定</summary>'+field('r-type','資料類型',options([['book','課本範例'],['exercise','習作計算題'],['survey','調查研究']]))+
  '<div id="r-cases">'+field('r-case','案例',options(data.items.map((z,i)=>[i,z.title])))+'</div>'+
  '<div id="r-survey" hidden>'+field('r-variable','結果變項',options(vars.map(x=>[x,x])))+
  field('r-group','分組因子 A',options(groups.map(x=>[x,x])))+field('r-group-b','分組因子 B（選填）','')+'<h3>納入組別</h3><div id="r-groups" class="check"></div></div>'+
@@ -533,7 +540,7 @@ function mount(route){
  if(id==='theory'){
   for(let x of ['d1','d2','obs','tail'])$(x).oninput=theoryUpdate;
   $('alpha').onchange=()=>{theoryUpdate();updateTutorial(+$('alpha').value);};
-  const sketch=()=>{const value=$('sketch').value,z=data.items.find(x=>x.title==='時段 × 運動型態');$('sketch-out').innerHTML=profile(value==='actual'?compute(z.model,z.headers,z.rows,.05).profile:{as:['a1','a2'],bs:['b1','b2','b3'],M:sketches[+value]});};
+  const sketch=()=>{const value=$('sketch').value,z=data.items.find(x=>x.title==='時段 × 運動型態');safe($('sketch-out'),()=>profile(value==='actual'?compute(z.model,z.headers,z.rows,.05).profile:{as:['a1','a2'],bs:['b1','b2','b3'],M:sketches[+value]}),'交互作用');};
   $('sketch').onchange=sketch;sketch();theoryUpdate();updateTutorial(+$('alpha').value);
  }else if(id==='book'||id==='exercise'){
   $('case').onchange=()=>exampleUpdate(id);$('alpha').onchange=()=>exampleUpdate(id,false);exampleUpdate(id);
