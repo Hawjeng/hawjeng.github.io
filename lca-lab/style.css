@@ -208,3 +208,19 @@ nav[aria-label="課程單元"] a[aria-current="location"],
   }
   nav[aria-label="課程單元"] a, .lesson-links a { margin-bottom: 0; }
 }
+
+.fit-topic {
+  padding: 1.2rem 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+.fit-topic h4 { margin: 0 0 .55rem; font-size: 1.12rem; }
+.fit-equation {
+  margin: .55rem 0;
+  border-left: 3px solid var(--accent);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.fit-index { margin: .5rem 0 1.35rem; }
+.fit-index caption { padding: .5rem 0; text-align: left; font-weight: 650; }
+.fit-index th, .fit-index td { text-align: left; }

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="邱皓政統計異質性分析課程。操作潛在類別模型，比較後驗機率與類別剖面，下載 Mplus、R 與 Python 教材。">
 <title>潛在類別分析｜邱皓政統計異質性分析</title>
-<link rel="stylesheet" href="style.css?v=principle-lessons">
+<link rel="stylesheet" href="style.css?v=fit-equations">
 <script src="lab.js?v=principle-lessons" defer></script>
 </head>
 <body>
@@ -135,17 +135,62 @@
 </section>
 <section class="lesson-panel" id="lca-fit" aria-labelledby="lca-fit-heading">
 <h3 id="lca-fit-heading">模型識別與模式適配指標</h3>
-<p>無限制的 K 類、J 個二元題模型需要 q = (K − 1) + KJ 個自由參數；完整反應表最多有 2<sup>J</sup> − 1 個獨立機率。病患範例 J = 3、K = 3，11 個參數超過 7 個獨立機率，說明只看到程式收斂仍不足以判定模型已識別。</p>
-<div class="math">AIC = −2ℓ + 2q<br>BIC = −2ℓ + q log(N)<br>saBIC = −2ℓ + q log((N + 2) / 24)</div>
-<p>在相同樣本、指標與編碼下比較不同 K。資訊準則越小越有利，並應檢查最佳概似重現、類別大小與剖面可解釋性。有可用的調整後 LMR 或 BLRT 時，連同檢定診斷一起解讀。</p>
-<div class="math">標準化 Entropy = 1 − [−Σ<sub>i</sub> w<sub>i</sub> Σ<sub>k</sub> τ<sub>ik</sub> log(τ<sub>ik</sub>)] / [N log(K)]，K &gt; 1</div>
-<p>N = Σ<sub>i</sub> w<sub>i</sub>，且 0 log(0) 視為 0。Entropy 越接近 1，表示後驗機率越集中，適合用於判讀分類清晰度。適配與選模另用前述資訊準則與診斷。</p><dl class="lesson-notes">
-<dt>絕對適配</dt><dd>對完整類別反應表，比對觀察細格次數 n<sub>r</sub> 和模型期望次數 m<sub>r</sub>。概似比離異數 G² = 2Σ n<sub>r</sub> log(n<sub>r</sub>/m<sub>r</sub>) 等於模型與飽和模型的 −2LL 差。Pearson χ² = Σ(n<sub>r</sub> − m<sub>r</sub>)²/m<sub>r</sub>。自由度及細格稀疏程度會影響卡方近似的適用性。</dd>
-<dt>相對適配</dt><dd>LL 越大，樣本內概似越高。AIC、BIC、saBIC 把自由參數數目納入懲罰，使用相同資料及可比概似時取較小值。AIC 每增加一個參數懲罰 2，BIC 懲罰 log(N)，saBIC 使用調整後的樣本數。</dd>
-<dt>相鄰類別數的比較</dt><dd>ΔG² = 2(ℓ<sub>K</sub> − ℓ<sub>K−1</sub>)。增加一類涉及混合權重邊界和未識別參數，普通卡方差異檢定的參考分配不適用。LMR 使用調整後的近似分配，BLRT 則由 K − 1 類模型模擬資料以建立比較基準。檢查最佳概似與重抽樣解是否穩定。</dd>
-<dt>分類品質與實質解釋</dt><dd>一起檢查 Entropy、APPA、D 矩陣、最小類別比例與各類剖面的可解釋性。Entropy 衡量後驗機率的集中程度。若較多類的解只增加一個很小且不穩定的類別，應回頭檢查起始值及模型設定。</dd>
-</dl>
-<p>在 <a href="#examples">TCS 調查範例</a>從 1 類加到 6 類，觀察 BIC、SaBIC 與 AIC 如何分別指向 3、5、6 類。<a href="https://www.statmodel.com/bmuthen/articles/Article_111.pdf">類別數選擇的模擬研究</a></p>
+<div class="fit-topic">
+<h4>模型識別</h4>
+<p>先比較模型自由參數數目與反應表可提供的獨立機率數目。</p>
+<div class="math fit-equation">自由參數數目　<i>q</i> = (K − 1) + KJ</div>
+<div class="math fit-equation">獨立反應型態機率數目　2<sup>J</sup> − 1</div>
+<p>病患範例有 3 類、3 題，11 個自由參數超過反應表的 7 個獨立機率。程式即使收斂，仍須檢查模型識別。</p>
+</div>
+<div class="table fit-index"><table>
+<caption>各種模型評估策略與指標（依教材第 4 章表 4.2 整理）</caption>
+<thead><tr><th scope="col">評估策略</th><th scope="col">指標或檢定</th><th scope="col">判讀重點</th></tr></thead>
+<tbody>
+<tr><th scope="row"><a href="#fit-absolute">絕對適配</a></th><td>LL、−2LL、G²、Pearson χ²、LRT</td><td>單一模型與觀察反應表的差距</td></tr>
+<tr><th scope="row"><a href="#fit-relative">相對適配</a></th><td>ΔG²、LMR-LRT、BLRT、LIP</td><td>增加類別後的適配改善</td></tr>
+<tr><th scope="row"><a href="#fit-criteria">訊息準則</a></th><td>AIC、BIC、saBIC、CAIC、AWE</td><td>兼顧適配與模型複雜度</td></tr>
+<tr><th scope="row"><a href="#fit-explanation">解釋力評估</a></th><td>LIP、BF、cmP</td><td>改善幅度與模型相對證據</td></tr>
+<tr><th scope="row"><a href="#fit-diagnostics">分類診斷</a></th><td>Entropy、NEC、APPA、OCC、mcaP、CLC、ICL</td><td>分類清晰度與分派品質</td></tr>
+</tbody></table></div>
+
+<section class="fit-topic" id="fit-absolute"><h4>絕對適配</h4>
+<p>LL 是估計解的對數概似。G² 與 Pearson χ² 則比較觀察細格次數 n<sub>r</sub> 和模型期望次數 m<sub>r</sub>。</p>
+<div class="math fit-equation">−2LL = −2 log L(Θ̂ | Y)</div>
+<div class="math fit-equation">G² = 2 Σ<sub>r</sub> n<sub>r</sub> log(n<sub>r</sub> / m<sub>r</sub>)</div>
+<div class="math fit-equation">Pearson χ² = Σ<sub>r</sub> (n<sub>r</sub> − m<sub>r</sub>)² / m<sub>r</sub></div>
+<p>G² 是待評估模型與飽和模型的 −2LL 差，可用於概似比檢定（LRT）。使用卡方近似前，先檢查模型自由度和細格是否稀疏。</p>
+</section>
+
+<section class="fit-topic" id="fit-relative"><h4>相對適配</h4>
+<p>在相同資料、指標編碼與概似定義下，比較 K 類與 K − 1 類模型。</p>
+<div class="math fit-equation">ΔG² = 2(ℓ<sub>K</sub> − ℓ<sub>K−1</sub>)</div>
+<p>新增類別時，混合權重可落在邊界，因此 ΔG² 的普通卡方近似通常不適用。LMR-LRT 用調整後的近似分配，BLRT 以較少類別的模型模擬資料，建立概似差的參考分配。要描述改善幅度，可看下方的 <a href="#fit-explanation">LIP</a>。</p>
+</section>
+
+<section class="fit-topic" id="fit-criteria"><h4>訊息準則</h4>
+<p>各準則以 −2ℓ 衡量適配，再依自由參數數目 q 加上不同懲罰。用同一批資料比較時取較小值。N 是有效樣本數。</p>
+<div class="math fit-equation">AIC = −2ℓ + 2q</div>
+<div class="math fit-equation">BIC = −2ℓ + q log(N)</div>
+<div class="math fit-equation">saBIC = −2ℓ + q log((N + 2) / 24)</div>
+<div class="math fit-equation">CAIC = −2ℓ + q [log(N) + 1]</div>
+<p>AWE 也是考慮模型複雜度的準則。<a href="#examples">TCS 調查範例</a>可逐一加入模型，觀察 AIC、BIC 與 saBIC 分別指向 6、3、5 類。<a href="https://www.statmodel.com/bmuthen/articles/Article_111.pdf">類別數選擇的模擬研究</a></p>
+</section>
+
+<section class="fit-topic" id="fit-explanation"><h4>解釋力評估</h4>
+<p>以 M<sub>0</sub> 為基準、M<sub>1</sub> 為待評估模型。概似增量比例（LIP）以基準模型的 −2LL 為分母，表示 −2LL 降低的幅度。</p>
+<div class="math fit-equation">LIP = [ (−2ℓ<sub>0</sub>) − (−2ℓ<sub>1</sub>) ] / (−2ℓ<sub>0</sub>)</div>
+<p>可用 BIC 差近似支持 M<sub>1</sub> 相對於 M<sub>0</sub> 的貝氏因子（BF）。cmP 則在指定的一組候選模型內，將 BIC 對應的相對權重正規化。</p>
+<div class="math fit-equation">BF<sub>1,0</sub> ≈ exp[(BIC<sub>0</sub> − BIC<sub>1</sub>) / 2]</div>
+</section>
+
+<section class="fit-topic" id="fit-diagnostics"><h4>分類診斷</h4>
+<p>亂度 E(K) 加總個人的後驗機率不確定性。標準化 Entropy 越接近 1，後驗機率越集中。式中 N 是權重總和，0 log(0) 以 0 計。</p>
+<div class="math fit-equation">E(K) = −Σ<sub>i</sub> w<sub>i</sub> Σ<sub>k</sub> τ<sub>ik</sub> log(τ<sub>ik</sub>)</div>
+<div class="math fit-equation">Entropy = 1 − E(K) / [N log(K)]，K &gt; 1</div>
+<p>NEC 將亂度與概似改善一起評估。APPA 是硬分派組內的平均後驗機率，OCC 比較後驗分類勝算與依類別比例得到的基準勝算，mcaP 是硬分派後的組別比例。CLC 和 ICL 則在模型評估中納入分類不確定性。</p>
+<p>可搭配 <a href="#classification-error">D 矩陣</a>、最小類別比例、最佳概似能否重現，以及各類剖面是否有實質意義一起判讀。</p>
+</section>
+
 </section>
 <section class="lesson-panel" id="auxiliary" aria-labelledby="auxiliary-heading">
 <h3 id="auxiliary-heading">輔助變數分析</h3>
