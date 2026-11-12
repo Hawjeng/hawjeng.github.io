@@ -227,7 +227,7 @@ function renderThreshold() {
   const t = thresholdSlider.valueAsNumber;
   const probabilityZero = 1 / (1 + Math.exp(-t));
   const x = 307 + 42 * t;
-  const thresholdText = 't = ' + t.toFixed(3).replace('-', '−');
+  const thresholdText = 'τ = ' + t.toFixed(3).replace('-', '−');
 
   byId('threshold-guide').setAttribute('d', 'M' + x + ' 37V242');
   byId('threshold-value').setAttribute('x', Math.min(510, Math.max(165, x)));

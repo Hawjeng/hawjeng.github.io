@@ -6,7 +6,7 @@
 <meta name="description" content="邱皓政統計異質性分析課程。操作潛在類別模型，比較後驗機率與類別剖面，下載 Mplus、R 與 Python 教材。">
 <title>潛在類別分析｜邱皓政統計異質性分析</title>
 <link rel="stylesheet" href="style.css?v=model-syntax">
-<script src="lab.js?v=threshold-control" defer></script>
+<script src="lab.js?v=threshold-tau" defer></script>
 </head>
 <body>
 <header><div class="wrap bar"><a href="../resources.html#advanced-statistics-apps">← 高階統計互動專案</a><span>邱皓政｜統計異質性分析</span></div></header>
@@ -54,9 +54,9 @@
 <p>交替更新至對數概似的變化足夠小。使用多組隨機起始值，比對最佳概似能否重現，並檢查接近 0 或 1 的反應機率與極小類別。不同起始值也可能交換類別編號，比較軟體結果時可依類別剖面配對。</p>
 </details>
 <details open><summary>如何讀 Mplus 的閾值與類別參數</summary>
-<p>對二元題，Mplus 採用 logit 連結時，閾值 <i>t</i><sub>jk</sub> 決定第 <i>k</i> 類在第 <i>j</i> 題的兩種作答機率：</p>
-<div class="math">P(Y<sub>j</sub> = 0 | C = k) = exp(t<sub>jk</sub>) / (1 + exp(t<sub>jk</sub>))<br>
-θ<sub>jk</sub> = P(Y<sub>j</sub> = 1 | C = k) = 1 / (1 + exp(t<sub>jk</sub>))</div>
+<p>對二元題，Mplus 採用 logit 連結時，閾值 τ<sub>jk</sub> 決定第 <i>k</i> 類在第 <i>j</i> 題的兩種作答機率：</p>
+<div class="math">P(Y<sub>j</sub> = 0 | C = k) = exp(τ<sub>jk</sub>) / (1 + exp(τ<sub>jk</sub>))<br>
+θ<sub>jk</sub> = P(Y<sub>j</sub> = 1 | C = k) = 1 / (1 + exp(τ<sub>jk</sub>))</div>
 <figure style="margin:1rem 0;max-width:42rem">
   <svg viewBox="0 0 610 305" width="100%" role="img" aria-label="二元題閾值與條件機率" aria-describedby="threshold-chart-desc">
     <desc id="threshold-chart-desc">閾值愈高，作答為 0 的機率愈高，作答為 1 的機率愈低。兩條曲線在閾值 0 時都為 50%。</desc>
@@ -83,14 +83,14 @@
       <text x="391" y="265">2</text>
       <text x="475" y="265">4</text>
       <text x="559" y="265">6</text>
-      <text id="threshold-value" x="293.812" y="23">t = −0.314</text><text x="307" y="291">閾值 t</text>
+      <text id="threshold-value" x="293.812" y="23">τ = −0.314</text><text x="307" y="291">閾值 τ</text>
     </g>
     </g>
   </svg>
   <figcaption>
-    <label for="threshold-slider">調整閾值 t</label>
+    <label for="threshold-slider">調整閾值 τ</label>
     <input id="threshold-slider" type="range" min="-6" max="6" step="0.001" value="-0.314" style="display:block;width:100%;accent-color:var(--accent)">
-    <output id="threshold-result" for="threshold-slider">t = −0.314，P(Y = 0) = 42.2%，P(Y = 1) = 57.8%</output>
+    <output id="threshold-result" for="threshold-slider">τ = −0.314，P(Y = 0) = 42.2%，P(Y = 1) = 57.8%</output>
     <div>
       <button type="button" data-threshold="-0.314">回到範例（−0.314）</button>
       <button type="button" data-threshold="0">設為 0</button>
@@ -108,6 +108,30 @@
 <div class="math">標準化 Entropy = 1 − [−Σ<sub>i</sub> w<sub>i</sub> Σ<sub>k</sub> τ<sub>ik</sub> log(τ<sub>ik</sub>)] / [N log(K)]，K &gt; 1</div>
 <p>N = Σ<sub>i</sub> w<sub>i</sub>，且 0 log(0) 視為 0。Entropy 越接近 1，表示後驗機率越集中，適合用於判讀分類清晰度。適配與選模另用前述資訊準則與診斷。</p>
 </details>
+<section id="software" aria-labelledby="software-heading">
+<h3 id="software-heading">潛在類別分析軟體比較</h3>
+<p>類別指標用潛在類別分析（LCA），連續指標用潛在剖面分析（LPA），跨時點的類別轉移用潛在轉移分析（LTA）。若要用共變數預測類別，或比較各類的外部結果，可再比較工具是否能在分步估計時校正分類誤差。</p>
+<div class="table" role="region" aria-label="軟體比較表" tabindex="0">
+<table style="min-width:58rem;text-align:left">
+<caption>版本欄沿用課堂投影片的比較基準。各工具連結提供文件、套件說明或原始論文。</caption>
+<thead><tr><th scope="col" style="text-align:left">工具</th><th scope="col" style="text-align:left">主要開發者</th><th scope="col" style="text-align:left">年代／版本</th><th scope="col" style="text-align:left">模型與操作</th><th scope="col" style="text-align:left">適用情境</th><th scope="col" style="text-align:left">限制與注意事項</th></tr></thead>
+<tbody>
+<tr><th scope="row"><a href="https://www.statmodel.com/">Mplus</a></th><td style="text-align:left">Linda K. Muthén、Bengt O. Muthén</td><td style="text-align:left">1998 首版／9.1.1</td><td style="text-align:left">LCA、LPA、LTA；語法</td><td style="text-align:left">可結合混合 SEM 與多層次模型；依模型使用 LMR、BLRT、BCH。</td><td style="text-align:left">商業授權；先確認所用估計法與模型支援哪些檢定。</td></tr>
+<tr><th scope="row"><a href="https://www.statisticalinnovations.com/latent-gold-6-1/">LatentGOLD</a></th><td style="text-align:left">Jeroen K. Vermunt、Jay Magidson</td><td style="text-align:left">2000 公開版／6.1</td><td style="text-align:left">LCA、LPA、LTA；GUI 與語法</td><td style="text-align:left">可用圖形介面探索類別剖面，並以 Step3 分析外部變項。</td><td style="text-align:left">依作業系統、用途及所需模組確認授權。</td></tr>
+<tr><th scope="row"><a href="https://cran.r-project.org/package=poLCA">R · poLCA</a></th><td style="text-align:left">Drew A. Linzer、Jeffrey B. Lewis</td><td style="text-align:left">2006 CRAN／1.6.0.2</td><td style="text-align:left">類別指標 LCA；R</td><td style="text-align:left">適合練習基本 LCA 與類別成員迴歸，可用多組起始值。</td><td style="text-align:left">連續指標的 LPA 與跨時點 LTA 需另選工具。</td></tr>
+<tr><th scope="row"><a href="https://cran.r-project.org/package=LCPA">R · LCPA</a></th><td style="text-align:left">Haijiang Qin、Lei Guo</td><td style="text-align:left">2026 CRAN／1.0.4</td><td style="text-align:left">LCA、LPA、LTA；R</td><td style="text-align:left">可比較不同估計方法，並可串接 Mplus。</td><td style="text-align:left">可用功能依後端而異。使用 Mplus 後端須另裝 Mplus。</td></tr>
+<tr><th scope="row"><a href="https://cran.r-project.org/package=tidySEM">R · tidySEM</a></th><td style="text-align:left">Caspar J. van Lissa、Mauricio Garnier-Villarreal 等</td><td style="text-align:left">2020 CRAN／0.2.12</td><td style="text-align:left">LCA、LPA、成長混合；R</td><td style="text-align:left">可用 lavaan 式語法整理模型、類別剖面與報告。</td><td style="text-align:left">混合模型工作流程使用 OpenMx；檢查所選模型與估計法。</td></tr>
+<tr><th scope="row"><a href="https://www.jstatsoft.org/article/view/v113i08">Python · StepMix</a></th><td style="text-align:left">Sacha Morin、Zsuzsa Bakk 等</td><td style="text-align:left">2023 首版／2.2.x</td><td style="text-align:left">LCA、LPA；Python、R 介面</td><td style="text-align:left">可用一步、兩步及三步估計，支援 BCH 與 ML 分類誤差校正。</td><td style="text-align:left">適合外部變項分析與程式化重現；LTA 需另選工具。</td></tr>
+<tr><th scope="row"><a href="https://www.stata.com/features/overview/latent-class-analysis/">Stata · gsem</a></th><td style="text-align:left">StataCorp</td><td style="text-align:left">2017 Stata 15／Stata 19</td><td style="text-align:left">LCA、LPA；lclass() 語法</td><td style="text-align:left">適合在同一模型內處理混合型指標、共變數與群組。</td><td style="text-align:left">商業授權；若收斂不穩，需比較起始值和重複解。</td></tr>
+<tr><th scope="row"><a href="https://www.jamovi.org/library.html">jamovi · snowRMM／snowLatent</a></th><td style="text-align:left">Hyunsoo Seol</td><td style="text-align:left">snowRMM 6.x</td><td style="text-align:left">LCA、LPA；點選式介面</td><td style="text-align:left">適合課堂快速比較類別剖面。</td><td style="text-align:left">各模組可用的模型和檢定依版本而異。</td></tr>
+<tr><th scope="row"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2785099/">SAS · PROC LCA／PROC LTA</a></th><td style="text-align:left">Stephanie T. Lanza、Linda M. Collins 等</td><td style="text-align:left">2007 首版／1.3.2（2015）</td><td style="text-align:left">LCA、LTA；SAS 外掛</td><td style="text-align:left">可納入共變數，並依程序處理多組、抽樣權數與叢集。</td><td style="text-align:left">須確認 Windows、SAS 版本與外掛安裝條件。</td></tr>
+<tr><th scope="row"><a href="https://github.com/IBMPredictiveAnalytics/STATS_LATENT_CLASS">IBM SPSS Statistics</a></th><td style="text-align:left">Norman H. Nie 等；IBM</td><td style="text-align:left">1968 首版／32.0</td><td style="text-align:left">LCA 擴充指令；SPSS</td><td style="text-align:left">既有 SPSS 流程可使用 STATS LATENT CLASS 擴充。</td><td style="text-align:left">安裝前核對擴充指令與 R 整合環境的相容性。</td></tr>
+<tr><th scope="row"><a href="https://jasp-stats.org/features/">JASP</a></th><td style="text-align:left">Eric-Jan Wagenmakers、Jonathon Love 等</td><td style="text-align:left">2013 開始開發／0.98.1</td><td style="text-align:left">圖形介面；依模組確認</td><td style="text-align:left">可作為一般統計教學介面。</td><td style="text-align:left">依官方模組清單確認所需的 LCA、LPA 或 LTA 功能。</td></tr>
+</tbody>
+</table>
+</div>
+<p>跨軟體比較時，先對齊指標編碼、遺漏值處理和模型限制。類別編號可能交換，可依條件反應機率對齊類別，再比較類別比例與模型適配度。</p>
+</section>
 </section>
 <section id="examples">
 <h2>範例與互動</h2>
