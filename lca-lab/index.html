@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="邱皓政統計異質性分析課程。操作潛在類別模型，比較後驗機率與類別剖面，下載 Mplus、R 與 Python 教材。">
 <title>潛在類別分析｜邱皓政統計異質性分析</title>
-<link rel="stylesheet" href="style.css?v=principle-tabs">
-<script src="lab.js?v=principle-tabs" defer></script>
+<link rel="stylesheet" href="style.css?v=principle-lessons">
+<script src="lab.js?v=principle-lessons" defer></script>
 </head>
 <body>
 <header><div class="wrap bar"><a href="../resources.html#advanced-statistics-apps">← 高階統計互動專案</a><span>邱皓政｜統計異質性分析</span></div></header>
@@ -16,12 +16,12 @@
 <h1>潛在類別分析</h1>
 <p>從類別反應辨識群體差異，練習解讀類別比例、條件反應機率與個人的後驗類別機率。</p>
 </div>
-<nav aria-label="課程單元"><a href="#principles">原理</a><a href="#examples">範例與互動</a><a href="#auxiliary">輔助變數分析</a><a href="#syntax">語法與結果</a><a href="#downloads">下載與來源</a><a href="#references">參考文獻</a></nav>
+<nav aria-label="課程單元"><a href="#principles">原理</a><a href="#examples">範例與互動</a><a href="#syntax">語法與結果</a><a href="#downloads">下載與來源</a><a href="#references">參考文獻</a></nav>
 <section id="principles">
 <h2>原理與參數公式</h2>
 <p>潛在類別分析（LCA）用一個未觀察到的類別變數 C 解釋多個類別指標的聯合分配。以下先建立二元指標模型，再由反應型態推算類別成員機率。</p>
 <div class="lesson-frame">
-<nav class="lesson-links" aria-label="原理各節"><a href="#lca-model">模型</a><a href="#lca-parameters">參數</a><a href="#lca-estimation">估計法</a><a href="#lca-assignment">分類</a><a href="#classification-error">D 矩陣</a><a href="#lca-fit">模式適配</a><a href="#software">軟體比較</a></nav>
+<nav class="lesson-links" aria-label="原理各節"><a href="#lca-model">模型</a><a href="#lca-parameters">參數</a><a href="#lca-estimation">估計法</a><a href="#lca-assignment">分類</a><a href="#classification-error">D 矩陣</a><a href="#lca-fit">模式適配</a><a href="#auxiliary">輔助變數分析</a><a href="#software">軟體比較</a></nav>
 <section class="lesson-panel" id="lca-model" aria-labelledby="lca-model-heading">
 <h3 id="lca-model-heading">由局部獨立到混合模型</h3>
 <div class="model-overview panel">
@@ -147,6 +147,36 @@
 </dl>
 <p>在 <a href="#examples">TCS 調查範例</a>從 1 類加到 6 類，觀察 BIC、SaBIC 與 AIC 如何分別指向 3、5、6 類。<a href="https://www.statmodel.com/bmuthen/articles/Article_111.pdf">類別數選擇的模擬研究</a></p>
 </section>
+<section class="lesson-panel" id="auxiliary" aria-labelledby="auxiliary-heading">
+<h3 id="auxiliary-heading">輔助變數分析</h3>
+<p>先釐清外部變數扮演的角色。共變項 X 用來解釋誰較可能屬於某個潛在類別。遠端結果 Z 用來比較各類在外部結果上的平均數或事件機率。</p>
+<div class="principles">
+<article><h4>共變項預測類別</h4><p>例如以年齡預測 TCS 使用類別。以第 K 類為參照，對第 k 類估計 log[P(C = k | X)/P(C = K | X)] = α<sub>k</sub> + β<sub>k</sub>X。exp(β<sub>k</sub>) 是 X 增加一單位時，歸入第 k 類相對於參照類的勝算比。</p></article>
+<article><h4>比較各類的遠端結果</h4><p>例如比較各 TCS 類別的生活滿意度平均數 E(Z | C = k)，或比較二元結果的事件機率 P(Z = 1 | C = k)。在觀察資料中，類別間的差異描述模型下的關聯。</p></article>
+</div>
+<details open><summary>一階段、二階段與三階段怎麼選</summary>
+<div class="table"><table><thead><tr><th scope="col">策略</th><th scope="col">操作與適用情境</th></tr></thead><tbody>
+<tr><th scope="row">單階段</th><td>共同估計測量模型和外部關聯。外部變數可影響類別比例及測量參數估計，因此要比較加入前後的類別剖面。</td></tr>
+<tr><th scope="row">虛擬分類</th><td>依個人的後驗機率重複抽取類別，分別估計後彙整。能表達分派變異，但直接從只含指標的後驗機率抽取時，外部關聯仍可能偏誤。</td></tr>
+<tr><th scope="row">二階段</th><td>先估計指標測量模型，再固定測量參數並估計含外部變數的結構模型。推論需考慮第一階段的估計不確定性。</td></tr>
+<tr><th scope="row">校正三階段 ML</th><td>先估計測量模型，再以最可能類別 G 和 <a href="#classification-error">D 矩陣</a>建立分派模型，最後固定分派誤差估計外部關聯。Mplus 的 R3STEP 用於共變項，DU3STEP 用於允許類別間變異數不同的連續遠端結果。</td></tr>
+<tr><th scope="row">BCH</th><td>透過 D 矩陣的反矩陣建立分類誤差校正權重，常用於比較連續遠端結果。分類分離度低時，權重可能不穩定或為負，應檢查變異數和標準誤。</td></tr>
+<tr><th scope="row">LTB</th><td>以潛在轉移架構表達測量部分和輔助部分，利用限制連結兩階段的類別變數。適合用來理解階段間的類別對應與測量限制。</td></tr>
+</tbody></table></div>
+<p>以共變項分析為例，三階段 ML 把 G 視為 C 的不完美指標。給定 X，分派到第 g 組的機率是各潛在類別的機率乘上相應分派機率後加總。</p>
+<div class="math">P(G = g | X) = Σ<sub>k</sub> D<sub>kg</sub> P(C = k | X)</div>
+<p>若直接把硬分派 G 當作觀察到的真實類別，估計的類別差異會混入分類誤差。使用三階段方法時，先檢查 D 矩陣是否顯示某些類別經常互相誤分。</p>
+</details>
+<details><summary>Mplus 指令與報告方式</summary>
+<p>以下各行分別示範一種分析。x 與 z 要先出現在資料變數清單中，並依實際研究問題選用一種設定。</p>
+<pre class="math"><code>! 共變項預測類別
+AUXILIARY = x (R3STEP);
+
+! 比較連續遠端結果的類別平均數
+AUXILIARY = z (BCH);</code></pre>
+<p>報告時說明類別數如何決定、測量模型是否固定、分類誤差如何校正，以及所報告的勝算比、平均數差異或事件機率。複雜遠端模型可用手動 BCH 指定共變項及類別間限制。<a href="https://www.statmodel.com/examples/webnotes/webnote21.pdf">Mplus 輔助變數技術說明</a></p>
+</details>
+</section>
 <section class="lesson-panel" id="software" aria-labelledby="software-heading">
 <h3 id="software-heading">潛在類別分析軟體比較</h3>
 <p>類別指標用潛在類別分析（LCA），連續指標用潛在剖面分析（LPA），跨時點的類別轉移用潛在轉移分析（LTA）。若要用共變數預測類別，或比較各類的外部結果，可再比較工具是否能在分步估計時校正分類誤差。</p>
@@ -198,36 +228,6 @@
 <p>讀取各類的 P(Y<sub>j</sub> = 1 | C = k)，並比較指標之間的高低。圖中的 Y1、Y2 等依序對應表中的指標欄。作答為 1 對應 Mplus 機率表的 Category 2。</p>
 <div id="profile"></div>
 </div>
-</section>
-<section id="auxiliary">
-<h2>輔助變數分析</h2>
-<p>先釐清外部變數扮演的角色。共變項 X 用來解釋誰較可能屬於某個潛在類別。遠端結果 Z 用來比較各類在外部結果上的平均數或事件機率。</p>
-<div class="principles">
-<article><h3>共變項預測類別</h3><p>例如以年齡預測 TCS 使用類別。以第 K 類為參照，對第 k 類估計 log[P(C = k | X)/P(C = K | X)] = α<sub>k</sub> + β<sub>k</sub>X。exp(β<sub>k</sub>) 是 X 增加一單位時，歸入第 k 類相對於參照類的勝算比。</p></article>
-<article><h3>比較各類的遠端結果</h3><p>例如比較各 TCS 類別的生活滿意度平均數 E(Z | C = k)，或比較二元結果的事件機率 P(Z = 1 | C = k)。在觀察資料中，類別間的差異描述模型下的關聯。</p></article>
-</div>
-<details open><summary>一階段、二階段與三階段怎麼選</summary>
-<div class="table"><table><thead><tr><th scope="col">策略</th><th scope="col">操作與適用情境</th></tr></thead><tbody>
-<tr><th scope="row">單階段</th><td>共同估計測量模型和外部關聯。外部變數可影響類別比例及測量參數估計，因此要比較加入前後的類別剖面。</td></tr>
-<tr><th scope="row">虛擬分類</th><td>依個人的後驗機率重複抽取類別，分別估計後彙整。能表達分派變異，但直接從只含指標的後驗機率抽取時，外部關聯仍可能偏誤。</td></tr>
-<tr><th scope="row">二階段</th><td>先估計指標測量模型，再固定測量參數並估計含外部變數的結構模型。推論需考慮第一階段的估計不確定性。</td></tr>
-<tr><th scope="row">校正三階段 ML</th><td>先估計測量模型，再以最可能類別 G 和 <a href="#classification-error">D 矩陣</a>建立分派模型，最後固定分派誤差估計外部關聯。Mplus 的 R3STEP 用於共變項，DU3STEP 用於允許類別間變異數不同的連續遠端結果。</td></tr>
-<tr><th scope="row">BCH</th><td>透過 D 矩陣的反矩陣建立分類誤差校正權重，常用於比較連續遠端結果。分類分離度低時，權重可能不穩定或為負，應檢查變異數和標準誤。</td></tr>
-<tr><th scope="row">LTB</th><td>以潛在轉移架構表達測量部分和輔助部分，利用限制連結兩階段的類別變數。適合用來理解階段間的類別對應與測量限制。</td></tr>
-</tbody></table></div>
-<p>以共變項分析為例，三階段 ML 把 G 視為 C 的不完美指標。給定 X，分派到第 g 組的機率是各潛在類別的機率乘上相應分派機率後加總。</p>
-<div class="math">P(G = g | X) = Σ<sub>k</sub> D<sub>kg</sub> P(C = k | X)</div>
-<p>若直接把硬分派 G 當作觀察到的真實類別，估計的類別差異會混入分類誤差。使用三階段方法時，先檢查 D 矩陣是否顯示某些類別經常互相誤分。</p>
-</details>
-<details><summary>Mplus 指令與報告方式</summary>
-<p>以下各行分別示範一種分析。x 與 z 要先出現在資料變數清單中，並依實際研究問題選用一種設定。</p>
-<pre class="math"><code>! 共變項預測類別
-AUXILIARY = x (R3STEP);
-
-! 比較連續遠端結果的類別平均數
-AUXILIARY = z (BCH);</code></pre>
-<p>報告時說明類別數如何決定、測量模型是否固定、分類誤差如何校正，以及所報告的勝算比、平均數差異或事件機率。複雜遠端模型可用手動 BCH 指定共變項及類別間限制。<a href="https://www.statmodel.com/examples/webnotes/webnote21.pdf">Mplus 輔助變數技術說明</a></p>
-</details>
 </section>
 <section id="syntax">
 <h2>Mplus、R 與 Python 語法與結果</h2>

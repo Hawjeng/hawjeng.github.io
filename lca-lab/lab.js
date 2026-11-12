@@ -366,6 +366,10 @@ function showPrincipleLesson(target) {
     if (lesson === selected) lesson.link.setAttribute('aria-current', 'location');
     else lesson.link.removeAttribute('aria-current');
   }
+  const strip = lessonNav.getBoundingClientRect();
+  const tab = selected.link.getBoundingClientRect();
+  if (tab.right > strip.right) lessonNav.scrollLeft += tab.right - strip.right;
+  else if (tab.left < strip.left) lessonNav.scrollLeft -= strip.left - tab.left;
 }
 
 function showCourseUnit(scrollToUnit) {
