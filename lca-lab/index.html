@@ -20,6 +20,14 @@
 <section id="principles">
 <h2>原理與參數公式</h2>
 <p>潛在類別分析（LCA）用一個未觀察到的類別變數 C 解釋多個類別指標的聯合分配。以下先建立二元指標模型，再由反應型態推算類別成員機率。</p>
+<figure style="margin:1rem 0">
+  <img src="patient-lca-model.png" alt="上方橢圓內有三個類別 C#1、C#2、C#3，下方三支箭頭分別指向 Y1 發燒、Y2 咳嗽與 Y3 流鼻水。" style="display:block;max-width:100%;height:auto">
+  <figcaption>病患範例的三類潛在類別模型</figcaption>
+</figure>
+<ul>
+  <li><strong>結構參數</strong>對應上方橢圓內三個類別的比例 π<sub>k</sub> = P(C = k)，描述母群中每一類有多少人。Mplus 以第 3 類為參照，用前兩類的類別截距換算三個比例。</li>
+  <li><strong>測量參數</strong>對應由潛在類別指向三個症狀的箭頭，描述給定類別後各症狀出現的機率 θ<sub>jk</sub> = P(Y<sub>j</sub> = 1 | C = k)。例如 θ<sub>1,2</sub> 是第 2 類出現發燒的機率。Mplus 採用 logit 連結時，從各類各題的閾值換算這些機率。</li>
+</ul>
 <div class="principles">
 <article><h3>觀察指標</h3><p>第 i 人的反應向量為 <b>y</b><sub>i</sub> = (y<sub>i1</sub>, …, y<sub>iJ</sub>)。二元題 y<sub>ij</sub> ∈ {0, 1}。本教材以 1 表示有該反應。</p></article>
 <article><h3>潛在類別比例</h3><p>π<sub>k</sub> = P(C = k)，k = 1, …, K。π<sub>k</sub> ≥ 0，且 Σ<sub>k</sub> π<sub>k</sub> = 1。模型估計 K − 1 個獨立的類別比例。</p></article>
