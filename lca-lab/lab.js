@@ -394,10 +394,27 @@ function showCourseUnit(scrollToUnit) {
     for (let disclosure = target.closest('details'); disclosure; disclosure = disclosure.parentElement.closest('details')) {
       disclosure.open = true;
     }
-    const destination = target === active.section ? unitNav : target.classList.contains('lesson-panel') ? lessonNav : target;
-    destination.scrollIntoView();
+    if (target !== active.section && !target.classList.contains('lesson-panel')) target.scrollIntoView();
   }
 }
 
+for (const {link} of [...courseUnits, ...principleLessons]) {
+  link.addEventListener('click', event => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    if (location.hash !== link.hash) {
+      history.scrollRestoration = 'manual';
+      history.replaceState({tabScroll: window.scrollY}, '');
+      history.pushState({tabScroll: window.scrollY}, '', link.hash);
+    }
+    showCourseUnit(false);
+  });
+}
+
 showCourseUnit(Boolean(location.hash));
+window.addEventListener('popstate', event => {
+  if (!Number.isFinite(event.state?.tabScroll)) return;
+  showCourseUnit(false);
+  window.scrollTo(0, event.state.tabScroll);
+});
 window.addEventListener('hashchange', () => showCourseUnit(true));

@@ -1,13 +1,13 @@
 :root{color-scheme:light;--paper:#f6f7f3;--white:#fff;--ink:#17373c;--muted:#4b6266;--line:#cadad6;--accent:#126960}
 *{box-sizing:border-box}
-html{scroll-padding-top:1.25rem}
+html{scroll-padding-top:1.25rem;scrollbar-gutter:stable}
 body{margin:0;background:var(--paper);color:var(--ink);font:1rem/1.65 "Instrument Sans",system-ui,"Microsoft JhengHei",sans-serif}
 a{color:var(--accent);text-underline-offset:.2em}
 :focus-visible{outline:3px solid #a14f2c;outline-offset:3px}
 .wrap{width:min(1140px,calc(100% - 2rem));margin-inline:auto}
 header,footer{background:var(--white);border-block:1px solid var(--line)}
 .bar{padding-block:.85rem;display:flex;gap:.5rem 1.5rem;flex-wrap:wrap;justify-content:space-between;font-size:.93rem}
-.hero{padding:clamp(1.35rem,3.5vw,2.5rem) 0 .85rem}
+.hero{padding:clamp(1.05rem,2.5vw,1.65rem) 0 .8rem}
 .eyebrow{letter-spacing:.15em;font-weight:700;text-transform:uppercase;font-size:.79rem;color:var(--accent)}
 h1,h2,h3{line-height:1.23;margin:.15em 0 .6em}
 h1{font-size:clamp(1.8rem,1.55rem + 1.1vw,2.35rem);font-weight:700;letter-spacing:.01em}
@@ -51,7 +51,7 @@ thead th{background:#edf4f1}
 .mini span{position:absolute;left:0;top:0;bottom:0;z-index:-1;width:var(--value);background:var(--ink);opacity:.16}
 #references li{margin:.65rem 0}
 footer .wrap{padding-block:1.5rem}
-@media(max-width:720px){.principles,.download-grid,.lab{grid-template-columns:1fr}.hero{padding-top:2rem}}
+@media(max-width:720px){.principles,.download-grid,.lab{grid-template-columns:1fr}}
 
 .derivation{margin-block:1.35rem}
 .derivation .math,details .math{margin-block:.55rem;border-left:3px solid #94bfb2}
@@ -274,14 +274,19 @@ nav[aria-label="課程單元"] a[aria-current="location"],
 .tcs-indicators th, .tcs-indicators td { white-space: normal; }
 .tcs-indicators th:nth-child(2), .tcs-indicators td:nth-child(2) { text-align: left; }
 
-.hero > h1 { margin-bottom: .15em; }
-.hero > .course-title-en:not(.eyebrow) {
-  color: var(--accent);
-  font-size: clamp(1rem,.95rem + .3vw,1.2rem);
-  font-weight: 650;
-  margin: 0 0 .6rem;
+.hero > h1 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .28rem .7rem;
+  margin: 0;
 }
-
+.course-title-en {
+  color: var(--muted);
+  font-size: clamp(1rem, .85rem + .6vw, 1.45rem);
+  font-weight: 500;
+  letter-spacing: 0;
+}
 .history-timeline {
   list-style: none;
   margin: 1.2rem 0 0;
@@ -300,3 +305,17 @@ nav[aria-label="課程單元"] a[aria-current="location"],
 @media (max-width: 600px) {
   .history-timeline li { grid-template-columns: minmax(0, 1fr); }
 }
+
+nav[aria-label="課程單元"] a:not([aria-current]),
+.lesson-links a:not([aria-current]) { color: var(--muted); }
+.lesson-links a { font-size: .94rem; font-weight: 600; }
+.lesson-links a[aria-current] { font-weight: 600; }
+main > section:not(#principles) {
+  margin-top: clamp(.8rem, 2vw, 1.4rem);
+  padding: clamp(.75rem, 2.6vw, 1.8rem);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: .7rem;
+}
+main > section { margin-bottom: 1.4rem; }
+#principles { padding-bottom: 0; border-bottom: 0; }
