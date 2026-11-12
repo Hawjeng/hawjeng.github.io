@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="邱皓政統計異質性分析課程。操作潛在類別模型，比較後驗機率與類別剖面，下載 Mplus、R 與 Python 教材。">
+<title>潛在類別分析｜邱皓政統計異質性分析</title>
+<link rel="stylesheet" href="style.css">
+<script src="lab.js" defer></script>
+</head>
+<body>
+<header><div class="wrap bar"><a href="../resources.html#advanced-statistics-apps">← 高階統計互動專案</a><span>邱皓政｜統計異質性分析</span></div></header>
+<main class="wrap">
+<div class="hero">
+<p class="eyebrow" lang="en">Latent Class Analysis</p>
+<h1>潛在類別分析</h1>
+<p>從類別反應辨識群體差異，練習解讀類別比例、條件反應機率與個人的後驗類別機率。</p>
+<nav aria-label="課程單元"><a href="#principles">原理</a><a href="#examples">範例與互動</a><a href="#downloads">程式與資料</a><a href="#references">參考文獻</a></nav>
+</div>
+<section id="principles">
+<h2>原理</h2>
+<div class="principles">
+<article><h3>類別比例 π</h3><p>π<sub>k</sub> = P(C = k) 表示第 k 類在母群中的比例。各類比例加總為 1，提供觀察反應前的類別機率。</p></article>
+<article><h3>條件反應機率 θ</h3><p>θ<sub>jk</sub> = P(Y<sub>j</sub> = 1 | C = k)。同一類的各題條件機率構成類別剖面。局部獨立假設指給定 C 後，各指標相互獨立。</p></article>
+<article><h3>後驗類別機率</h3><p>將各類的先驗比例乘上該類產生此反應型態的機率，再除以各類分子的總和。最大後驗機率對應最可能類別，同時可保留其餘類別的不確定性。</p></article>
+</div>
+<details><summary>模型式與 EM 估計</summary>
+<p class="math" aria-label="反應向量的邊際機率等於對類別加總各類比例乘以各題條件機率">P(Y = y) = Σ<sub>k</sub> π<sub>k</sub> ∏<sub>j</sub> P(Y<sub>j</sub> = y<sub>j</sub> | C = k)</p>
+<p>EM 的 E 步以目前參數計算每人的後驗機率。M 步以這些機率作權重，更新類別比例及各題反應機率。應用多組初始值，比對最佳對數概似是否重現，並檢查邊界解和極小類別。</p>
+</details>
+<details><summary>如何比較類別數</summary>
+<p>在相同資料與指標下估計不同 K，比較 AIC、BIC、saBIC（數值越小越有利），再檢查類別大小、剖面可解釋性與解的穩定性。若可用，可參考調整後 LMR 檢定或 BLRT。Entropy 描述分類清晰度，應和模型適配資訊一起閱讀。</p>
+<p>J 個二元題最多提供 2<sup>J</sup> − 1 個獨立反應型態機率。無限制 K 類模型有 KJ + K − 1 個參數。參數量超過資料可提供的資訊時，模型無法識別。通過此計數條件後，仍需檢查識別與估計診斷。</p>
+</details>
+</section>
+<section id="examples">
+<h2>範例與互動</h2>
+<div class="tab-row" role="group" aria-label="切換課程範例">
+<button type="button" data-example="patient" aria-pressed="true">病患示例｜3 類</button>
+<button type="button" data-example="tcs" aria-pressed="false">TCS 調查｜5 類</button>
+</div>
+<div id="case-description"></div>
+<div class="lab">
+<article class="panel">
+<h3>設定反應型態</h3>
+<p>切換觀察值，看看哪些題目改變最可能類別。未觀察的題目會略過。</p>
+<form id="pattern"></form>
+<button type="button" id="reset">全部設為未觀察</button>
+</article>
+<article class="panel" aria-labelledby="posterior-heading">
+<h3 id="posterior-heading">後驗類別機率</h3>
+<p id="posterior-note" aria-live="polite"></p>
+<div id="posterior"></div>
+</article>
+</div>
+<div class="panel profile">
+<h3>類別剖面</h3>
+<p>讀取各類的 P(Y<sub>j</sub> = 1 | C = k)，並比較指標之間的高低。下表的 1 對應 Mplus 機率表的 Category 2。</p>
+<div id="profile"></div>
+</div>
+</section>
+<section id="downloads">
+<h2>程式與資料</h2>
+<p>將程式與資料放在同一資料夾，依下載區的說明執行。用同一組指標與類別數比較結果，對照時先依剖面配對類別編號。</p>
+<div class="download-grid">
+<article><h3>Mplus</h3><p>使用對應的反應型態資料檔，執行三類病患或五類 TCS 模擬練習。</p><div class="actions"><a class="download-link" href="downloads/patient.inp" download>病患 .inp</a><a class="download-link" href="downloads/tcs-demo.inp" download>TCS 模擬 .inp</a></div></article>
+<article><h3>R</h3><p>以 base R 執行多起始值的 EM，輸出對數概似、資訊準則與各類條件反應機率。</p><div class="actions"><a class="download-link" href="downloads/lca.R" download>下載 .R</a></div></article>
+<article><h3>Python</h3><p>以 Python 標準函式庫執行相同的二元 LCA，輸出類別比例與反應機率。</p><div class="actions"><a class="download-link" href="downloads/lca.py" download>下載 .py</a></div></article>
+</div>
+<h3>資料與操作說明</h3>
+<ul>
+<li><a href="downloads/patient-patterns.dat" download>病患反應型態與次數</a>，由課堂模擬資料彙整，可重現病患案例的對數概似。</li>
+<li><a href="downloads/tcs-demo-patterns.dat" download>TCS 模擬練習資料</a>，可直接操作三種程式，估計值會與上方的正式調查案例不同。</li>
+<li>TCS 正式案例需向 <a href="https://srda.sinica.edu.tw/search/metadata/detail/D00265_1">SRDA 取得資料</a>。已有課堂編碼檔者，可在本機使用 <a href="downloads/prepare-tcs.py" download>TCS 整理程式</a> 與 <a href="downloads/tcs.inp" download>TCS 正式案例 Mplus 語法</a>。</li>
+<li><a href="downloads/README.txt" download>下載操作說明與指令</a>。</li>
+</ul>
+</section>
+<section id="references">
+<h2>參考文獻</h2>
+<ol>
+<li>邱皓政（2023）。《潛在異質性分析：潛在結構模式與進階應用》。五南。<a href="https://www.wunan.com.tw/bookdetail?NO=16340">出版社書頁</a></li>
+<li>Nylund-Gibson, K., &amp; Choi, A. Y. (2018). Ten frequently asked questions about latent class analysis. <i>Translational Issues in Psychological Science, 4</i>(4), 440–461. <a href="https://doi.org/10.1037/tps0000176">DOI</a></li>
+<li>Sinha, P., Calfee, C. S., &amp; Delucchi, K. L. (2021). Practitioner's guide to latent class analysis: Methodological considerations and common pitfalls. <i>Critical Care Medicine, 49</i>(1), e63–e79. <a href="https://doi.org/10.1097/CCM.0000000000004710">DOI</a></li>
+<li>張卿卿（2025）。《傳播調查資料庫 第三期第三次（2024）：傳播與生活日常：消費、健康與娛樂（公共版）》（D00265_1）。<a href="https://doi.org/10.6141/TW-SRDA-D00265_1-1">資料來源</a></li>
+</ol>
+</section>
+</main>
+<footer><div class="wrap"><strong>教材出處</strong><p>邱皓政（2023）。《潛在異質性分析：潛在結構模式與進階應用》。五南。原理與估計分別對應第 3 章與第 4 章。</p><a href="../books/heterogeneity-2023.html">專書介紹與配套資源</a></div></footer>
+<noscript><p class="wrap">請啟用 JavaScript 操作範例。</p></noscript>
+</body>
+</html>
