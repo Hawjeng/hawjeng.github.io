@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="邱皓政統計異質性分析課程。操作潛在類別模型，比較後驗機率與類別剖面，下載 Mplus、R 與 Python 教材。">
 <title>潛在類別分析｜邱皓政統計異質性分析</title>
-<link rel="stylesheet" href="style.css">
-<script src="lab.js" defer></script>
+<link rel="stylesheet" href="style.css?v=model-syntax">
+<script src="lab.js?v=model-syntax" defer></script>
 </head>
 <body>
 <header><div class="wrap bar"><a href="../resources.html#advanced-statistics-apps">← 高階統計互動專案</a><span>邱皓政｜統計異質性分析</span></div></header>
@@ -15,22 +15,48 @@
 <p class="eyebrow" lang="en">Latent Class Analysis</p>
 <h1>潛在類別分析</h1>
 <p>從類別反應辨識群體差異，練習解讀類別比例、條件反應機率與個人的後驗類別機率。</p>
-<nav aria-label="課程單元"><a href="#principles">原理</a><a href="#examples">範例與互動</a><a href="#downloads">程式與資料</a><a href="#references">參考文獻</a></nav>
+<nav aria-label="課程單元"><a href="#principles">原理</a><a href="#examples">範例與互動</a><a href="#syntax">Mplus、R 與 Python 語法</a><a href="#downloads">下載與來源</a><a href="#references">參考文獻</a></nav>
 </div>
 <section id="principles">
-<h2>原理</h2>
+<h2>原理與參數公式</h2>
+<p>潛在類別分析（LCA）用一個未觀察到的類別變數 C 解釋多個類別指標的聯合分配。以下先建立二元指標模型，再由反應型態推算類別成員機率。</p>
 <div class="principles">
-<article><h3>類別比例 π</h3><p>π<sub>k</sub> = P(C = k) 表示第 k 類在母群中的比例。各類比例加總為 1，提供觀察反應前的類別機率。</p></article>
-<article><h3>條件反應機率 θ</h3><p>θ<sub>jk</sub> = P(Y<sub>j</sub> = 1 | C = k)。同一類的各題條件機率構成類別剖面。局部獨立假設指給定 C 後，各指標相互獨立。</p></article>
-<article><h3>後驗類別機率</h3><p>將各類的先驗比例乘上該類產生此反應型態的機率，再除以各類分子的總和。最大後驗機率對應最可能類別，同時可保留其餘類別的不確定性。</p></article>
+<article><h3>觀察指標</h3><p>第 i 人的反應向量為 <b>y</b><sub>i</sub> = (y<sub>i1</sub>, …, y<sub>iJ</sub>)。二元題 y<sub>ij</sub> ∈ {0, 1}。本教材以 1 表示有該反應。</p></article>
+<article><h3>潛在類別比例</h3><p>π<sub>k</sub> = P(C = k)，k = 1, …, K。π<sub>k</sub> ≥ 0，且 Σ<sub>k</sub> π<sub>k</sub> = 1。模型估計 K − 1 個獨立的類別比例。</p></article>
+<article><h3>條件反應機率</h3><p>θ<sub>jk</sub> = P(Y<sub>j</sub> = 1 | C = k)。相對地，P(Y<sub>j</sub> = 0 | C = k) = 1 − θ<sub>jk</sub>。同一類的 J 個 θ 值組成類別剖面。</p></article>
 </div>
-<details><summary>模型式與 EM 估計</summary>
-<p class="math" aria-label="反應向量的邊際機率等於對類別加總各類比例乘以各題條件機率">P(Y = y) = Σ<sub>k</sub> π<sub>k</sub> ∏<sub>j</sub> P(Y<sub>j</sub> = y<sub>j</sub> | C = k)</p>
-<p>EM 的 E 步以目前參數計算每人的後驗機率。M 步以這些機率作權重，更新類別比例及各題反應機率。應用多組初始值，比對最佳對數概似是否重現，並檢查邊界解和極小類別。</p>
+<div class="derivation">
+<h3>由局部獨立到混合模型</h3>
+<p>局部獨立假設給定類別 C 後，各指標的聯合機率可拆成題目機率的乘積。若忽略 C，指標仍可因類別組成不同而相關。</p>
+<div class="math">L<sub>ik</sub> = P(<b>Y</b><sub>i</sub> = <b>y</b><sub>i</sub> | C<sub>i</sub> = k) = ∏<sub>j ∈ Oᵢ</sub> θ<sub>jk</sub><sup>yᵢⱼ</sup>(1 − θ<sub>jk</sub>)<sup>1 − yᵢⱼ</sup></div>
+<div class="math">P(<b>Y</b><sub>i</sub> = <b>y</b><sub>i</sub>) = Σ<sub>k = 1</sub><sup>K</sup> π<sub>k</sub>L<sub>ik</sub></div>
+<p>O<sub>i</sub> 是第 i 人有作答的題目集合。在可忽略缺失機制的觀察資料概似中，未觀察的題目從乘積略過。若題目有多個反應類別，將每題因子換成 θ<sub>jkr</sub> = P(Y<sub>j</sub> = r | C = k)，同一題同一類的各反應機率加總為 1。</p>
+</div>
+<div class="derivation">
+<h3>由反應型態推算後驗機率</h3>
+<div class="math">τ<sub>ik</sub> = P(C<sub>i</sub> = k | <b>Y</b><sub>i</sub> = <b>y</b><sub>i</sub>) = π<sub>k</sub>L<sub>ik</sub> / Σ<sub>h = 1</sub><sup>K</sup> π<sub>h</sub>L<sub>ih</sub></div>
+<p>以病患三題皆回答「有」為例，第 2 類的分子是 .53498 × .947 × .804 × .843 ≈ .34338。將它除以三類分子的總和，得到約 <strong>96.2%</strong> 的後驗機率。可在下方範例重做。τ<sub>ik</sub> 也可用來估計各類人數，將每人歸入最大 τ 的類別則是另一種摘要。</p>
+</div>
+<details open><summary>最大概似與 EM 更新式</summary>
+<p>若第 i 列為一種反應型態，w<sub>i</sub> 是出現次數。逐筆資料則令 w<sub>i</sub> = 1。最大化的觀察資料對數概似為</p>
+<div class="math">ℓ(π, θ) = Σ<sub>i</sub> w<sub>i</sub> log(Σ<sub>k</sub> π<sub>k</sub>L<sub>ik</sub>)</div>
+<p><strong>E 步</strong>使用目前的 π 與 θ 計算 τ<sub>ik</sub>。<strong>M 步</strong>用 τ<sub>ik</sub> 當作分配至第 k 類的權重，更新兩組參數：</p>
+<div class="math">π<sub>k</sub><sup>新</sup> = Σ<sub>i</sub> w<sub>i</sub>τ<sub>ik</sub> / Σ<sub>i</sub> w<sub>i</sub></div>
+<div class="math">θ<sub>jk</sub><sup>新</sup> = Σ<sub>i: j ∈ Oᵢ</sub> w<sub>i</sub>τ<sub>ik</sub>y<sub>ij</sub> / Σ<sub>i: j ∈ Oᵢ</sub> w<sub>i</sub>τ<sub>ik</sub></div>
+<p>交替更新至對數概似的變化足夠小。使用多組隨機起始值，比對最佳概似能否重現，並檢查接近 0 或 1 的反應機率與極小類別。不同起始值也可能交換類別編號，比較軟體結果時可依類別剖面配對。</p>
 </details>
-<details><summary>如何比較類別數</summary>
-<p>在相同資料與指標下估計不同 K，比較 AIC、BIC、saBIC（數值越小越有利），再檢查類別大小、剖面可解釋性與解的穩定性。若可用，可參考調整後 LMR 檢定或 BLRT。Entropy 描述分類清晰度，應和模型適配資訊一起閱讀。</p>
-<p>J 個二元題最多提供 2<sup>J</sup> − 1 個獨立反應型態機率。無限制 K 類模型有 KJ + K − 1 個參數。參數量超過資料可提供的資訊時，模型無法識別。通過此計數條件後，仍需檢查識別與估計診斷。</p>
+<details><summary>如何讀 Mplus 的閾值與類別參數</summary>
+<p>對二元題，若 Mplus 的估計連結為 logit，輸出的閾值 <i>t</i><sub>jk</sub> 對應較高反應類別的條件機率。以第 K 類為參照的類別截距 γ<sub>k</sub> 則轉換成類別比例：</p>
+<div class="math">θ<sub>jk</sub> = 1 / (1 + exp(t<sub>jk</sub>))</div>
+<div class="math">π<sub>k</sub> = exp(γ<sub>k</sub>) / Σ<sub>h</sub> exp(γ<sub>h</sub>)，γ<sub>K</sub> = 0</div>
+<p>也可直接讀 <span lang="en">Results in Probability Scale</span> 的 Category 2 與 <span lang="en">Based on the Estimated Model</span> 的類別比例。</p>
+</details>
+<details open><summary>模型識別、類別數與分類品質</summary>
+<p>無限制的 K 類、J 個二元題模型需要 q = (K − 1) + KJ 個自由參數；完整反應表最多有 2<sup>J</sup> − 1 個獨立機率。病患範例 J = 3、K = 3，11 個參數超過 7 個獨立機率，說明只看到程式收斂仍不足以判定模型已識別。</p>
+<div class="math">AIC = −2ℓ + 2q<br>BIC = −2ℓ + q log(N)<br>saBIC = −2ℓ + q log((N + 2) / 24)</div>
+<p>在相同樣本、指標與編碼下比較不同 K。資訊準則越小越有利，並應檢查最佳概似重現、類別大小與剖面可解釋性。有可用的調整後 LMR 或 BLRT 時，連同檢定診斷一起解讀。</p>
+<div class="math">標準化 Entropy = 1 − [−Σ<sub>i</sub> w<sub>i</sub> Σ<sub>k</sub> τ<sub>ik</sub> log(τ<sub>ik</sub>)] / [N log(K)]，K &gt; 1</div>
+<p>N = Σ<sub>i</sub> w<sub>i</sub>，且 0 log(0) 視為 0。Entropy 越接近 1，表示後驗機率越集中，適合用於判讀分類清晰度。適配與選模另用前述資訊準則與診斷。</p>
 </details>
 </section>
 <section id="examples">
@@ -59,8 +85,28 @@
 <div id="profile"></div>
 </div>
 </section>
+<section id="syntax">
+<h2>Mplus、R 與 Python 語法</h2>
+<p>左側選擇案例與類別數，右側會顯示使用相同資料的三種語法。R 使用 base R，Python 使用標準函式庫。</p>
+<div class="syntax-layout">
+<details class="panel syntax-settings" open><summary>分析設定</summary>
+<label for="syntax-example">案例</label>
+<select id="syntax-example"><option value="patient">病患症狀（模擬）</option><option value="tcs-demo">TCS 六題模擬練習</option><option value="tcs">TCS 正式案例</option></select>
+<label for="syntax-classes">類別數 K</label>
+<select id="syntax-classes"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select>
+<p id="syntax-data"></p>
+<p id="syntax-identification" class="syntax-note" hidden></p>
+</details>
+<div class="code-stack">
+<p id="syntax-status" role="status" aria-live="polite"></p>
+<article class="panel code-panel"><h3>Mplus</h3><div class="actions"><button type="button" class="download-link" data-copy="mplus" disabled>複製 Mplus 語法</button><button type="button" data-save="mplus" disabled>下載 .inp</button></div><p id="mplus-command" class="run-command"></p><label for="mplus-source">可執行的 Mplus 語法</label><textarea id="mplus-source" rows="16" readonly spellcheck="false" wrap="off"></textarea></article>
+<article class="panel code-panel"><h3>R</h3><div class="actions"><button type="button" class="download-link" data-copy="r" disabled>複製 R 語法</button><button type="button" data-save="r" disabled>下載 .R</button></div><p id="r-command" class="run-command"></p><label for="r-source">可執行的 R 語法</label><textarea id="r-source" rows="16" readonly spellcheck="false" wrap="off"></textarea></article>
+<article class="panel code-panel"><h3>Python</h3><div class="actions"><button type="button" class="download-link" data-copy="python" disabled>複製 Python 語法</button><button type="button" data-save="python" disabled>下載 .py</button></div><p id="python-command" class="run-command"></p><label for="python-source">可執行的 Python 語法</label><textarea id="python-source" rows="16" readonly spellcheck="false" wrap="off"></textarea></article>
+</div>
+</div>
+</section>
 <section id="downloads">
-<h2>程式與資料</h2>
+<h2>下載與來源</h2>
 <p>將程式與資料放在同一資料夾，依下載區的說明執行。用同一組指標與類別數比較結果，對照時先依剖面配對類別編號。</p>
 <div class="download-grid">
 <article><h3>Mplus</h3><p>使用對應的反應型態資料檔，執行三類病患或五類 TCS 模擬練習。</p><div class="actions"><a class="download-link" href="downloads/patient.inp" download>病患 .inp</a><a class="download-link" href="downloads/tcs-demo.inp" download>TCS 模擬 .inp</a></div></article>
