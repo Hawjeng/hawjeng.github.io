@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="邱皓政統計異質性分析課程。操作潛在類別模型，比較後驗機率與類別剖面，下載 Mplus、R 與 Python 教材。">
 <title>潛在類別分析｜邱皓政統計異質性分析</title>
-<link rel="stylesheet" href="style.css?v=stable-tabs">
+<link rel="stylesheet" href="style.css?v=history-portraits">
 <script src="lab.js?v=stable-tabs" defer></script>
 </head>
 <body>
@@ -18,7 +18,19 @@
 <nav aria-label="課程單元"><a href="#principles">原理</a><a href="#examples">範例與互動</a><a href="#syntax">語法與結果</a><a href="#downloads">下載與來源</a><a href="#references">參考文獻</a></nav>
 <section id="principles" aria-label="原理">
 <div class="lesson-frame">
-<nav class="lesson-links" aria-label="原理各節"><a href="#lca-model">模型</a><a href="#lca-history">簡史</a><a href="#lca-parameters">參數</a><a href="#lca-estimation">估計法</a><a href="#lca-assignment">分類</a><a href="#classification-error">D 矩陣</a><a href="#lca-fit">模式適配</a><a href="#auxiliary">輔助變數分析</a><a href="#software">軟體比較</a></nav>
+<nav class="lesson-links" aria-label="原理各節"><a href="#lca-history">簡史</a><a href="#lca-model">模型</a><a href="#lca-parameters">參數</a><a href="#lca-estimation">估計法</a><a href="#lca-assignment">分類</a><a href="#classification-error">D 矩陣</a><a href="#lca-fit">模式適配</a><a href="#auxiliary">輔助變數分析</a><a href="#software">軟體比較</a></nav>
+<section class="lesson-panel" id="lca-history" aria-labelledby="lca-history-heading">
+<h2 id="lca-history-heading">潛在類別分析簡史</h2>
+<p>LCA 從解釋類別作答的潛在結構模型，發展到能估計跨時點轉移、評估分類誤差與分析外部變數的方法。</p>
+<ol class="history-timeline">
+<li><span class="history-years">1950–1970</span><div><h3>潛在結構奠基</h3><p>Lazarsfeld 提出用未觀察到的類別解釋作答組合。Green 與 Anderson 推進模型形式與參數求解，Lazarsfeld 與 Henry 在 1968 年把這些研究整理成專書。 <a href="https://books.google.com/books/about/Latent_Structure_Analysis.html?id=jsFPAQAAIAAJ">Lazarsfeld 與 Henry（1968）</a></p></div><div class="history-portraits"><a href="https://en.wikipedia.org/wiki/Paul_Lazarsfeld"><img src="history/lazarsfeld.jpeg" alt="Paul Lazarsfeld 肖像" width="72" height="88" loading="lazy"><span aria-hidden="true">Paul Lazarsfeld</span></a><a href="https://hub.jhu.edu/2019/07/25/bert-green-psychological-brain-sciences-obituary/"><img src="history/green.png" alt="Bert F. Green Jr. 肖像" width="72" height="88" loading="lazy"><span aria-hidden="true">Bert F. Green Jr.</span></a></div></li>
+<li><span class="history-years">1970–1990</span><div><h3>最大概似與 EM 演算法</h3><p>Goodman（1974）發展以最大概似探索潛在結構的做法，也討論模型識別問題。Dempster、Laird 與 Rubin（1977）提出通用的 EM 演算法，使含有未觀察類別的模型可以反覆估計類別歸屬機率和模型參數。 <a href="https://doi.org/10.1111/j.2517-6161.1977.tb01600.x">EM 演算法原文</a></p></div><div class="history-portraits"><a href="https://www.mcgill.ca/psychology/yoshio-takane"><img src="history/takane.gif" alt="Yoshio Takane 肖像" width="72" height="88" loading="lazy"><span aria-hidden="true">Yoshio Takane</span></a><a href="https://en.wikipedia.org/wiki/Leo_Goodman"><img src="history/goodman.jpeg" alt="Leo A. Goodman 肖像" width="72" height="88" loading="lazy"><span aria-hidden="true">Leo A. Goodman</span></a></div></li>
+<li><span class="history-years">1990–2003</span><div><h3>混合模型與縱貫分析</h3><p>LCA 逐漸納入更一般的混合模型架構。潛在轉移分析（LTA）把問題從某一時點的類別歸屬，延伸到同一人在不同時點轉入哪一類。LEM、Mplus 與 Latent GOLD 也讓這類分析有較通用的軟體可用。 <a href="https://onlinelibrary.wiley.com/doi/10.1002/9780470567333.ch7">Collins 與 Lanza 的 LTA 專章</a></p></div><div class="history-portraits"><a href="https://www.tilburguniversity.edu/staff/j-k-vermunt"><img src="history/vermunt.jpeg" alt="Jeroen Vermunt 肖像" width="72" height="88" loading="lazy"><span aria-hidden="true">Jeroen Vermunt</span></a><a href="https://www.statmodel.com/bmuthen/"><img src="history/muthen.jpeg" alt="Bengt Muthén 肖像" width="72" height="88" loading="lazy"><span aria-hidden="true">Bengt Muthén</span></a></div></li>
+<li><span class="history-years">2004–2010</span><div><h3>分類誤差與類別數評鑑</h3><p>Bolck、Croon 與 Hagenaars（2004）提出以分類誤差校正外部關聯估計的做法。Nylund、Asparouhov 與 Muthén（2007）以模擬比較 BIC、BLRT 等選模方法，Vermunt（2010）則改良帶共變項的三步驟估計。 <a href="https://www.statmodel.com/bmuthen/articles/Article_111.pdf">類別數評鑑研究</a></p></div></li>
+<li><span class="history-years">2011–2018</span><div><h3>輔助變數方法與實證應用</h3><p>三步驟法與 BCH 校正逐漸進入軟體工作流程。研究者可先依指標建立類別，再分析共變項或遠端結果，同時把硬分派的誤差納入估計。 <a href="https://www.statmodel.com/download/webnote15.pdf">Asparouhov 與 Muthén（2014）</a></p></div></li>
+<li><span class="history-years">2019–2026</span><div><h3>可重現分析與跨領域應用</h3><p>R 的 tidySEM 與 Python 的 StepMix 等工具，使混合模型可納入程式化分析與報告流程。臨床、傳播與社會調查等應用也更重視交代指標編碼、類別數判斷、類別剖面和分類品質。 <a href="https://www.jstatsoft.org/article/view/v113i08">StepMix 論文</a></p></div></li>
+</ol>
+</section>
 <section class="lesson-panel" id="lca-model" aria-labelledby="lca-model-heading">
 <h2 id="lca-model-heading">由局部獨立到混合模型</h2>
 <p>潛在類別分析（LCA）用一個未觀察到的類別變數 C 解釋多個類別指標的聯合分配。以下先建立二元指標模型，再由反應型態推算類別成員機率。</p>
@@ -36,18 +48,6 @@
 <div class="math">L<sub>ik</sub> = P(<b>Y</b><sub>i</sub> = <b>y</b><sub>i</sub> | C<sub>i</sub> = k) = ∏<sub>j ∈ Oᵢ</sub> θ<sub>jk</sub><sup>yᵢⱼ</sup>(1 − θ<sub>jk</sub>)<sup>1 − yᵢⱼ</sup></div>
 <div class="math">P(<b>Y</b><sub>i</sub> = <b>y</b><sub>i</sub>) = Σ<sub>k = 1</sub><sup>K</sup> π<sub>k</sub>L<sub>ik</sub></div>
 <p>O<sub>i</sub> 是第 i 人有作答的題目集合。在可忽略缺失機制的觀察資料概似中，未觀察的題目從乘積略過。若題目有多個反應類別，將每題因子換成 θ<sub>jkr</sub> = P(Y<sub>j</sub> = r | C = k)，同一題同一類的各反應機率加總為 1。</p><p>當 K = 1 時，各指標彼此獨立，構成比較類別數的基準模型。增加類別後若兩題仍有明顯的細格殘差，可回頭檢查它們是否因題目內容或測量方式而存在局部相依。</p>
-</section>
-<section class="lesson-panel" id="lca-history" aria-labelledby="lca-history-heading">
-<h2 id="lca-history-heading">潛在類別分析簡史</h2>
-<p>LCA 從解釋類別作答的潛在結構模型，發展到能估計跨時點轉移、評估分類誤差與分析外部變數的方法。</p>
-<ol class="history-timeline">
-<li><span class="history-years">1950–1970</span><div><h3>潛在結構奠基</h3><p>Lazarsfeld 提出用未觀察到的類別解釋作答組合。Green 與 Anderson 推進模型形式與參數求解，Lazarsfeld 與 Henry 在 1968 年把這些研究整理成專書。 <a href="https://books.google.com/books/about/Latent_Structure_Analysis.html?id=jsFPAQAAIAAJ">Lazarsfeld 與 Henry（1968）</a></p></div></li>
-<li><span class="history-years">1970–1990</span><div><h3>最大概似與 EM 演算法</h3><p>Goodman（1974）發展以最大概似探索潛在結構的做法，也討論模型識別問題。Dempster、Laird 與 Rubin（1977）提出通用的 EM 演算法，使含有未觀察類別的模型可以反覆估計類別歸屬機率和模型參數。 <a href="https://doi.org/10.1111/j.2517-6161.1977.tb01600.x">EM 演算法原文</a></p></div></li>
-<li><span class="history-years">1990–2003</span><div><h3>混合模型與縱貫分析</h3><p>LCA 逐漸納入更一般的混合模型架構。潛在轉移分析（LTA）把問題從某一時點的類別歸屬，延伸到同一人在不同時點轉入哪一類。LEM、Mplus 與 Latent GOLD 也讓這類分析有較通用的軟體可用。 <a href="https://onlinelibrary.wiley.com/doi/10.1002/9780470567333.ch7">Collins 與 Lanza 的 LTA 專章</a></p></div></li>
-<li><span class="history-years">2004–2010</span><div><h3>分類誤差與類別數評鑑</h3><p>Bolck、Croon 與 Hagenaars（2004）提出以分類誤差校正外部關聯估計的做法。Nylund、Asparouhov 與 Muthén（2007）以模擬比較 BIC、BLRT 等選模方法，Vermunt（2010）則改良帶共變項的三步驟估計。 <a href="https://www.statmodel.com/bmuthen/articles/Article_111.pdf">類別數評鑑研究</a></p></div></li>
-<li><span class="history-years">2011–2018</span><div><h3>輔助變數方法與實證應用</h3><p>三步驟法與 BCH 校正逐漸進入軟體工作流程。研究者可先依指標建立類別，再分析共變項或遠端結果，同時把硬分派的誤差納入估計。 <a href="https://www.statmodel.com/download/webnote15.pdf">Asparouhov 與 Muthén（2014）</a></p></div></li>
-<li><span class="history-years">2019–2026</span><div><h3>可重現分析與跨領域應用</h3><p>R 的 tidySEM 與 Python 的 StepMix 等工具，使混合模型可納入程式化分析與報告流程。臨床、傳播與社會調查等應用也更重視交代指標編碼、類別數判斷、類別剖面和分類品質。 <a href="https://www.jstatsoft.org/article/view/v113i08">StepMix 論文</a></p></div></li>
-</ol>
 </section>
 <section class="lesson-panel" id="lca-parameters" aria-labelledby="lca-parameters-heading">
 <h2 id="lca-parameters-heading">參數與類別剖面</h2>
