@@ -327,7 +327,9 @@ const exercises='<details><summary>辨識獨立與相依設計</summary>'+table(
 function examples(kind){
  let items=data.items.filter(x=>x.kind===kind);
  return heading(kind==='book'?'課本範例':'習作詳解')+(kind==='exercise'?card(exercises+'<p>下方可查看計算題的完整摘要表、判讀及事後比較。</p>'):'')+
- '<div class="grid"><div class="card controls">'+field('case','選擇案例',options(items.map((x,i)=>[i,x.title])))+alpha()+'<div id="case-notes"></div><div id="pool-control"></div></div><div class="card" id="results" aria-live="polite"></div></div>';
+ '<div class="grid'+(kind==='exercise'?' exercise-layout':'')+'">'+
+ (kind==='exercise'?'<details class="card controls exercise-controls" open><summary>案例設定</summary>':'<div class="card controls">')+
+ field('case','選擇案例',options(items.map((x,i)=>[i,x.title])))+alpha()+'<div id="case-notes"></div><div id="pool-control"></div>'+(kind==='exercise'?'</details>':'</div>')+'<div class="card" id="results" aria-live="polite"></div></div>';
 }
 function exampleUpdate(kind,change=true){
  let z=data.items.filter(x=>x.kind===kind)[+$('case').value],a=+$('alpha').value;
@@ -348,7 +350,27 @@ function exampleUpdate(kind,change=true){
   }
   return '<h3>'+esc(z.title)+'</h3>'+show(r,a)+extra+'<details><summary>展開原始觀測值</summary>'+table(z.headers,z.rows)+'</details>';
  });
+ if(kind==='exercise')addExerciseChartDownloads(z.title);
 }
+function addExerciseChartDownloads(title){
+ $('results').querySelectorAll('figure svg').forEach((chart,index)=>{
+  const svg=chart.cloneNode(true);
+  const {width,height}=chart.viewBox.baseVal;
+  svg.removeAttribute('style');
+  svg.setAttribute('width',width);
+  svg.setAttribute('height',height);
+  svg.setAttribute('font-family','system-ui, sans-serif');
+
+  const link=document.createElement('a');
+  link.className='chart-download';
+  link.textContent='下載 SVG 圖檔';
+  link.setAttribute('aria-label','下載 '+chart.getAttribute('aria-label')+' SVG 圖檔');
+  link.download=title.replace(/[<>:"/\\|?*]/g,'-')+'-'+(index+1)+'.svg';
+  link.href='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(svg));
+  chart.closest('figure').append(link);
+ });
+}
+
 function refreshSurveyGroups(variable,first,second,container,rebuildOptions=true){
  const prior=second.value;
  if(rebuildOptions){
