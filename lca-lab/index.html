@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="邱皓政統計異質性分析課程。操作潛在類別模型，比較後驗機率與類別剖面，下載 Mplus、R 與 Python 教材。">
 <title>潛在類別分析｜邱皓政統計異質性分析</title>
-<link rel="stylesheet" href="style.css?v=tcs-background">
+<link rel="stylesheet" href="style.css?v=course-home">
 <script src="lab.js?v=tcs-background" defer></script>
 </head>
 <body>
@@ -17,13 +17,12 @@
 <p>從類別反應辨識群體差異，練習解讀類別比例、條件反應機率與個人的後驗類別機率。</p>
 </div>
 <nav aria-label="課程單元"><a href="#principles">原理</a><a href="#examples">範例與互動</a><a href="#syntax">語法與結果</a><a href="#downloads">下載與來源</a><a href="#references">參考文獻</a></nav>
-<section id="principles">
-<h2>原理與參數公式</h2>
-<p>潛在類別分析（LCA）用一個未觀察到的類別變數 C 解釋多個類別指標的聯合分配。以下先建立二元指標模型，再由反應型態推算類別成員機率。</p>
+<section id="principles" aria-label="原理">
 <div class="lesson-frame">
 <nav class="lesson-links" aria-label="原理各節"><a href="#lca-model">模型</a><a href="#lca-parameters">參數</a><a href="#lca-estimation">估計法</a><a href="#lca-assignment">分類</a><a href="#classification-error">D 矩陣</a><a href="#lca-fit">模式適配</a><a href="#auxiliary">輔助變數分析</a><a href="#software">軟體比較</a></nav>
 <section class="lesson-panel" id="lca-model" aria-labelledby="lca-model-heading">
-<h3 id="lca-model-heading">由局部獨立到混合模型</h3>
+<h2 id="lca-model-heading">由局部獨立到混合模型</h2>
+<p>潛在類別分析（LCA）用一個未觀察到的類別變數 C 解釋多個類別指標的聯合分配。以下先建立二元指標模型，再由反應型態推算類別成員機率。</p>
 <div class="model-overview panel">
 <figure>
   <img src="patient-lca-model.png" alt="上方橢圓內有三個類別 C#1、C#2、C#3，下方三支箭頭分別指向 Y1 發燒、Y2 咳嗽與 Y3 流鼻水。" width="334" height="195">
@@ -40,7 +39,7 @@
 <p>O<sub>i</sub> 是第 i 人有作答的題目集合。在可忽略缺失機制的觀察資料概似中，未觀察的題目從乘積略過。若題目有多個反應類別，將每題因子換成 θ<sub>jkr</sub> = P(Y<sub>j</sub> = r | C = k)，同一題同一類的各反應機率加總為 1。</p><p>當 K = 1 時，各指標彼此獨立，構成比較類別數的基準模型。增加類別後若兩題仍有明顯的細格殘差，可回頭檢查它們是否因題目內容或測量方式而存在局部相依。</p>
 </section>
 <section class="lesson-panel" id="lca-parameters" aria-labelledby="lca-parameters-heading">
-<h3 id="lca-parameters-heading">參數與類別剖面</h3>
+<h2 id="lca-parameters-heading">參數與類別剖面</h2>
 <div class="principles">
 <article><h3>觀察指標</h3><p>第 i 人的反應向量為 <b>y</b><sub>i</sub> = (y<sub>i1</sub>, …, y<sub>iJ</sub>)。二元題 y<sub>ij</sub> ∈ {0, 1}。本教材以 1 表示有該反應。</p></article>
 <article><h3>潛在類別比例</h3><p>π<sub>k</sub> = P(C = k)，k = 1, …, K。π<sub>k</sub> ≥ 0，且 Σ<sub>k</sub> π<sub>k</sub> = 1。模型估計 K − 1 個獨立的類別比例。</p></article>
@@ -103,7 +102,7 @@
 
 </section>
 <section class="lesson-panel" id="lca-estimation" aria-labelledby="lca-estimation-heading">
-<h3 id="lca-estimation-heading">參數估計與收斂檢查</h3>
+<h2 id="lca-estimation-heading">參數估計與收斂檢查</h2>
 <p>最大概似估計（ML）找出最能解釋觀察反應型態的參數。EM 與 Newton–Raphson（NR）是取得 ML 解的演算法。NR 利用梯度與曲率更新參數，接近最優解時通常更快，但曲率矩陣近奇異時可能不穩定。MLR 在最大概似架構下使用穩健標準誤，並在適用時提供校正的檢定統計量。</p><p>若第 i 列為一種反應型態，w<sub>i</sub> 是出現次數。逐筆資料則令 w<sub>i</sub> = 1。最大化的觀察資料對數概似為</p>
 <div class="math">ℓ(π, θ) = Σ<sub>i</sub> w<sub>i</sub> log(Σ<sub>k</sub> π<sub>k</sub>L<sub>ik</sub>)</div>
 <p><strong>E 步</strong>使用目前的 π 與 θ 計算 τ<sub>ik</sub>。<strong>M 步</strong>用 τ<sub>ik</sub> 當作分配至第 k 類的權重，更新兩組參數：</p>
@@ -112,7 +111,7 @@
 <p>交替更新至對數概似的變化足夠小。使用多組隨機起始值，比對最佳概似能否重現，並檢查接近 0 或 1 的反應機率與極小類別。不同起始值也可能交換類別編號，比較軟體結果時可依類別剖面配對。</p>
 </section>
 <section class="lesson-panel" id="lca-assignment" aria-labelledby="lca-assignment-heading">
-<h3 id="lca-assignment-heading">從後驗機率到分類分派</h3>
+<h2 id="lca-assignment-heading">從後驗機率到分類分派</h2>
 <p class="assignment-lead">LCA 會為每個人估計一組類別歸屬機率。<strong>分派</strong>是決定如何把這組機率記錄成個人的分類結果。</p>
 
 <div class="assignment-cards">
@@ -151,7 +150,7 @@
 </div>
 </section>
 <section class="lesson-panel" id="classification-error" aria-labelledby="classification-error-heading">
-<h3 id="classification-error-heading">分類正確與分類誤差 D 矩陣</h3>
+<h2 id="classification-error-heading">分類正確與分類誤差 D 矩陣</h2>
 <p>令 C 為模型中的潛在類別，G 為依最大後驗機率得到的觀察分組。D 矩陣的列是 C，欄是 G。每列的分母是該潛在類別的期望人數。</p>
 <div class="math">D<sub>kg</sub> = P(G = g | C = k) = Σ<sub>i:Gᵢ=g</sub> w<sub>i</sub>τ<sub>ik</sub> / Σ<sub>i</sub> w<sub>i</sub>τ<sub>ik</sub></div>
 <div class="table"><table><caption>第 3 章病患範例的 D 矩陣</caption><thead><tr><th scope="col">潛在類別</th><th scope="col">分派 G = 1</th><th scope="col">分派 G = 2</th><th scope="col">分派 G = 3</th></tr></thead><tbody>
@@ -163,7 +162,7 @@
 <p>平均後驗分派機率（APPA）反過來以硬分派組 G 為條件，估計 P(C = k | G = g)。其分母為該硬分派組的人數。Mplus 報表中的兩張表應依列、欄標題分別判讀。<a href="#auxiliary">輔助變數分析</a>會用到 D 矩陣的分類誤差資訊。</p>
 </section>
 <section class="lesson-panel" id="lca-fit" aria-labelledby="lca-fit-heading">
-<h3 id="lca-fit-heading">模型識別與模式適配指標</h3>
+<h2 id="lca-fit-heading">模型識別與模式適配指標</h2>
 <div class="fit-topic">
 <h4>模型識別</h4>
 <p>先比較模型自由參數數目與反應表可提供的獨立機率數目。</p>
@@ -222,7 +221,7 @@
 
 </section>
 <section class="lesson-panel" id="auxiliary" aria-labelledby="auxiliary-heading">
-<h3 id="auxiliary-heading">輔助變數分析</h3>
+<h2 id="auxiliary-heading">輔助變數分析</h2>
 <p>先釐清外部變數扮演的角色。共變項 X 用來解釋誰較可能屬於某個潛在類別。遠端結果 Z 用來比較各類在外部結果上的平均數或事件機率。</p>
 <div class="principles">
 <article><h4>共變項預測類別</h4><p>例如以年齡預測 TCS 使用類別。以第 K 類為參照，對第 k 類估計 log[P(C = k | X)/P(C = K | X)] = α<sub>k</sub> + β<sub>k</sub>X。exp(β<sub>k</sub>) 是 X 增加一單位時，歸入第 k 類相對於參照類的勝算比。</p></article>
@@ -252,7 +251,7 @@ AUXILIARY = z (BCH);</code></pre>
 </details>
 </section>
 <section class="lesson-panel" id="software" aria-labelledby="software-heading">
-<h3 id="software-heading">潛在類別分析軟體比較</h3>
+<h2 id="software-heading">潛在類別分析軟體比較</h2>
 <p>類別指標用潛在類別分析（LCA），連續指標用潛在剖面分析（LPA），跨時點的類別轉移用潛在轉移分析（LTA）。若要用共變數預測類別，或比較各類的外部結果，可再比較工具是否能在分步估計時校正分類誤差。</p>
 <div class="table" role="region" aria-label="軟體比較表" tabindex="0">
 <table style="min-width:58rem;text-align:left">
