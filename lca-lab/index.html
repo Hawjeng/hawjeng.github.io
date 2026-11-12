@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="邱皓政統計異質性分析課程。操作潛在類別模型，比較後驗機率與類別剖面，下載 Mplus、R 與 Python 教材。">
 <title>潛在類別分析｜邱皓政統計異質性分析</title>
-<link rel="stylesheet" href="style.css?v=fit-equations">
+<link rel="stylesheet" href="style.css?v=classification-lesson">
 <script src="lab.js?v=principle-lessons" defer></script>
 </head>
 <body>
@@ -112,14 +112,43 @@
 <p>交替更新至對數概似的變化足夠小。使用多組隨機起始值，比對最佳概似能否重現，並檢查接近 0 或 1 的反應機率與極小類別。不同起始值也可能交換類別編號，比較軟體結果時可依類別剖面配對。</p>
 </section>
 <section class="lesson-panel" id="lca-assignment" aria-labelledby="lca-assignment-heading">
-<h3 id="lca-assignment-heading">後驗機率與軟、硬分派</h3>
-<div class="math">τ<sub>ik</sub> = P(C<sub>i</sub> = k | <b>Y</b><sub>i</sub> = <b>y</b><sub>i</sub>) = π<sub>k</sub>L<sub>ik</sub> / Σ<sub>h = 1</sub><sup>K</sup> π<sub>h</sub>L<sub>ih</sub></div>
-<p>以病患三題皆回答「有」為例，第 2 類的分子是 .53498 × .947 × .804 × .843 ≈ .34338。將它除以三類分子的總和，得到約 <strong>96.2%</strong> 的後驗機率。可在下方範例重做。τ<sub>ik</sub> 也可用來估計各類人數，將每人歸入最大 τ 的類別則是另一種摘要。</p><p>後驗機率 τ<sub>ik</sub> 回答「已知這個人的作答，屬於第 k 類的機率是多少？」類別比例 π<sub>k</sub> 則是看到個人作答之前的模型機率。</p>
-<div class="table"><table><thead><tr><th scope="col">分派方式</th><th scope="col">個人層次</th><th scope="col">彙整方式</th></tr></thead><tbody>
-<tr><th scope="row">軟分派</th><td>保留完整的後驗機率向量，每人跨類別的權重加總為 1。</td><td>第 k 類的期望人數是 Σ<sub>i</sub> w<sub>i</sub>τ<sub>ik</sub>。</td></tr>
-<tr><th scope="row">硬分派</th><td>將個人指派給後驗機率最高的類別，令 G<sub>i</sub> = arg max<sub>k</sub> τ<sub>ik</sub>。若並列，應說明處理規則。</td><td>逐類計算最可能類別（MLC）的人數。分派只保留一個標籤。</td></tr>
-</tbody></table></div>
-<p>病患範例的軟分派比例約為 16.5%、53.5%、30.0%，章稿的硬分派比例則為 8.1%、56.2%、35.7%。可用 <a href="#examples">範例的後驗機率</a> 看個人向量及其最大值。</p>
+<h3 id="lca-assignment-heading">從後驗機率到分類分派</h3>
+<p class="assignment-lead">LCA 會為每個人估計一組類別歸屬機率。<strong>分派</strong>是決定如何把這組機率記錄成個人的分類結果。</p>
+
+<div class="assignment-cards">
+<article class="assignment-card">
+<h4>軟分派</h4>
+<p>保留每一類的機率。若一位病患對第 1、2、3 類的機率分別為 0.002、0.962、0.036，就以這三個數值記錄他對各類的歸屬。</p>
+<div class="assignment-weights" aria-label="第 1、2、3 類的軟分派權重"><span>0.002</span><span>0.962</span><span>0.036</span></div>
+<p>彙整時，把每個人在某一類的權重加起來，就是該類的期望人數。</p>
+</article>
+<article class="assignment-card">
+<h4>硬分派</h4>
+<p>只保留機率最高的類別。這位病患的第 2 類機率最高，因此將他記為第 2 類，也就是他的最可能類別（MLC）。</p>
+<div class="assignment-weights" aria-label="第 1、2、3 類的硬分派權重"><span>0</span><span>1</span><span>0</span></div>
+<p>彙整時，每人只計入一組。若最高機率並列，需先訂定並說明處理規則。</p>
+</article>
+</div>
+
+<div class="assignment-step">
+<h4>這三個機率怎麼算出來？</h4>
+<p>以發燒、咳嗽、流鼻水皆回答「有」的病患為例。π<sub>k</sub> 是看到作答前的類別比例，L<sub>ik</sub> 是第 k 類出現這種作答的機率。將兩者相乘，再除以所有類別乘積的總和。</p>
+<div class="math fit-equation">τ<sub>ik</sub> = P(C<sub>i</sub> = k | <b>Y</b><sub>i</sub> = <b>y</b><sub>i</sub>) = π<sub>k</sub>L<sub>ik</sub> / Σ<sub>h = 1</sub><sup>K</sup> π<sub>h</sub>L<sub>ih</sub></div>
+<div class="math fit-equation">第 2 類的乘積 = 0.53498 × 0.947 × 0.804 × 0.843 ≈ 0.34338</div>
+<div class="math fit-equation">第 2 類的後驗機率 ≈ 0.34338 / 0.35707 ≈ 0.962</div>
+<p>三類機率加起來等於 1。可到 <a href="#examples">病患範例</a>，把三個症狀都設為「有」，重做這個計算。</p>
+</div>
+
+<div class="assignment-step">
+<h4>分派方式如何影響全體比例？</h4>
+<p>同一份病患資料中，軟分派用機率加總，硬分派用人數計數，因此兩種方法會得出不同的比例。</p>
+<div class="table assignment-table"><table>
+<thead><tr><th scope="col">分派</th><th scope="col">第 1 類</th><th scope="col">第 2 類</th><th scope="col">第 3 類</th></tr></thead>
+<tbody><tr><th scope="row">軟分派</th><td>16.5%</td><td>53.5%</td><td>30.0%</td></tr>
+<tr><th scope="row">硬分派</th><td>8.1%</td><td>56.2%</td><td>35.7%</td></tr></tbody>
+</table></div>
+<p>硬分派給每人一個標籤，個人仍可能屬於其他類別。下一節用 <a href="#classification-error">D 矩陣</a>量化這種分類誤差。</p>
+</div>
 </section>
 <section class="lesson-panel" id="classification-error" aria-labelledby="classification-error-heading">
 <h3 id="classification-error-heading">分類正確與分類誤差 D 矩陣</h3>
