@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="邱皓政統計異質性分析課程。操作潛在類別模型，比較後驗機率與類別剖面，下載 Mplus、R 與 Python 教材。">
 <title>潛在類別分析｜邱皓政統計異質性分析</title>
-<link rel="stylesheet" href="style.css?v=unit-spacing">
+<link rel="stylesheet" href="style.css?v=research-checklist">
 <script src="lab.js?v=stable-tabs" defer></script>
 </head>
 <body>
@@ -15,7 +15,7 @@
 <h1>潛在類別分析 <span class="course-title-en" lang="en">Latent Class Analysis (LCA)</span></h1>
 <p>從類別反應辨識群體差異，練習解讀類別比例、條件反應機率與個人的後驗類別機率。</p>
 </div>
-<nav aria-label="課程單元"><a href="#principles">原理</a><a href="#examples">範例與互動</a><a href="#syntax">語法與結果</a><a href="#downloads">下載與來源</a><a href="#references">參考文獻</a></nav>
+<nav aria-label="課程單元"><a href="#principles">原理</a><a href="#examples">範例與互動</a><a href="#syntax">語法與結果</a><a href="#checklist">研究檢核</a><a href="#downloads">下載與來源</a><a href="#references">參考文獻</a></nav>
 <section id="principles" aria-label="原理">
 <div class="lesson-frame">
 <nav class="lesson-links" aria-label="原理各節"><a href="#lca-history">簡史</a><a href="#lca-model">模型</a><a href="#lca-parameters">參數</a><a href="#lca-estimation">估計法</a><a href="#lca-assignment">分類</a><a href="#classification-error">D 矩陣</a><a href="#lca-fit">模式適配</a><a href="#auxiliary">輔助變數分析</a><a href="#software">軟體比較</a></nav>
@@ -390,6 +390,49 @@ AUXILIARY = z (BCH);</code></pre>
 </div></div></article>
 </div>
 </div>
+</section>
+<section id="checklist" aria-labelledby="checklist-heading">
+<h2 id="checklist-heading">LCA 研究檢核清單</h2>
+<p>用這 12 問檢查自己的研究設計、估計與報告。勾選已查核的項目。各題的狀態標籤是課堂投影片對 TCS 案例的評估。</p>
+<ol class="research-checklist">
+<li><h3><label><input type="checkbox"> 1. 研究問題是否適合？</label></h3>
+<p><strong>方法意義</strong> 釐清要探索或驗證哪種潛在異質性，並保留外部結果供後續驗證。</p>
+<p><strong>TCS 範例</strong> <span class="checklist-status" data-status="部分具備">部分具備</span> 以六種上網動機辨識類型。宜明示探索定位，補充分群後要回答的研究問題。</p></li>
+<li><h3><label><input type="checkbox"> 2. 類別是否有本體論基礎？</label></h3>
+<p><strong>方法意義</strong> 區分類型差異與程度差異。潛在類別是異質性的模型描述，應以實務證據支持。</p>
+<p><strong>TCS 範例</strong> <span class="checklist-status" data-status="部分具備">部分具備</span> 動機組合有實務意義。可比較 C1、C2 的程度與形狀，避免將類別實體化。</p></li>
+<li><h3><label><input type="checkbox"> 3. 理論依據是否充分？</label></h3>
+<p><strong>方法意義</strong> 以理論支持指標選擇、預期類型與類別差異，區分事前預期與事後解釋。</p>
+<p><strong>TCS 範例</strong> <span class="checklist-status" data-status="待補強">待補強</span> 連結網路使用動機理論，說明事前預期，區分剖面探索與事後命名。</p></li>
+<li><h3><label><input type="checkbox"> 4. 測量品質是否優良？</label></h3>
+<p><strong>方法意義</strong> 檢查指標的概念涵蓋、區辨力、反應尺度、編碼與內容重複。</p>
+<p><strong>TCS 範例</strong> <span class="checklist-status" data-status="部分具備">部分具備</span> 題目由調查團隊設計。宜補充概念與測量依據，檢查六題的反應分布與區辨力。</p></li>
+<li><h3><label><input type="checkbox"> 5. 抽樣與樣本量是否適切？</label></h3>
+<p><strong>方法意義</strong> 分別評估代表性與估計精確度，交代抽樣、權重及最小類別的估計需求。</p>
+<p><strong>TCS 範例</strong> <span class="checklist-status" data-status="已具備">已具備</span> 投影片記載全國四階段 PPS，有效樣本 1,857 筆，調查資料有權重。分析報告仍須交代實際使用的權重。</p></li>
+<li><h3><label><input type="checkbox"> 6. 資料處理是否完備？</label></h3>
+<p><strong>方法意義</strong> 記錄清理與特殊碼轉換，報告遺漏比例、處理方式和最終納入樣本數。</p>
+<p><strong>TCS 範例</strong> <span class="checklist-status" data-status="部分具備">部分具備</span> 清理已程式化。重做輔助分析時，應核對年齡特殊碼及異常標準差，並交代遺漏、加權與樣本處理。</p></li>
+<li><h3><label><input type="checkbox"> 7. 估計結果是否穩定？</label></h3>
+<p><strong>方法意義</strong> 報告估計法與起始值，檢查最佳 LL 能否重現、收斂警告及異常參數。</p>
+<p><strong>TCS 範例</strong> <span class="checklist-status" data-status="部分具備">部分具備</span> 投影片指出五類 LL 跨軟體相近，tidySEM 的差異較大。宜補報最佳 LL 重現次數，並檢查四類解與 BLRT。</p></li>
+<li><h3><label><input type="checkbox"> 8. 模型假設是否合理？</label></h3>
+<p><strong>方法意義</strong> 檢查局部獨立、指標分布及固定或跨類限制，必要時比較替代模型。</p>
+<p><strong>TCS 範例</strong> <span class="checklist-status" data-status="待補強">待補強</span> 投影片列出 G² = 43.47、p = .041。宜查稀疏細格與二變項殘差，並交代參數限制與替代模型。</p></li>
+<li><h3><label><input type="checkbox"> 9. 分析程序是否預先規劃？</label></h3>
+<p><strong>方法意義</strong> 事先訂定選模準則、最大類別數與停止或排除規則，區分計畫分析與探索。</p>
+<p><strong>TCS 範例</strong> <span class="checklist-status" data-status="部分具備">部分具備</span> 已比較 1–6 類。宜補充最多六類的依據、停止規則與準則不一致時的取捨。</p></li>
+<li><h3><label><input type="checkbox"> 10. 圖表是否清楚透明？</label></h3>
+<p><strong>方法意義</strong> 呈現適配度、類別比例與分類品質，區分模型估計與硬分派比例，報告不確定性。</p>
+<p><strong>TCS 範例</strong> <span class="checklist-status" data-status="部分具備">部分具備</span> 已有選模、剖面與分類品質表。宜確認各類 AvePP 與誤差矩陣，並補報標準誤或信賴區間及警告。</p></li>
+<li><h3><label><input type="checkbox"> 11. 結果能否複製並驗證？</label></h3>
+<p><strong>方法意義</strong> 用可比較樣本驗證剖面及外部關聯，校正分類誤差，保留語法、版本與重現資訊。</p>
+<p><strong>TCS 範例</strong> <span class="checklist-status" data-status="待補強">待補強</span> 跨軟體一致只能檢查估計能否重現。仍需獨立樣本驗證、外部關聯的誤差校正，以及語法、版本和種子。</p></li>
+<li><h3><label><input type="checkbox"> 12. 詮釋是否合理審慎？</label></h3>
+<p><strong>方法意義</strong> 依完整剖面命名，把類名當作摘要，避免過度宣稱固定本質、因果或最佳解。</p>
+<p><strong>TCS 範例</strong> <span class="checklist-status" data-status="待補強">待補強</span> 檢查 C5 是否主要由娛樂題界定，對照三類與四類解，交代替代解釋與限制。</p></li>
+</ol>
+<p><a href="#tcs-example">查看 TCS 範例與資料處理</a></p>
 </section>
 <section id="downloads">
 <h2>下載與來源</h2>

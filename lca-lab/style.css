@@ -410,3 +410,13 @@ main > section { margin-block: clamp(.8rem, 2vw, 1.4rem) 1.4rem; }
   .history-timeline > li { padding-left: 1.1rem; }
   .history-years { margin-left: 0; }
 }
+
+.research-checklist { padding: 0; list-style: none; }
+.research-checklist > li { border-top: 1px solid var(--line); padding: .9rem 0; }
+.research-checklist h3 { margin: 0 0 .45rem; }
+.research-checklist label { display: flex; align-items: baseline; gap: .45rem; cursor: pointer; }
+.research-checklist input { accent-color: var(--accent); flex: none; }
+.research-checklist p { margin: .3rem 0 0; max-width: 78ch; }
+.checklist-status { display: inline-block; border-radius: .25rem; padding-inline: .35rem; background: #e5eff7; color: #205577; font-size: .88em; }
+.checklist-status[data-status="已具備"] { background: #e3f2e8; color: #235b39; }
+.checklist-status[data-status="待補強"] { background: #faeee2; color: #833d25; }
