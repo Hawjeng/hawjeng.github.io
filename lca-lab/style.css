@@ -76,6 +76,10 @@ button:disabled{opacity:.55;cursor:default}
   gap: .65rem;
   margin-block: .8rem;
 }
+.profile-charts:has(> .profile-chart:nth-child(5)) {
+  grid-template-columns: repeat(5, minmax(10.5rem, 1fr));
+  overflow-x: auto;
+}
 .profile-chart {
   margin: 0;
   max-width: 23rem;
