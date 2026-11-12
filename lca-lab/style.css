@@ -52,3 +52,22 @@ thead th{background:#edf4f1}
 #references li{margin:.65rem 0}
 footer .wrap{padding-block:1.5rem}
 @media(max-width:720px){.principles,.download-grid,.lab{grid-template-columns:1fr}.hero{padding-top:2rem}}
+
+.derivation{margin-block:1.35rem}
+.derivation .math,details .math{margin-block:.55rem;border-left:3px solid #94bfb2}
+.syntax-layout{display:grid;grid-template-columns:220px minmax(0,1fr);align-items:start;gap:1rem;margin-top:1rem}
+.syntax-layout:has(.syntax-settings:not([open])){grid-template-columns:minmax(0,1fr)}
+.syntax-settings:not([open]){justify-self:start;padding:.6rem .95rem}
+.syntax-settings label{display:block;font-weight:650;margin:.8rem 0 .25rem}
+.syntax-settings select{display:block;width:100%;min-width:0}
+.syntax-settings p{margin:.8rem 0 0}
+.syntax-note{font-size:.9rem;color:#793c21}
+.code-stack{min-width:0}
+.code-panel + .code-panel{margin-top:.85rem}
+.code-panel label{display:block;margin:.7rem 0 .25rem;font-weight:650}
+.code-panel textarea{display:block;width:100%;min-height:12rem;resize:vertical;border:1px solid var(--line);border-radius:.35rem;background:#f8fbfa;color:var(--ink);padding:.75rem;font: .89rem/1.6 ui-monospace,Consolas,monospace}
+.run-command{overflow-wrap:anywhere;margin:.65rem 0}
+.run-command code{background:#e8f2ee;padding:.12rem .28rem}
+#syntax-status:empty{display:none}
+button:disabled{opacity:.55;cursor:default}
+@media(max-width:720px){.syntax-layout{grid-template-columns:minmax(0,1fr)}}
