@@ -220,3 +220,45 @@ syntaxButtons.forEach(button => button.addEventListener('click',async () => {
 }));
 
 renderSyntax();
+
+const thresholdSlider = byId('threshold-slider');
+
+function renderThreshold() {
+  const t = thresholdSlider.valueAsNumber;
+  const probabilityZero = 1 / (1 + Math.exp(-t));
+  const x = 307 + 42 * t;
+  const thresholdText = 't = ' + t.toFixed(3).replace('-', '−');
+
+  byId('threshold-guide').setAttribute('d', 'M' + x + ' 37V242');
+  byId('threshold-value').setAttribute('x', Math.min(510, Math.max(165, x)));
+  byId('threshold-value').textContent = thresholdText;
+
+  for (const [name, probability, side] of [
+    ['zero', probabilityZero, 1],
+    ['one', 1 - probabilityZero, -1]
+  ]) {
+    const y = 242 - 205 * probability;
+    const point = byId('threshold-point-' + name);
+    const label = byId('threshold-label-' + name);
+    const labelSide = x < 115 ? 1 : x > 499 ? -1 : side;
+    point.setAttribute('cx', x);
+    point.setAttribute('cy', y);
+    label.setAttribute('x', x + 12 * labelSide);
+    label.setAttribute('y', Math.min(238, Math.max(52, y + 10 * side)));
+    label.setAttribute('text-anchor', labelSide === 1 ? 'start' : 'end');
+    label.textContent = percent(probability);
+  }
+
+  byId('threshold-result').textContent = thresholdText +
+    '，P(Y = 0) = ' + percent(probabilityZero) +
+    '，P(Y = 1) = ' + percent(1 - probabilityZero);
+}
+
+thresholdSlider.addEventListener('input', renderThreshold);
+document.querySelectorAll('[data-threshold]').forEach(button => {
+  button.addEventListener('click', () => {
+    thresholdSlider.value = button.dataset.threshold;
+    renderThreshold();
+  });
+});
+renderThreshold();
