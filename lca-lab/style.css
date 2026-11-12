@@ -95,3 +95,13 @@ button:disabled{opacity:.55;cursor:default}
   fill: currentColor;
   font-size: 13px;
 }
+
+nav[aria-label="課程單元"] {
+  padding-block: .8rem;
+  border-bottom: 1px solid var(--line);
+}
+nav[aria-label="課程單元"] a[aria-current="location"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}

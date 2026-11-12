@@ -313,3 +313,27 @@ document.querySelectorAll('[data-threshold]').forEach(button => {
   });
 });
 renderThreshold();
+
+const unitNav = document.querySelector('nav[aria-label="課程單元"]');
+const courseUnits = Array.from(unitNav.links ?? unitNav.querySelectorAll('a'), link => ({
+  link,
+  section: byId(link.hash.slice(1))
+}));
+
+function showCourseUnit(scrollToUnit) {
+  const target = byId(location.hash.slice(1));
+  const active = courseUnits.find(({section}) => target && section.contains(target)) ?? courseUnits[0];
+
+  for (const unit of courseUnits) {
+    unit.section.hidden = unit !== active;
+    if (unit === active) unit.link.setAttribute('aria-current', 'location');
+    else unit.link.removeAttribute('aria-current');
+  }
+
+  if (scrollToUnit && target) {
+    (target === active.section ? unitNav : target).scrollIntoView();
+  }
+}
+
+showCourseUnit(Boolean(location.hash));
+window.addEventListener('hashchange', () => showCourseUnit(true));
