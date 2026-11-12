@@ -150,12 +150,17 @@ function renderPosterior() {
   ).join('');
 }
 
-document.querySelectorAll('[data-example]').forEach(button => {
-  button.addEventListener('click', () => {
-    current = button.dataset.example;
-    document.querySelectorAll('[data-example]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-    renderCase();
-  });
+const exampleButtons = document.querySelectorAll('[data-example]');
+
+function selectExample(example) {
+  current = example;
+  byId('tcs-example').hidden = example !== 'tcs';
+  exampleButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.example === example)));
+  renderCase();
+}
+
+exampleButtons.forEach(button => {
+  button.addEventListener('click', () => selectExample(button.dataset.example));
 });
 byId('pattern').addEventListener('change',renderPosterior);
 byId('pattern').addEventListener('submit',event => event.preventDefault());
@@ -383,6 +388,7 @@ function showCourseUnit(scrollToUnit) {
   }
 
   if (active.section.id === 'principles') showPrincipleLesson(target);
+  if (target === byId('tcs-example') && current !== 'tcs') selectExample('tcs');
 
   if (scrollToUnit && target) {
     for (let disclosure = target.closest('details'); disclosure; disclosure = disclosure.parentElement.closest('details')) {

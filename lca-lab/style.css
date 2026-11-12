@@ -264,3 +264,12 @@ nav[aria-label="課程單元"] a[aria-current="location"],
 @media (max-width: 620px) {
   .assignment-cards { grid-template-columns: minmax(0, 1fr); }
 }
+
+.tcs-background { margin-block: 1rem; }
+.tcs-background h4 { margin: 1.1rem 0 .35rem; }
+.tcs-background p { margin-block: .45rem .8rem; }
+.tcs-background ol { padding-left: 1.45rem; }
+.tcs-background li + li { margin-top: .55rem; }
+.tcs-indicators caption { text-align: left; font-weight: 650; margin-bottom: .4rem; }
+.tcs-indicators th, .tcs-indicators td { white-space: normal; }
+.tcs-indicators th:nth-child(2), .tcs-indicators td:nth-child(2) { text-align: left; }

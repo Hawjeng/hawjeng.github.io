@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="邱皓政統計異質性分析課程。操作潛在類別模型，比較後驗機率與類別剖面，下載 Mplus、R 與 Python 教材。">
 <title>潛在類別分析｜邱皓政統計異質性分析</title>
-<link rel="stylesheet" href="style.css?v=classification-lesson">
-<script src="lab.js?v=principle-lessons" defer></script>
+<link rel="stylesheet" href="style.css?v=tcs-background">
+<script src="lab.js?v=tcs-background" defer></script>
 </head>
 <body>
 <header><div class="wrap bar"><a href="../resources.html#advanced-statistics-apps">← 高階統計互動專案</a><span>邱皓政｜統計異質性分析</span></div></header>
@@ -283,6 +283,35 @@ AUXILIARY = z (BCH);</code></pre>
 <button type="button" data-example="patient" aria-pressed="true">病患示例｜3 類</button>
 <button type="button" data-example="tcs" aria-pressed="false">TCS 調查｜5 類</button>
 </div>
+<section class="panel tcs-background" id="tcs-example" aria-labelledby="tcs-background-heading" hidden>
+<h3 id="tcs-background-heading">臺灣傳播調查資料庫（TCS）</h3>
+<p><span lang="en">Taiwan Communication Survey</span> 自 2012 年起透過面訪等方式，長期記錄臺灣民眾如何使用媒體，以及媒體與人際互動、娛樂和公共生活的關係。<a href="https://tesd.survey.sinica.edu.tw/database/tcs">TCS 官方網站</a></p>
+<h4>本範例使用哪一波資料？</h4>
+<p>本例使用張卿卿（2025）釋出的第三期第三次（2024）面訪公共版《傳播與生活日常：消費、健康與娛樂》（D00265_1）。調查於 2024 年 6 月 24 日至 9 月 26 日完成 2,016 案，對象為臺灣本島年滿 18 歲、具有本國國籍的民眾。<a href="https://srda.sinica.edu.tw/search/metadata/detail/D00265_1">SRDA 資料與問卷</a> · <a href="https://doi.org/10.6141/TW-SRDA-D00265_1-1">資料 DOI</a></p>
+<h4>用哪些題目建立類別？</h4>
+<p>E13 是「上網的原因或動機」複選題。模型取前六個選項，各自編成一個二元指標。五類模型用這六題的作答組合描繪不同的上網型態。</p>
+<div class="table tcs-indicators"><table>
+<caption>六個指標的未加權觀察摘要（有效樣本 1,857 人）</caption>
+<thead><tr><th scope="col">指標</th><th scope="col">上網動機</th><th scope="col">勾選人數</th><th scope="col">勾選率</th></tr></thead>
+<tbody>
+<tr><th scope="row">Y1 <code>ve13m01</code></th><td>維繫友誼</td><td>1,566</td><td>84.3%</td></tr>
+<tr><th scope="row">Y2 <code>ve13m02</code></th><td>娛樂消遣</td><td>1,395</td><td>75.1%</td></tr>
+<tr><th scope="row">Y3 <code>ve13m03</code></th><td>時事、新聞或政府資訊</td><td>1,248</td><td>67.2%</td></tr>
+<tr><th scope="row">Y4 <code>ve13m04</code></th><td>生活休閒資訊</td><td>1,149</td><td>61.9%</td></tr>
+<tr><th scope="row">Y5 <code>ve13m05</code></th><td>理財、消費與購物</td><td>822</td><td>44.3%</td></tr>
+<tr><th scope="row">Y6 <code>ve13m06</code></th><td>工作或學習</td><td>933</td><td>50.2%</td></tr>
+</tbody></table></div>
+<p>每題的勾選率都以 1,857 人為分母。每人可勾選多項，所以各題勾選率可以合計超過 100%。</p>
+<details open><summary>資料清理與重現</summary>
+<ol>
+<li><strong>先核對題號與值標籤。</strong>取 E13 的 <code>ve13m01</code> 到 <code>ve13m06</code>，依序對應 Y1 到 Y6。「其他」與 E14 的網路消費金額未用於這個六指標模型。</li>
+<li><strong>區分未勾選與未作答。</strong>有效作答保留 1（勾選）或 0（未勾選）。原碼 96（跳答）、97（不知道）、98（拒答）與 99（遺漏）視為缺失，整理成模型輸入的 −9。</li>
+<li><strong>確認分析人數。</strong>158 筆跳答加上 1 筆拒答，共 159 筆六題皆缺失，排除後剩 1,857 筆。若重做時遇到部分題目缺失，仍可保留該筆的有效題目供模型估計。</li>
+<li><strong>分清頻數與調查權數。</strong>教材把相同作答型態合併成一列，附上出現次數。Mplus 的 <code>FREQWEIGHT</code> 在此表示作答型態的人數。重做本例可用已編碼的課堂 CSV 與 <a href="downloads/prepare-tcs.py" download>資料整理程式</a>。</li>
+</ol>
+<p>「語法與結果」的 TCS 模擬練習使用合成資料，可公開下載並重跑。這裡的樣本摘要和五類剖面來自正式課堂案例。</p>
+</details>
+</section>
 <div id="case-description"></div>
 <div class="lab">
 <article class="panel">
