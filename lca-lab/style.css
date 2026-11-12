@@ -273,3 +273,11 @@ nav[aria-label="課程單元"] a[aria-current="location"],
 .tcs-indicators caption { text-align: left; font-weight: 650; margin-bottom: .4rem; }
 .tcs-indicators th, .tcs-indicators td { white-space: normal; }
 .tcs-indicators th:nth-child(2), .tcs-indicators td:nth-child(2) { text-align: left; }
+
+.hero > h1 { margin-bottom: .15em; }
+.hero > .course-title-en:not(.eyebrow) {
+  color: var(--accent);
+  font-size: clamp(1.05rem, 2.35vw, 1.45rem);
+  font-weight: 650;
+  margin: 0 0 .6rem;
+}
