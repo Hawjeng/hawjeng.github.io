@@ -420,3 +420,19 @@ main > section { margin-block: clamp(.8rem, 2vw, 1.4rem) 1.4rem; }
 .checklist-status { display: inline-block; border-radius: .25rem; padding-inline: .35rem; background: #e5eff7; color: #205577; font-size: .88em; }
 .checklist-status[data-status="已具備"] { background: #e3f2e8; color: #235b39; }
 .checklist-status[data-status="待補強"] { background: #faeee2; color: #833d25; }
+
+.research-checklist > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: .7rem 1.25rem;
+  align-items: start;
+}
+.checklist-example {
+  padding: .6rem .8rem;
+  border-left: 2px solid var(--line);
+  background: var(--paper);
+}
+.checklist-example p { margin: 0; }
+@media (max-width: 620px) {
+  .research-checklist > li { grid-template-columns: minmax(0, 1fr); }
+}
