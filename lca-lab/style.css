@@ -71,3 +71,27 @@ footer .wrap{padding-block:1.5rem}
 #syntax-status:empty{display:none}
 button:disabled{opacity:.55;cursor:default}
 @media(max-width:720px){.syntax-layout{grid-template-columns:minmax(0,1fr)}}
+
+.profile-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: .65rem;
+  margin-block: .8rem;
+}
+.profile-chart {
+  margin: 0;
+  max-width: 23rem;
+  padding: .55rem;
+  border: 1px solid var(--line);
+  border-radius: .35rem;
+}
+.profile-chart figcaption {
+  font-weight: 650;
+  text-align: center;
+}
+.profile-chart svg {
+  display: block;
+  width: 100%;
+  fill: currentColor;
+  font-size: 13px;
+}

@@ -60,6 +60,43 @@ function renderFit() {
     }).join('') + '</tr>').join('') + '</tbody></table>';
 }
 
+function renderProfile(container, model) {
+  container.innerHTML = '<label>配對檢視類別 <select><option value="all">全部類別</option>' +
+    model.classes.map((name,k) => '<option value="'+k+'">'+name+'</option>').join('') +
+    '</select></label><div class="profile-charts"></div><div class="profile-values"></div>';
+  const selector = container.querySelector('select');
+  selector.addEventListener('change', () => renderProfileSelection(container, model, selector.value));
+  renderProfileSelection(container, model, selector.value);
+}
+
+function renderProfileSelection(container, model, selected) {
+  const visible = model.theta.map((row,k) => ({row,k}))
+    .filter(({k}) => selected === 'all' || k === Number(selected));
+  const x = j => 56 + 224 * j / (model.indicators.length - 1);
+  const y = probability => 124 - 108 * probability;
+  const grid = [0, .25, .5, .75, 1].map(probability =>
+    '<path d="M45 '+y(probability)+'H290" stroke="var(--line)"/>'+
+    '<text x="41" y="'+(y(probability)+4)+'" text-anchor="end">'+Math.round(probability*100)+'%</text>'
+  ).join('');
+  container.querySelector('.profile-charts').innerHTML = visible.map(({row,k}) => {
+    const coordinates = row.map((probability,j) => x(j)+','+y(probability)).join(' ');
+    const points = row.map((probability,j) =>
+      '<circle cx="'+x(j)+'" cy="'+y(probability)+'" r="4" fill="'+colors[k]+'"/>'+
+      '<text x="'+x(j)+'" y="145" text-anchor="middle">Y'+(j+1)+'</text>'
+    ).join('');
+    const description = row.map((probability,j) => model.indicators[j]+' '+percent(probability)).join('，');
+    return '<figure class="profile-chart"><figcaption>'+model.classes[k]+' · '+percent(model.prior[k])+'</figcaption>'+
+      '<svg viewBox="0 0 300 153" role="img" aria-label="'+model.classes[k]+'：'+description+'">'+
+      grid+'<polyline points="'+coordinates+'" fill="none" stroke="'+colors[k]+'" stroke-width="2.5"/>'+
+      points+'</svg></figure>';
+  }).join('');
+  container.querySelector('.profile-values').innerHTML = '<div class="table"><table><thead><tr><th scope="col">類別</th><th scope="col">比例 π</th>'+
+    model.indicators.map(label => '<th scope="col">'+label+'</th>').join('')+'</tr></thead><tbody>'+
+    visible.map(({row,k}) => '<tr><th scope="row">'+model.classes[k]+'</th><td>'+percent(model.prior[k])+'</td>'+
+      row.map(value => '<td><div class="mini"><span style="--value:'+100*value+'%;--ink:'+colors[k]+'"></span>'+
+      value.toFixed(3)+'</div></td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+}
+
 function renderCase() {
   const model = models[current];
   const names = ['有效 N','對數概似','AIC','BIC','saBIC','Entropy'];
@@ -84,11 +121,7 @@ function renderCase() {
     '<select id="item-'+i+'"><option value="1">1（有）</option><option value="0">0（無）</option>'+
     '<option value="">未觀察</option></select></label>').join('');
   model.pattern.forEach((value,i) => byId('item-'+i).value = value);
-  byId('profile').innerHTML = '<div class="table"><table><thead><tr><th scope="col">類別</th><th scope="col">比例 π</th>'+
-    model.indicators.map(label => '<th scope="col">'+label+'</th>').join('')+'</tr></thead><tbody>'+
-    model.theta.map((row,k) => '<tr><th scope="row">'+model.classes[k]+'</th><td>'+percent(model.prior[k])+'</td>'+
-      row.map(value => '<td><div class="mini"><span style="--value:'+100*value+'%;--ink:'+colors[k]+'"></span>'+
-      value.toFixed(3)+'</div></td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+  renderProfile(byId('profile'), model);
   renderPosterior();
 }
 
@@ -236,6 +269,8 @@ syntaxButtons.forEach(button => button.addEventListener('click',async () => {
 }));
 
 renderSyntax();
+
+renderProfile(byId('principles-profile'), models.patient);
 
 const thresholdSlider = byId('threshold-slider');
 

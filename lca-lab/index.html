@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="邱皓政統計異質性分析課程。操作潛在類別模型，比較後驗機率與類別剖面，下載 Mplus、R 與 Python 教材。">
 <title>潛在類別分析｜邱皓政統計異質性分析</title>
-<link rel="stylesheet" href="style.css?v=model-syntax">
-<script src="lab.js?v=tcs-fit-comparison" defer></script>
+<link rel="stylesheet" href="style.css?v=paired-profiles">
+<script src="lab.js?v=paired-profiles" defer></script>
 </head>
 <body>
 <header><div class="wrap bar"><a href="../resources.html#advanced-statistics-apps">← 高階統計互動專案</a><span>邱皓政｜統計異質性分析</span></div></header>
@@ -33,6 +33,11 @@
 <article><h3>潛在類別比例</h3><p>π<sub>k</sub> = P(C = k)，k = 1, …, K。π<sub>k</sub> ≥ 0，且 Σ<sub>k</sub> π<sub>k</sub> = 1。模型估計 K − 1 個獨立的類別比例。</p></article>
 <article><h3>條件反應機率</h3><p>θ<sub>jk</sub> = P(Y<sub>j</sub> = 1 | C = k)。相對地，P(Y<sub>j</sub> = 0 | C = k) = 1 − θ<sub>jk</sub>。同一類的 J 個 θ 值組成類別剖面。</p></article>
 </div>
+<details open>
+  <summary>用條件機率讀取類別剖面</summary>
+  <p>每張圖顯示給定某一類後，各題回答「有」的機率。圖的縱軸是測量參數 θ<sub>jk</sub>，類名旁的百分比則是結構參數 π<sub>k</sub>。例如第 2 類的三個症狀機率都高於 80%。選擇類別可同步查看折線圖與數值表。</p>
+  <div id="principles-profile"></div>
+</details>
 <div class="derivation">
 <h3>由局部獨立到混合模型</h3>
 <p>局部獨立假設給定類別 C 後，各指標的聯合機率可拆成題目機率的乘積。若忽略 C，指標仍可因類別組成不同而相關。</p>
@@ -155,7 +160,7 @@
 </div>
 <div class="panel profile">
 <h3>類別剖面</h3>
-<p>讀取各類的 P(Y<sub>j</sub> = 1 | C = k)，並比較指標之間的高低。下表的 1 對應 Mplus 機率表的 Category 2。</p>
+<p>讀取各類的 P(Y<sub>j</sub> = 1 | C = k)，並比較指標之間的高低。圖中的 Y1、Y2 等依序對應表中的指標欄。作答為 1 對應 Mplus 機率表的 Category 2。</p>
 <div id="profile"></div>
 </div>
 </section>
