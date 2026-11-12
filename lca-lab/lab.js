@@ -353,6 +353,21 @@ const courseUnits = Array.from(unitNav.links ?? unitNav.querySelectorAll('a'), l
   section: byId(link.hash.slice(1))
 }));
 
+const lessonNav = document.querySelector('.lesson-links');
+const principleLessons = Array.from(lessonNav.querySelectorAll('a'), link => ({
+  link,
+  section: byId(link.hash.slice(1))
+}));
+
+function showPrincipleLesson(target) {
+  const selected = principleLessons.find(({section}) => target && section.contains(target)) ?? principleLessons[0];
+  for (const lesson of principleLessons) {
+    lesson.section.hidden = lesson !== selected;
+    if (lesson === selected) lesson.link.setAttribute('aria-current', 'location');
+    else lesson.link.removeAttribute('aria-current');
+  }
+}
+
 function showCourseUnit(scrollToUnit) {
   const target = byId(location.hash.slice(1));
   const active = courseUnits.find(({section}) => target && section.contains(target)) ?? courseUnits[0];
@@ -363,11 +378,14 @@ function showCourseUnit(scrollToUnit) {
     else unit.link.removeAttribute('aria-current');
   }
 
+  if (active.section.id === 'principles') showPrincipleLesson(target);
+
   if (scrollToUnit && target) {
     for (let disclosure = target.closest('details'); disclosure; disclosure = disclosure.parentElement.closest('details')) {
       disclosure.open = true;
     }
-    (target === active.section ? unitNav : target).scrollIntoView();
+    const destination = target === active.section ? unitNav : target.classList.contains('lesson-panel') ? lessonNav : target;
+    destination.scrollIntoView();
   }
 }
 

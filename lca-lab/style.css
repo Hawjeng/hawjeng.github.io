@@ -104,12 +104,6 @@ nav[aria-label="課程單元"] a[aria-current="location"] {
   color: white;
 }
 
-.lesson-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .4rem 1rem;
-  margin-block: 0 1.1rem;
-}
 .model-overview {
   display: grid;
   grid-template-columns: minmax(15rem, 2fr) minmax(0, 3fr);
@@ -168,3 +162,49 @@ nav[aria-label="課程單元"] a[aria-current="location"] {
 .threshold-legend li { display: flex; align-items: center; gap: .5rem; }
 .threshold-legend span { width: 2rem; border-top: 3px solid #126960; }
 .threshold-legend li + li span { border-top: 3px dashed #a14f2c; }
+
+nav[aria-label="課程單元"],
+.lesson-links {
+  gap: .25rem;
+  padding: 0;
+  border-bottom: 1px solid var(--line);
+}
+nav[aria-label="課程單元"] a,
+.lesson-links a {
+  margin-bottom: -1px;
+  padding: .65rem clamp(.6rem, 1.5vw, 1.05rem);
+  background: transparent;
+  border: 1px solid transparent;
+  border-top: 3px solid transparent;
+  border-radius: .45rem .45rem 0 0;
+  white-space: nowrap;
+}
+nav[aria-label="課程單元"] a[aria-current="location"],
+.lesson-links a[aria-current="location"] {
+  background: var(--white);
+  border-color: var(--line);
+  border-top-color: var(--accent);
+  border-bottom-color: var(--white);
+  color: var(--accent);
+}
+.lesson-frame {
+  margin-top: 1.4rem;
+  padding: clamp(.75rem, 2.6vw, 1.8rem);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: .7rem;
+}
+.lesson-panel {
+  padding: clamp(1rem, 2.5vw, 1.65rem) 0 0;
+  border: 0;
+}
+.lesson-panel > h3 { font-size: clamp(1.2rem, 2vw, 1.55rem); }
+.lesson-panel > .model-overview { background: var(--paper); }
+@media (max-width: 620px) {
+  nav[aria-label="課程單元"], .lesson-links {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: .2rem .2rem 0;
+  }
+  nav[aria-label="課程單元"] a, .lesson-links a { margin-bottom: 0; }
+}
