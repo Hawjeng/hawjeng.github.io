@@ -1,14 +1,15 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const f=v=>v===null||Number.isNaN(v)||v===undefined?'—':v===Infinity?'∞':Math.abs(v)>=10000?v.toExponential(3):Number(v.toFixed(4)).toString();
+const decimal = new Intl.NumberFormat('en-US', {useGrouping:false, maximumFractionDigits:4});
+const f=v=>v==null||Number.isNaN(v)?'—':decimal.format(v===0?0:v);
 const p=v=>v==null?'—':v<.0001?'< .0001':v.toFixed(4).replace(/^0/,'');
 const data=globalThis.LAB_DATA;
 const tabs=[['theory','原理說明'],['book','課本範例'],['survey','調查研究'],['exercise','習作詳解'],['manual','自行輸入'],['r-code','R 與 Python 語法'],['downloads','下載與來源']];
 const options=(xs)=>xs.map(([v,n])=>'<option value="'+esc(v)+'">'+esc(n)+'</option>').join('');
 const field=(id,title,inner)=>'<label>'+title+'<select id="'+id+'">'+inner+'</select></label>';
 const alpha=()=>field('alpha','顯著水準 α',options([['.05','0.05'],['.01','0.01'],['.10','0.10']]));
-const table=(heads,rows,cap='',hit=()=>false)=>'<div class="table"><table>'+(cap?'<caption>'+esc(cap)+'</caption>':'')+'<thead><tr>'+heads.map(x=>'<th scope="col">'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+rows.map((r,i)=>'<tr>'+r.map((x,j)=>'<td'+(hit(i,j)?' class="hit"':'')+'>'+esc(x)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+const table=(heads,rows,cap='',hit=()=>false,tableClass='')=>'<div class="table"><table'+(tableClass?' class="'+tableClass+'"':'')+'>'+(cap?'<caption>'+esc(cap)+'</caption>':'')+'<thead><tr>'+heads.map(x=>'<th scope="col">'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+rows.map((r,i)=>'<tr>'+r.map((x,j)=>'<td'+(hit(i,j)?' class="hit"':'')+'>'+esc(x)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
 const card=(s)=>'<div class="card">'+s+'</div>';
 const heading=s=>'<h2 id="section-title">'+s+'</h2>';
 const csv=(h,r)=>[h,...r].map(row=>row.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n');
@@ -236,7 +237,7 @@ function show(res,a){
   return apaResult(zh,en,apaF(z.df,z.df2,z.f),z.p,a,'',z.eta);
  }).join('');
  const summary=table(['變異來源','SS','df','MS','F','p','F 臨界值','偏 η²'],
-  res.terms.map(z=>[z.name==='組內誤差'?'組內（誤差）':z.name,f(z.s),z.df,f(z.ms),f(z.f),p(z.p),f(z.crit),f(z.eta)]),'變異數分析摘要表');
+  res.terms.map(z=>[z.name==='組內誤差'?'組內（誤差）':z.name,f(z.s),z.df,f(z.ms),f(z.f),p(z.p),f(z.crit),f(z.eta)]),'變異數分析摘要表',undefined,'anova-summary');
  let html=overview;
  if(res.profile)html+=table(['A 水準',...res.profile.bs,'A 邊際平均'],[...res.profile.M.map((r,i)=>[res.profile.as[i],...r.map(f),f(avg(r))]),['B 邊際平均',...res.profile.bs.map((_,j)=>f(avg(res.profile.M.map(r=>r[j])))),f(avg(res.profile.M.flat()))]],'細格與邊際平均');
  html+=(res.methodNote??'')+sumsOfSquares(res)+'<h3>F 檢定</h3>'+fSteps(res,a)+interpretation+summary;
