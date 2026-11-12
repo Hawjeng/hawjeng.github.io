@@ -1,0 +1,18 @@
+TITLE: Synthetic six-indicator latent class analysis with grouped patterns;
+DATA: FILE = tcs-demo-patterns.dat;
+VARIABLE:
+    NAMES = Y1-Y6 n;
+    USEVARIABLES = Y1-Y6;
+    CATEGORICAL = Y1-Y6;
+    FREQWEIGHT = n;
+    MISSING = ALL (-9);
+    CLASSES = c(5);
+ANALYSIS:
+    TYPE = MIXTURE;
+    STARTS = 1000 200;
+    STITERATIONS = 20;
+OUTPUT:
+    TECH1 TECH8;
+PLOT:
+    TYPE = PLOT3;
+    SERIES = Y1-Y6 (*);
