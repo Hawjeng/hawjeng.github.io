@@ -107,8 +107,8 @@
     </div>
   </figcaption>
 </figure>
-<p>以第 K 類為參照時，類別截距 γ<sub>k</sub> 可轉換成類別比例：</p>
-<div class="math">π<sub>k</sub> = exp(γ<sub>k</sub>) / Σ<sub>h</sub> exp(γ<sub>h</sub>)，γ<sub>K</sub> = 0</div>
+<p>以第 K 類為參照時，類別截距 α<sub>k</sub> 可轉換成類別比例：</p>
+<div class="math">π<sub>k</sub> = exp(α<sub>k</sub>) / Σ<sub>h</sub> exp(α<sub>h</sub>)，α<sub>K</sub> = 0</div>
 <p>也可直接讀 <span lang="en">Results in Probability Scale</span> 的 Category 2 與 <span lang="en">Based on the Estimated Model</span> 的類別比例。</p>
 </details>
 
@@ -181,14 +181,16 @@
 <h5>模型需要估計多少參數？</h5>
 <div class="math fit-equation">自由參數數目　<i>q</i> = (K − 1) + KJ</div>
 <ul>
-<li><strong>K − 1 個結構參數。</strong>K 個類別比例加總為 1。知道前 K − 1 個比例後，最後一類的比例就能算出來。</li>
+<li><strong>K − 1 個類別截距 α，用來估計分組比重。</strong>以第 K 類為參照，固定 α<sub>K</sub> = 0。其餘每個 α<sub>k</sub> 是第 k 類相對於參照類的對數勝算。用這 K − 1 個自由截距換算出 K 個類別比例 π<sub>k</sub>，比例總和為 1。</li>
 <li><strong>KJ 個測量參數。</strong>每一類的每一題估一個「回答 1」的機率。「回答 0」的機率用 1 減去它即可得到，因此 K 類乘上 J 題，共 KJ 個。</li>
 </ul>
+<div class="math fit-equation">類別截距　α<sub>k</sub> = log(π<sub>k</sub> / π<sub>K</sub>)，k = 1, …, K − 1</div>
+<div class="math fit-equation">類別比例　π<sub>k</sub> = exp(α<sub>k</sub>) / Σ<sub>h = 1</sub><sup>K</sup> exp(α<sub>h</sub>)，α<sub>K</sub> = 0</div>
 <h5>反應表能提供多少獨立機率？</h5>
 <div class="math fit-equation">獨立反應型態機率數目　2<sup>J</sup> − 1</div>
 <p>每題可答 0 或 1，J 題共有 2<sup>J</sup> 種完整作答組合。這些組合的機率總和等於 1，知道其中 2<sup>J</sup> − 1 種機率後，最後一種就能算出來。</p>
 <h5>代入病患範例</h5>
-<div class="math fit-equation">模型要估的參數　(3 − 1) + 3 × 3 = 11</div>
+<div class="math fit-equation">模型要估的參數　2 個 α 截距 + 9 個條件反應機率 = 11</div>
 <div class="math fit-equation">反應表提供的獨立機率　2<sup>3</sup> − 1 = 7</div>
 <p>11 大於 7，因此不同的參數組合可以產生相同的反應型態機率。即使程式收斂，資料也無法唯一決定這個無限制三類模型的參數。若自由參數數目小於或等於 7，則通過這個計數檢查，還需要檢查模型本身是否可識別。</p>
 </div>
