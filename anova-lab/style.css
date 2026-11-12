@@ -21,3 +21,12 @@
 .survey-controls:not([open]){justify-self:start;padding-block:.5rem}
 
 .syntax-layout:has(>.syntax-settings:not([open])){grid-template-columns:minmax(0,1fr)} .syntax-settings[open]>summary{margin-bottom:12px}
+
+.exercise-controls > summary { cursor: pointer; font-weight: 700; }
+.exercise-controls[open] > summary { margin-bottom: 12px; }
+.exercise-controls:not([open]) { justify-self: start; padding-block: .5rem; }
+.chart-download { display: inline-block; margin-top: .5rem; }
+@media (min-width: 761px) {
+ .grid.exercise-layout { grid-template-columns: 220px minmax(0, 1fr); }
+ .grid.exercise-layout:has(> .exercise-controls:not([open])) { grid-template-columns: minmax(0, 1fr); }
+}
