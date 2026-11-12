@@ -199,30 +199,33 @@ function setCommand(language, command) {
   byId(language+'-command').replaceChildren(code);
 }
 
-async function renderRReport(example, classes, revision) {
-  const status = byId('r-report-status');
-  const output = byId('r-report-output');
-  const guide = byId('r-report-guide');
+const reportRuntimes = {
+  mplus: 'Mplus 9.1.1 · 原生輸出節錄',
+  r: 'R 4.6.1 · 24 組隨機起始值',
+  python: 'Python 3.13.5 · 24 組隨機起始值'
+};
+
+async function renderSoftwareReport(language, example, classes, revision) {
+  const status = byId(language+'-report-status');
+  const output = byId(language+'-report-output');
   output.hidden = true;
-  guide.hidden = true;
 
   if (example === 'tcs') {
-    status.textContent = '正式 TCS 的 R 報表需使用授權資料。請以上方的 R 指令在本機執行，或切換至 TCS 模擬案例查看同一類別數的公開報表。';
+    status.textContent = '正式 TCS 需使用授權資料。可依上方說明在本機執行，或切換至 TCS 模擬案例查看公開報表。';
     return;
   }
 
-  status.textContent = '載入 R 報表中…';
+  status.textContent = '載入報表中…';
   try {
-    const reports = JSON.parse(await loadSyntaxFile('r-reports.json'));
+    const reports = JSON.parse(await loadSyntaxFile(language+'-reports.json'));
     if (revision !== syntaxRevision) return;
     const report = reports[example]?.[classes];
-    if (!report) throw new Error('Missing R report');
+    if (!report) throw new Error('Missing software report');
     output.textContent = report;
-    status.textContent = classes + ' 類模型 · R 4.6.1 實跑 · 24 組隨機起始值';
+    status.textContent = classes + ' 類模型 · ' + reportRuntimes[language];
     output.hidden = false;
-    guide.hidden = false;
   } catch {
-    if (revision === syntaxRevision) status.textContent = 'R 報表載入失敗。可使用上方指令在本機產生報表。';
+    if (revision === syntaxRevision) status.textContent = '報表載入失敗。可依上方說明在本機產生報表。';
   }
 }
 
@@ -248,8 +251,10 @@ async function renderSyntax() {
   for (const language of Object.keys(syntaxFiles)) byId(language+'-source').value = '';
   setCommand('mplus','在 Mplus 開啟 '+mplusFile+'，與資料檔放在同一資料夾。');
   setCommand('r','Rscript lca.R '+example+' '+classes);
-  renderRReport(example, classes, revision);
   setCommand('python','python lca.py '+example+' '+classes);
+  for (const language of Object.keys(reportRuntimes)) {
+    renderSoftwareReport(language, example, classes, revision);
+  }
   syntaxStatus.textContent = '載入語法中…';
   try {
     const [mplus, r, python] = await Promise.all([mplusFile, 'lca.R', 'lca.py'].map(loadSyntaxFile));
@@ -325,12 +330,12 @@ function renderThreshold() {
     label.setAttribute('x', x + 12 * labelSide);
     label.setAttribute('y', Math.min(238, Math.max(52, y + 10 * side)));
     label.setAttribute('text-anchor', labelSide === 1 ? 'start' : 'end');
-    label.textContent = percent(probability);
+    label.textContent = probability.toFixed(3);
   }
 
   byId('threshold-result').textContent = thresholdText +
-    '，P(Y = 0) = ' + percent(probabilityZero) +
-    '，P(Y = 1) = ' + percent(1 - probabilityZero);
+    '，P(Y = 0) = ' + probabilityZero.toFixed(3) +
+    '，P(Y = 1) = ' + (1 - probabilityZero).toFixed(3);
 }
 
 thresholdSlider.addEventListener('input', renderThreshold);
