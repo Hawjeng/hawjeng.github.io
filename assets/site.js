@@ -41,7 +41,7 @@
       let visible = 0;
       items.forEach(item => {
         const match = (category === 'all' || item.dataset.category === category) &&
-          item.textContent.toLocaleLowerCase().includes(query);
+          (item.textContent + ' ' + (item.dataset.search || '')).toLocaleLowerCase().includes(query);
         item.hidden = !match;
         if (match) visible++;
       });

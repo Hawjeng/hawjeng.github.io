@@ -198,20 +198,29 @@ def talks_page():
     title = '演講授課'
     intro = '2010 年起的演講、研習工作坊與授課紀錄。可依年份篩選，或搜尋機構與活動題目。'
     years = list(dict.fromkeys(talk['date'][:4] for talk in TALKS))
-    rows = []
+    rows_by_year = {year: [] for year in years}
     for talk in TALKS:
         date = talk['date']
-        rows.append(
-            f'<article class="timeline-row talk-row" data-category="{E(date[:4])}">'
-            f'<div class="period">{E(date)}</div>'
+        year, month, days = date.split('/', 2)
+        days = re.sub(r',0?(\d{1,2})/', r'日、\1 月 ', days) if '/' in days else days.replace(',', '、')
+        days = days.lstrip('0').replace('-', '–')
+        rows_by_year[year].append(
+            f'<article class="timeline-row talk-row" data-category="{E(year)}" data-search="{E(date)}">'
+            f'<div class="period talk-date"><strong>{int(month)}</strong><span>月 {E(days)} 日</span></div>'
             f'<div class="talk-details"><h3>{E(talk["title"])}</h3>'
             f'<p><span class="talk-institution-label">單位</span> {E(talk["institution"])}</p></div></article>'
         )
+    groups = ''.join(
+        f'<section class="talk-year" aria-labelledby="talk-year-{E(year)}">'
+        f'<h2 id="talk-year-{E(year)}">{E(year)} 年</h2>'
+        f'{"".join(rows)}</section>'
+        for year, rows in rows_by_year.items()
+    )
     body = heading('Talks & workshops', title, 'Talks, workshops & lectures', intro)
     body += f"""<div class="container">
   {toolbar(years, '筆紀錄', '機構、題目或日期', '年份')}
   <section class="catalog-content" aria-label="演講、研習與授課紀錄">
-    <div class="timeline">{''.join(rows)}</div>
+    <div class="talk-years">{groups}</div>
     <p id="empty-results" class="empty-results" hidden>沒有符合的紀錄，請更換關鍵字或年份。</p>
     <p class="source-note">資料來源為{ext(S['cv'] + '#page=16', '學術履歷第 16–19 頁')}。</p>
   </section>

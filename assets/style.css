@@ -36,3 +36,11 @@
 .talk-row .talk-details p{margin-top:.38rem;color:var(--muted)}
 .talk-institution-label{font-weight:600;color:var(--blue);margin-right:.35em}
 @media(max-width:760px){.talk-row{grid-template-columns:minmax(0,1fr);gap:.35rem}}
+
+.talk-year + .talk-year{margin-top:1.5rem}
+.talk-year:not(:has(.talk-row:not([hidden]))){display:none}
+.talk-year h2{padding:.55rem .85rem;background:var(--blue-soft);border-left:3px solid var(--blue);color:var(--ink);font-size:1.12rem}
+
+.talk-date{display:flex;align-items:baseline;gap:.4rem;flex-wrap:wrap}
+.talk-date strong{font:400 1.85rem/1 Georgia,serif;font-variant-numeric:lining-nums tabular-nums}
+.talk-date span{font-weight:500}
