@@ -202,9 +202,10 @@ def talks_page():
     for talk in TALKS:
         date = talk['date']
         rows.append(
-            f'<article class="timeline-row" data-category="{E(date[:4])}">'
+            f'<article class="timeline-row talk-row" data-category="{E(date[:4])}">'
             f'<div class="period">{E(date)}</div>'
-            f'<h3>{E(talk["description"])}</h3></article>'
+            f'<div class="talk-details"><h3>{E(talk["title"])}</h3>'
+            f'<p><span class="talk-institution-label">單位</span> {E(talk["institution"])}</p></div></article>'
         )
     body = heading('Talks & workshops', title, 'Talks, workshops & lectures', intro)
     body += f"""<div class="container">
