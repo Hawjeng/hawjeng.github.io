@@ -215,9 +215,16 @@ def talks_page():
         f'{"".join(rows)}</section>'
         for year, rows in rows_by_year.items()
     )
+    year_options = ''.join(f'<option value="{E(year)}">{E(year)} 年</option>' for year in years)
     body = heading('Talks & workshops', title, 'Talks, workshops & lectures', intro)
     body += f"""<div class="container">
-  {toolbar(years, '筆紀錄', '機構、題目或日期', '年份')}
+  <div class="catalog-toolbar talks-toolbar" data-filters data-unit="篇" data-count-prefix="合計 ">
+    <label for="talk-year-filter" class="sr-only">年份</label>
+    <select id="talk-year-filter" data-filter-select><option value="all">全部</option>{year_options}</select>
+    <label for="catalog-search" class="sr-only">搜尋演講授課</label>
+    <input id="catalog-search" type="search" placeholder="搜尋機構、題目或日期" autocomplete="off">
+    <p id="result-count" class="result-count" role="status" aria-live="polite"></p>
+  </div>
   <section class="catalog-content" aria-label="演講、研習與授課紀錄">
     <div class="talk-years">{groups}</div>
     <p id="empty-results" class="empty-results" hidden>沒有符合的紀錄，請更換關鍵字或年份。</p>

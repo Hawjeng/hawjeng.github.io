@@ -44,3 +44,8 @@
 .talk-date{display:flex;align-items:baseline;flex-wrap:wrap}
 .talk-date strong{font:400 1.85rem/1 Georgia,serif;font-variant-numeric:lining-nums tabular-nums}
 .talk-date span{font-weight:500}
+
+.talks-toolbar{display:grid;grid-template-columns:auto minmax(0,22rem) auto;align-items:center;justify-content:start;gap:10px;padding-block:16px}
+.talks-toolbar select,.talks-toolbar input{min-width:0;min-height:40px;padding:6px 9px;border:1px solid var(--line);border-radius:4px;background:var(--white);color:var(--ink);font:inherit;font-size:.88rem}
+.talks-toolbar .result-count{font-size:.8rem}
+@media(max-width:420px){.talks-toolbar{gap:6px}.talks-toolbar input{font-size:.8rem}}

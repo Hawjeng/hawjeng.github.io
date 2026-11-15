@@ -35,7 +35,8 @@
     const search = document.querySelector('#catalog-search');
     const count = document.querySelector('#result-count');
     const empty = document.querySelector('#empty-results');
-    let category = 'all';
+    const select = filters.querySelector('[data-filter-select]');
+    let category = select?.value || 'all';
     const apply = () => {
       const query = (search?.value || '').trim().toLocaleLowerCase();
       let visible = 0;
@@ -45,7 +46,7 @@
         item.hidden = !match;
         if (match) visible++;
       });
-      if (count) count.textContent = `${visible} ${filters.dataset.unit || '項結果'}`;
+      if (count) count.textContent = `${filters.dataset.countPrefix || ''}${visible} ${filters.dataset.unit || '項結果'}`;
       if (empty) empty.hidden = visible !== 0;
     };
     filters.addEventListener('click', e => {
@@ -53,6 +54,10 @@
       if (!button) return;
       category = button.dataset.filter;
       filters.querySelectorAll('[data-filter]').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+      apply();
+    });
+    select?.addEventListener('change', () => {
+      category = select.value;
       apply();
     });
     search?.addEventListener('input', apply);
