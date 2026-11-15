@@ -142,11 +142,23 @@ def paper_row(p, full=True):
 def focus_cards():
     return ''.join(f'<article class="research-card"><span class="number">0{i}</span><h3>{E(t)}</h3><span class="research-en" lang="en">{E(en)}</span><p>{E(text)}</p></article>' for i,(t,en,text) in enumerate(FOCI,1))
 
-def timeline(items):
-    def period(item):
-        return re.sub(r'(?<=\d{4}\.)0(?=[1-9]\b)', '', item['period'])
+def timeline(items, bilingual=False):
+    rows = []
+    for item in items:
+        period = re.sub(r'(?<=\d{4}\.)0(?=[1-9]\b)', '', item['period'])
+        institution = E(item['institution'])
+        if item.get('institutionUrl'):
+            institution = ext(item['institutionUrl'], item['institution'], '')
+        detail = item.get('detail', '')
+        notes = f'<p>{E(detail)}</p>' if detail and (not bilingual or re.search(r'[\u3400-\u9fff]', detail)) else ''
+        if bilingual:
+            notes += f'<p lang="en">{E(item["detailEn"])}</p>'
+        rows.append(
+            f'<div class="timeline-row"><div class="period">{E(period)}</div>'
+            f'<div><h3>{institution} · {E(item["title"])}</h3>{notes}</div></div>'
+        )
+    return '<div class="timeline">' + ''.join(rows) + '</div>'
 
-    return '<div class="timeline">'+''.join(f'<div class="timeline-row"><div class="period">{E(period(i))}</div><div><h3>'+(ext(i['institutionUrl'],i['institution'],'') if i.get('institutionUrl') else E(i['institution']))+f' · {E(i["title"])}</h3>'+(f'<p>{E(i["detail"])}</p>' if i.get('detail') else '')+'</div></div>' for i in items)+'</div>'
 
 def degree_credential():
     chinese = ext(D['institutionUrl'], D['institution'] + D['title'], 'appointment-link') if D.get('institutionUrl') else E(D['institution'] + D['title'])
@@ -194,7 +206,7 @@ def research_page():
 
 def about_page():
     body = heading('About','學經歷','Hawjeng Chiou, Ph.D.','國立臺灣師範大學企業管理學系特聘教授、教育心理與輔導學系合聘教授、中央研究院人文社會科學研究中心合聘研究員。美國南加州大學心理計量學博士。')
-    body += f'<div class="container about-layout"><aside class="about-sidebar"><img src="assets/images/hawjeng4.jpg" width="542" height="747" alt="邱皓政在統計方法講座中演講"><div><h2>邱皓政</h2><p lang="en">Hawjeng Chiou, Ph.D.</p><p>研究、教學與專書寫作</p></div>{ext(S["cv"],"完整履歷 PDF","button")}</aside><div><section class="about-section"><h2>教育背景</h2>{timeline(P["education"])}</section><section class="about-section"><h2>主要學術經歷</h2>{timeline([R,*P["career"]])}</section><section class="about-section"><h2>學術與行政服務</h2>{timeline(P["service"])}</section></div></div>'
+    body += f'<div class="container about-layout"><aside class="about-sidebar"><img src="assets/images/hawjeng4.jpg" width="542" height="747" alt="邱皓政在統計方法講座中演講"><div><h2>邱皓政</h2><p lang="en">Hawjeng Chiou, Ph.D.</p><p>研究、教學與專書寫作</p></div>{ext(S["cv"],"完整履歷 PDF","button")}</aside><div><section class="about-section"><h2>教育背景</h2>{timeline(P["education"], bilingual=True)}</section><section class="about-section"><h2>主要學術經歷</h2>{timeline([R,*P["career"]], bilingual=True)}</section><section class="about-section"><h2>學術與行政服務</h2>{timeline(P["service"], bilingual=True)}</section></div></div>'
     return page('about.html','個人介紹與學經歷','邱皓政的心理計量學背景、中央研究院人文社會科學研究中心合聘研究員職務、統計方法專書、教育背景與學術經歷。',body)
 
 def talks_page():
