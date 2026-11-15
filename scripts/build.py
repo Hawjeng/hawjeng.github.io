@@ -150,12 +150,15 @@ def timeline(items, bilingual=False):
         if item.get('institutionUrl'):
             institution = ext(item['institutionUrl'], item['institution'], '')
         detail = item.get('detail', '')
-        notes = f'<p>{E(detail)}</p>' if detail and (not bilingual or re.search(r'[\u3400-\u9fff]', detail)) else ''
+        inline_detail = ''
+        notes = f'<p>{E(detail)}</p>' if detail else ''
         if bilingual:
-            notes += f'<p lang="en">{E(item["detailEn"])}</p>'
+            if re.search(r'[\u3400-\u9fff]', detail):
+                inline_detail = f' <small class="timeline-detail">{E(detail)}</small>'
+            notes = f'<p lang="en">{E(item["detailEn"])}</p>'
         rows.append(
             f'<div class="timeline-row"><div class="period">{E(period)}</div>'
-            f'<div><h3>{institution} · {E(item["title"])}</h3>{notes}</div></div>'
+            f'<div><h3>{institution} · {E(item["title"])}{inline_detail}</h3>{notes}</div></div>'
         )
     return '<div class="timeline">' + ''.join(rows) + '</div>'
 

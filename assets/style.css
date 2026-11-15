@@ -53,3 +53,5 @@
 .about-layout .timeline-row{grid-template-columns:minmax(7.5rem,max-content) minmax(0,1fr)}
 .about-layout .timeline-row .period{white-space:nowrap}
 @media(max-width:480px){.about-layout .timeline-row{grid-template-columns:minmax(0,1fr);gap:4px}}
+
+.timeline-detail{margin-inline-start:.5em;color:var(--muted);font-size:.88em;font-weight:400}
