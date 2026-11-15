@@ -57,7 +57,7 @@ def header(active, prefix):
     nav += ext(S['cv'], 'VITA', '')
     return f'''<a class="skip-link" href="#main">跳到主要內容</a>
 <header class="site-header"><div class="container header-inner">
-<a class="brand" href="{prefix}index.html" aria-label="邱皓政，回首頁"><span class="brand-mark" aria-hidden="true">Hc</span><span class="brand-name">邱皓政<span class="brand-en">HAWJENG CHIOU</span></span></a>
+<a class="brand" href="{prefix}index.html" aria-label="邱皓政，回首頁"><span class="brand-name">邱皓政<span class="brand-en">HAWJENG CHIOU</span></span></a>
 <button class="menu-toggle" type="button" aria-controls="primary-nav" aria-expanded="false" aria-label="開啟導覽選單">選單</button>
 <nav id="primary-nav" class="primary-nav" aria-label="主要導覽">{nav}<a class="nav-contact" href="#contact">聯繫</a></nav></div></header>'''
 
