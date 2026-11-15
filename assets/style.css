@@ -31,7 +31,7 @@
 .preface-body p{font-size:clamp(1rem,.95rem + .25vw,1.125rem);line-height:1.9}
 .preface-body p+p{margin-top:1.15em}
 
-.talk-row{grid-template-columns:10rem minmax(0,1fr)}
+.talk-row{grid-template-columns:5.75rem minmax(0,1fr);column-gap:12px}
 .talk-row .talk-details h3{font-size:1.08rem;line-height:1.55;overflow-wrap:anywhere}
 .talk-row .talk-details p{margin-top:.38rem;color:var(--muted)}
 .talk-institution-label{font-weight:600;color:var(--blue);margin-right:.35em}
