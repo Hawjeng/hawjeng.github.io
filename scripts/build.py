@@ -143,7 +143,10 @@ def focus_cards():
     return ''.join(f'<article class="research-card"><span class="number">0{i}</span><h3>{E(t)}</h3><span class="research-en" lang="en">{E(en)}</span><p>{E(text)}</p></article>' for i,(t,en,text) in enumerate(FOCI,1))
 
 def timeline(items):
-    return '<div class="timeline">'+''.join(f'<div class="timeline-row"><div class="period">{E(i["period"])}</div><div><h3>'+(ext(i['institutionUrl'],i['institution'],'') if i.get('institutionUrl') else E(i['institution']))+f' · {E(i["title"])}</h3>'+(f'<p>{E(i["detail"])}</p>' if i.get('detail') else '')+'</div></div>' for i in items)+'</div>'
+    def period(item):
+        return re.sub(r'(?<=\d{4}\.)0(?=[1-9]\b)', '', item['period'])
+
+    return '<div class="timeline">'+''.join(f'<div class="timeline-row"><div class="period">{E(period(i))}</div><div><h3>'+(ext(i['institutionUrl'],i['institution'],'') if i.get('institutionUrl') else E(i['institution']))+f' · {E(i["title"])}</h3>'+(f'<p>{E(i["detail"])}</p>' if i.get('detail') else '')+'</div></div>' for i in items)+'</div>'
 
 def degree_credential():
     chinese = ext(D['institutionUrl'], D['institution'] + D['title'], 'appointment-link') if D.get('institutionUrl') else E(D['institution'] + D['title'])

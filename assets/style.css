@@ -49,3 +49,7 @@
 .talks-toolbar select,.talks-toolbar input{min-width:0;min-height:40px;padding:6px 9px;border:1px solid var(--line);border-radius:4px;background:var(--white);color:var(--ink);font:inherit;font-size:.88rem}
 .talks-toolbar .result-count{font-size:.8rem}
 @media(max-width:420px){.talks-toolbar{gap:6px}.talks-toolbar input{font-size:.8rem}}
+
+.about-layout .timeline-row{grid-template-columns:minmax(7.5rem,max-content) minmax(0,1fr)}
+.about-layout .timeline-row .period{white-space:nowrap}
+@media(max-width:480px){.about-layout .timeline-row{grid-template-columns:minmax(0,1fr);gap:4px}}
