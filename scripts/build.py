@@ -20,6 +20,7 @@ BOOKS = json.loads((ROOT / 'data/books.json').read_text(encoding='utf-8-sig'))
 BOOK_ARCHIVE = json.loads((ROOT / 'data/books-archive.json').read_text(encoding='utf-8'))
 PROJECTS = json.loads((ROOT / 'data/projects.json').read_text(encoding='utf-8-sig'))
 RESOURCES = json.loads((ROOT / 'data/resources.json').read_text(encoding='utf-8-sig'))
+TALKS = json.loads((ROOT / 'data/talks.json').read_text(encoding='utf-8'))
 E = lambda value: escape(str(value or ''), quote=True)
 
 def url(value):
@@ -39,8 +40,21 @@ FOCI = [
 ]
 
 def header(active, prefix):
-    links = [('index.html','首頁'),('books.html','專書著作'),('research.html','研究'),('about.html','學經歷'),('resources.html','教學與專案')]
-    nav = ''.join(f'<a href="{prefix}{path}"'+(' aria-current="page"' if path == active else '')+f'>{title}</a>'+(ext(S['cv'], 'VITA', '') if path == 'about.html' else '') for path,title in links)
+    links = [
+        ('index.html', '首頁'),
+        ('about.html', '學經歷'),
+        ('research.html', '研究'),
+        ('books.html', '專書著作'),
+        ('talks.html', '演講授課'),
+        ('resources.html', '教學與專案'),
+    ]
+    nav = ''.join(
+        f'<a href="{prefix}{path}"'
+        + (' aria-current="page"' if path == active else '')
+        + f'>{title}</a>'
+        for path, title in links
+    )
+    nav += ext(S['cv'], 'VITA', '')
     return f'''<a class="skip-link" href="#main">跳到主要內容</a>
 <header class="site-header"><div class="container header-inner">
 <a class="brand" href="{prefix}index.html" aria-label="邱皓政，回首頁"><span class="brand-mark" aria-hidden="true">Hc</span><span class="brand-name">邱皓政<span class="brand-en">HAWJENG CHIOU</span></span></a>
@@ -151,9 +165,9 @@ def home():
 <div class="container"><section class="section">{section_heading('Recent publications','近期研究','research.html#publications','精選論文完整資訊','2025–2026 年精選期刊論文。')}<div class="papers-list">{''.join(paper_row(p,False) for p in P['papers'][:4])}</div></section><section class="section split-section"><div>{section_heading('Academic background','學術歷程','about.html','完整學經歷')}{timeline([R,P['career'][0],P['career'][4],P['career'][5],P['education'][0]])}</div><div>{section_heading('For students','從問題開始，選擇方法','resources.html','教學與分析資源')}<div class="learning-list"><article class="learning-item"><span class="learning-number">1</span><div><h3>統計與量化研究的基礎</h3><p>從資料、測量、研究設計與推論開始。</p><a href="books.html">統計與量化研究書目</a></div></article><article class="learning-item"><span class="learning-number">2</span><div><h3>模型的原理與應用</h3><p>結構方程、多層次、潛在異質性與貝氏分析。</p><a href="books.html">進階模型專書與序言</a></div></article><article class="learning-item"><span class="learning-number">3</span><div><h3>範例資料與分析實作</h3><p>透過專書配套資料，練習模型設定與結果解讀。</p><a href="resources.html">取得教材與範例資料</a></div></article></div></div></section></div>'''
     return page('index.html','心理計量、量化研究與專書','邱皓政的研究、統計方法專書與原文序言。中央研究院人文社會科學研究中心合聘研究員、國立臺灣師範大學特聘教授，南加州大學心理計量學博士。',body)
 
-def toolbar(categories, unit, placeholder):
+def toolbar(categories, unit, placeholder, filter_label='主題'):
     buttons = '<button type="button" data-filter="all" aria-pressed="true">全部</button>'+''.join(f'<button type="button" data-filter="{E(c)}" aria-pressed="false">{E(c)}</button>' for c in categories)
-    return f'<div class="catalog-toolbar"><div class="filter-row" data-filters data-unit="{E(unit)}" role="group" aria-label="依主題篩選">{buttons}</div><div class="search-row"><div class="search-field"><label for="catalog-search" class="search-label">搜尋</label><input id="catalog-search" type="search" placeholder="{E(placeholder)}" autocomplete="off"></div><p id="result-count" class="result-count" role="status" aria-live="polite"></p></div></div><noscript><p class="no-js-note">以下列出完整內容。搜尋與主題篩選需啟用 JavaScript。</p></noscript>'
+    return f'<div class="catalog-toolbar"><div class="filter-row" data-filters data-unit="{E(unit)}" role="group" aria-label="依{E(filter_label)}篩選">{buttons}</div><div class="search-row"><div class="search-field"><label for="catalog-search" class="search-label">搜尋</label><input id="catalog-search" type="search" placeholder="{E(placeholder)}" autocomplete="off"></div><p id="result-count" class="result-count" role="status" aria-live="polite"></p></div></div><noscript><p class="no-js-note">以下列出完整內容。搜尋與{E(filter_label)}篩選需啟用 JavaScript。</p></noscript>'
 
 def archive_book_card(b):
     preface = ext(b['prefaceUrl'], '序言', '') if b.get('prefaceUrl') else '<span>序言</span>'
@@ -179,6 +193,30 @@ def about_page():
     body = heading('About','學經歷','Hawjeng Chiou, Ph.D.','國立臺灣師範大學企業管理學系特聘教授、教育心理與輔導學系合聘教授、中央研究院人文社會科學研究中心合聘研究員。美國南加州大學心理計量學博士。')
     body += f'<div class="container about-layout"><aside class="about-sidebar"><img src="assets/images/hawjeng4.jpg" width="542" height="747" alt="邱皓政在統計方法講座中演講"><div><h2>邱皓政</h2><p lang="en">Hawjeng Chiou, Ph.D.</p><p>研究、教學與專書寫作</p></div>{ext(S["cv"],"完整履歷 PDF","button")}</aside><div><section class="about-section"><h2>教育背景</h2>{timeline(P["education"])}</section><section class="about-section"><h2>主要學術經歷</h2>{timeline([R,*P["career"]])}</section><section class="about-section"><h2>學術與行政服務</h2>{timeline(P["service"])}</section><p class="source-note">學經歷依本人 2026.09.15 修訂履歷與師大官方教師介紹核對；中央研究院合聘職務由本人補充。{ext(S["cv"],"查看完整紀錄","")}</p></div></div>'
     return page('about.html','個人介紹與學經歷','邱皓政的心理計量學背景、中央研究院人文社會科學研究中心合聘研究員職務、統計方法專書、教育背景與學術經歷。',body)
+
+def talks_page():
+    title = '演講授課'
+    intro = '2010 年起的演講、研習工作坊與授課紀錄。可依年份篩選，或搜尋機構與活動題目。'
+    years = list(dict.fromkeys(talk['date'][:4] for talk in TALKS))
+    rows = []
+    for talk in TALKS:
+        date = talk['date']
+        rows.append(
+            f'<article class="timeline-row" data-category="{E(date[:4])}">'
+            f'<div class="period">{E(date)}</div>'
+            f'<h3>{E(talk["description"])}</h3></article>'
+        )
+    body = heading('Talks & workshops', title, 'Talks, workshops & lectures', intro)
+    body += f"""<div class="container">
+  {toolbar(years, '筆紀錄', '機構、題目或日期', '年份')}
+  <section class="catalog-content" aria-label="演講、研習與授課紀錄">
+    <div class="timeline">{''.join(rows)}</div>
+    <p id="empty-results" class="empty-results" hidden>沒有符合的紀錄，請更換關鍵字或年份。</p>
+    <p class="source-note">資料來源為{ext(S['cv'] + '#page=16', '學術履歷第 16–19 頁')}。</p>
+  </section>
+</div>"""
+    return page('talks.html', title, intro, body)
+
 
 def resources_page():
     body = heading('Learning & projects','教學與專案','Learning materials & research projects','依課程層級選擇統計互動專案，或查找專書配套資源。')
@@ -235,7 +273,7 @@ def build():
         shutil.copytree(ROOT/'anova-lab',target/'anova-lab',dirs_exist_ok=True)
         shutil.copytree(ROOT/'lca-lab',target/'lca-lab',dirs_exist_ok=True)
     (target/'books').mkdir(exist_ok=True)
-    pages = {'index.html':home(),'books.html':books_page(),'research.html':research_page(),'about.html':about_page(),'resources.html':resources_page(),'sources.html':sources_page()}
+    pages = {'index.html':home(),'books.html':books_page(),'research.html':research_page(),'about.html':about_page(),'talks.html':talks_page(),'resources.html':resources_page(),'sources.html':sources_page()}
     for b in BOOKS:
         if not re.fullmatch(r'[a-z0-9-]+',b['id']):
             raise ValueError('Invalid book id')
