@@ -202,11 +202,10 @@ def talks_page():
     for talk in TALKS:
         date = talk['date']
         year, month, days = date.split('/', 2)
-        days = re.sub(r',0?(\d{1,2})/', r'日、\1 月 ', days) if '/' in days else days.replace(',', '、')
-        days = days.lstrip('0').replace('-', '–')
+        days = re.sub(r'(?<![0-9])0(?=[0-9])', '', days).replace('/', '.').replace(',', '、').replace('-', '–')
         rows_by_year[year].append(
             f'<article class="timeline-row talk-row" data-category="{E(year)}" data-search="{E(date)}">'
-            f'<div class="period talk-date"><strong>{int(month)}</strong><span>月 {E(days)} 日</span></div>'
+            f'<div class="period talk-date"><strong>{int(month)}</strong><span>.{E(days)}</span></div>'
             f'<div class="talk-details"><h3>{E(talk["title"])}</h3>'
             f'<p><span class="talk-institution-label">單位</span> {E(talk["institution"])}</p></div></article>'
         )

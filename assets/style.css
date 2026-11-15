@@ -41,6 +41,6 @@
 .talk-year:not(:has(.talk-row:not([hidden]))){display:none}
 .talk-year h2{padding:.55rem .85rem;background:var(--blue-soft);border-left:3px solid var(--blue);color:var(--ink);font-size:1.12rem}
 
-.talk-date{display:flex;align-items:baseline;gap:.4rem;flex-wrap:wrap}
+.talk-date{display:flex;align-items:baseline;flex-wrap:wrap}
 .talk-date strong{font:400 1.85rem/1 Georgia,serif;font-variant-numeric:lining-nums tabular-nums}
 .talk-date span{font-weight:500}
