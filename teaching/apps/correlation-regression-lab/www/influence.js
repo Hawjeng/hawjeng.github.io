@@ -32,19 +32,28 @@ function fit(data) {
   const slope = xy/xx, intercept = my-slope*mx;
   const predict = x => intercept+slope*x;
   const mse = data.reduce((sum,[x,y]) => sum+(y-predict(x))**2,0)/(n-2);
-  return {mx,my,xx,slope,predict,mse,r:xy/Math.sqrt(xx*yy)};
+  return {mx,my,xx,yy,slope,intercept,predict,mse,r:xy/Math.sqrt(xx*yy)};
 }
 const axis = document.getElementById('axis');
-for(let x=0;x<=40;x+=5){
-  axis.append(svg('line',{x1:xScale(x),x2:xScale(x),y1:22,y2:412,stroke:'#d4e4e6'}));
-  label(axis,xScale(x),435,x);
+const zx = document.getElementById('zx');
+const zy = document.getElementById('zy');
+const equationOption = document.getElementById('equation');
+const equationText = document.getElementById('equation-text');
+
+function renderAxes(model, sx, sy) {
+  axis.replaceChildren();
+  const tick = n => String(Number(n.toFixed(1)));
+  for(let x=0;x<=40;x+=5){
+    axis.append(svg('line',{x1:xScale(x),x2:xScale(x),y1:22,y2:412,stroke:'#d4e4e6'}));
+    label(axis,xScale(x),435,zx.checked ? tick((x-model.mx)/sx) : x);
+  }
+  for(let y=50;y<=110;y+=10){
+    axis.append(svg('line',{x1:62,x2:828,y1:yScale(y),y2:yScale(y),stroke:'#d4e4e6'}));
+    label(axis,51,yScale(y)+5,zy.checked ? tick((y-model.my)/sy) : y,'end');
+  }
+  label(axis,445,469,zx.checked ? '認真程度 zₓ' : '認真程度 X');
+  label(axis,66,17,zy.checked ? '考試成績 zᵧ' : '考試成績 Y','start');
 }
-for(let y=50;y<=110;y+=10){
-  axis.append(svg('line',{x1:62,x2:828,y1:yScale(y),y2:yScale(y),stroke:'#d4e4e6'}));
-  label(axis,51,yScale(y)+5,y,'end');
-}
-label(axis,445,457,'認真程度 X');
-label(axis,66,17,'考試成績 Y','start');
 const circles = original.map((_,i)=>{
   const node = svg('circle',{r:8,tabindex:0,class:'point','data-index':i,role:'button'});
   const option = new Option('第 '+(i+1)+' 筆',i);
@@ -83,7 +92,17 @@ function drawQuadrants(model){
 const fmt = number => Number.isFinite(number) ? number.toFixed(4) : '—';
 function render(){
   const full = fit(points);
+  const sx=Math.sqrt(full.xx/(points.length-1));
+  const sy=Math.sqrt(full.yy/(points.length-1));
+  renderAxes(full,sx,sy);
   drawQuadrants(full);
+  equationText.hidden=!equationOption.checked;
+  if(equationOption.checked){
+    const slope=full.slope*(zx.checked?sx:1)/(zy.checked?sy:1);
+    const intercept=(full.intercept+(zx.checked?full.slope*full.mx:0)-(zy.checked?full.my:0))/(zy.checked?sy:1);
+    equationText.textContent='迴歸方程式｜'+(zy.checked?'ẑᵧ':'ŷ')+' = '+fmt(intercept)+
+      (slope<0?' − ':' + ')+fmt(Math.abs(slope))+' × '+(zx.checked?'zₓ':'X');
+  }
   const removed = fit(points.filter((_,i)=>i!==selected));
   const [x,y] = points[selected], yhat = full.predict(x), e=y-yhat;
   const h=1/points.length+(x-full.mx)**2/full.xx;
@@ -138,7 +157,7 @@ chart.addEventListener('keydown',event=>{
   selected=Number(event.target.dataset.index);
   move(points[selected][0]+delta[0],points[selected][1]+delta[1]);
 });
-quadrantOption.onchange=render;
+quadrantOption.onchange=equationOption.onchange=zx.onchange=zy.onchange=render;
 selectPoint.onchange=()=>{selected=Number(selectPoint.value);render();};
 document.getElementById('reset').onclick=()=>{points=original.map(p=>[...p]);selected=1;render();};
 render();

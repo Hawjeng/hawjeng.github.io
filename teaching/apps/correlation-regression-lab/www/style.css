@@ -15,3 +15,5 @@ details{padding:10px 0}summary{cursor:pointer;font-weight:650;color:var(--accent
 @media(max-width:760px){.console-grid,.theory-columns{grid-template-columns:minmax(0,1fr)}.diag-frame{height:1150px}}
 
 .chart-panel{max-width:820px;margin:16px auto 0}.plot-key{display:flex;gap:6px 10px;flex-wrap:wrap;justify-content:center;margin:0 0 6px}.plot-key span{padding:4px 9px;background:#eaf4f4;border:1px solid #d4e4e6;border-radius:5px;font-size:13px;color:#244c55}
+
+.plot-controls{display:flex;flex-wrap:wrap;gap:0 18px}.plot-controls .shiny-input-container{width:auto;max-width:100%;margin-bottom:0}.equation-box{padding:12px 16px;margin-top:8px;background:#edf6f5;border-left:3px solid #286d79;overflow-wrap:anywhere}.equation-box p{margin:4px 0 0}
