@@ -3,7 +3,7 @@ const original = [[4.0, 66.0], [27.0, 87.0], [18.0, 83.0], [7.0, 73.0], [30.0, 8
 const chart = document.getElementById('scatter');
 const selectPoint = document.getElementById('point');
 const metrics = document.getElementById('metrics');
-const originalBounds = {x0: 62, y0: 22, width: 766, height: 390, xmin: -5, xmax: 40, ymin: 48, ymax: 112};
+const originalBounds = {x0: 250, y0: 22, width: 390, height: 390, xmin: -5, xmax: 40, ymin: 48, ymax: 112};
 let bounds = {...originalBounds};
 let points = original.map(point => [...point]);
 let selected = 1;
@@ -50,8 +50,6 @@ function configureBounds(model,sx,sy) {
   if(zx.checked&&zy.checked&&sx>0&&sy>0){
     const range=points.flatMap(([x,y])=>[(x-model.mx)/sx,(y-model.my)/sy]);
     const min=Math.min(...range,0), max=Math.max(...range,0), pad=(max-min)*.15;
-    bounds.x0=250;
-    bounds.width=bounds.height;
     bounds.xmin=model.mx+(min-pad)*sx;
     bounds.xmax=model.mx+(max+pad)*sx;
     bounds.ymin=model.my+(min-pad)*sy;
@@ -276,12 +274,12 @@ selectPoint.onchange=()=>{selected=Number(selectPoint.value);render();};
 document.getElementById('download-chart').onclick=()=>{
   const copy=chart.cloneNode(true);
   copy.setAttribute('xmlns','http://www.w3.org/2000/svg');
-  copy.setAttribute('width','860');
+  copy.setAttribute('width','540');
   copy.setAttribute('height','485');
   copy.setAttribute('font-family','Microsoft JhengHei, Arial, sans-serif');
   copy.setAttribute('font-size','15');
   copy.setAttribute('fill','#173b44');
-  copy.prepend(svg('rect',{x:0,y:0,width:860,height:485,fill:'#f5f9f9',rx:8}));
+  copy.prepend(svg('rect',{x:175,y:0,width:540,height:485,fill:'#f5f9f9',rx:8}));
   const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(copy)],{type:'image/svg+xml'}));
   const link=document.createElement('a');
   link.href=url;
