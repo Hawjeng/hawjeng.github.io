@@ -286,9 +286,9 @@ ui <- fluidPage(
  tabsetPanel(id='unit',
   tabPanel('原理說明',includeHTML('www/theory.html'),critical_controls()),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
-   card(uiOutput('book_result'),plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')))),
+   card(plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('book_result')))),
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
-   card(uiOutput('exercise_result'),plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),div(class='plot-surface',plotOutput('exercise_plot',height=520),uiOutput('exercise_plot_label',class='plot-label-layer')),uiOutput('exercise_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('worked_answers'))),
+   card(plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),div(class='plot-surface',plotOutput('exercise_plot',height=520),uiOutput('exercise_plot_label',class='plot-label-layer')),uiOutput('exercise_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('exercise_result')),uiOutput('worked_answers'))),
   tabPanel('調查習作',
    card(h3('手機使用行為調查'),p('預設案例為玩手遊時間與手機遊戲成癮的 Pearson 相關。可切換全體或單一星座，也可改選變數。'),
     tags$details(tags$summary('載入其他調查資料'),
@@ -296,7 +296,7 @@ ui <- fluidPage(
      fileInput('survey_file','選擇調查逐筆資料 CSV',accept='.csv')),
     row_controls(uiOutput('survey_group'),select('survey_method','分析方法',methods)),uiOutput('survey_options'),uiOutput('survey_levels'),
     downloadButton('raw_survey','下載逐筆分析資料 CSV')),
-   card(uiOutput('survey_result'),plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=520),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG'))),
+   card(plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=520),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('survey_result'))),
    includeHTML('www/survey-practice.html')),
   tabPanel('殘差與影響點',includeHTML('www/diagnostics.html')),
   tabPanel('R 與 Python 語法',
@@ -312,7 +312,7 @@ ui <- fluidPage(
    card(h3('輸入逐筆資料'),p('第一列填變數名稱，欄位以逗號分隔。類別可填文字，缺失值留空。'),
     textAreaInput('manual_csv','CSV 資料','學習時間,練習次數,成績\n2,3,61\n4,4,68\n5,8,75\n7,5,77\n8,7,83\n9,10,88\n10,8,91',rows=8,width='100%'),
     select('manual_method','分析方法',methods),uiOutput('manual_options'),uiOutput('manual_levels')),
-   card(uiOutput('manual_result'),plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),div(class='plot-surface',plotOutput('manual_plot',height=520),uiOutput('manual_plot_label',class='plot-label-layer')),uiOutput('manual_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG'))))))
+   card(plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),div(class='plot-surface',plotOutput('manual_plot',height=520),uiOutput('manual_plot_label',class='plot-label-layer')),uiOutput('manual_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('manual_result'))))))
 server <- function(input,output,session){
  critical_settings<-reactive({
   req(input$critical_n,input$critical_alpha,input$critical_tails)
