@@ -40,17 +40,18 @@ const zy = document.getElementById('zy');
 const equationOption = document.getElementById('equation');
 const equationText = document.getElementById('equation-text');
 const equationOverlay = document.getElementById('equation-overlay');
-function placeEquation(label){
-  const text=equationOverlay.querySelector('text'), rect=equationOverlay.querySelector('rect');
-  text.textContent=label;
-  const w=text.getComputedTextLength()+22, h=29;
+function placeEquation(label,r2){
+  const texts=[...equationOverlay.querySelectorAll('text')];
+  const rect=equationOverlay.querySelector('rect');
+  texts[0].textContent=label;
+  texts[1].textContent=r2;
+  const w=Math.max(...texts.map(text=>text.getComputedTextLength()))+22, h=49;
   const [left,right,top,bottom]=[99,805-w,54,385-h];
   const candidates=[[right,top],[left,top],[right,bottom],[left,bottom]];
   const count=([x,y])=>points.filter(([px,py])=>xScale(px)>=x-9&&xScale(px)<=x+w+9&&yScale(py)>=y-9&&yScale(py)<=y+h+9).length;
   const [x,y]=candidates.reduce((best,next)=>count(next)<count(best)?next:best);
   for(const [key,value] of Object.entries({x,y,width:w,height:h}))rect.setAttribute(key,value);
-  text.setAttribute('x',x+11);
-  text.setAttribute('y',y+19);
+  texts.forEach((text,i)=>{text.setAttribute('x',x+11);text.setAttribute('y',y+19+20*i);});
 }
 
 function zTicks(min,max,center,spread){
@@ -147,8 +148,9 @@ function render(){
     const intercept=(full.intercept+(zx.checked?full.slope*full.mx:0)-(zy.checked?full.my:0))/(zy.checked?sy:1);
     const label=(zy.checked?'ẑᵧ':'ŷ')+' = '+fmt(intercept)+
       (slope<0?' − ':' + ')+fmt(Math.abs(slope))+' × '+(zx.checked?'zₓ':'X');
-    equationText.textContent='迴歸方程式｜'+label;
-    placeEquation(label);
+    const r2='R² = '+fmt(full.r**2);
+    equationText.textContent='迴歸方程式｜'+label+'｜'+r2;
+    placeEquation(label,r2);
   }
   const removed = fit(points.filter((_,i)=>i!==selected));
   const [x,y] = points[selected], yhat = full.predict(x), e=y-yhat;

@@ -102,10 +102,10 @@ plot_controls <- function(prefix) {
   checkboxInput(paste0(prefix,'_zx'),'X 軸用 z 分數'),
   checkboxInput(paste0(prefix,'_zy'),'Y 軸用 z 分數'))
 }
-equation_label <- function(a,zx,zy,plot_label=FALSE){
+equation_label <- function(a,zx,zy,plot_label=FALSE,model=NULL){
  d<-a$data;kind<-a$kind
  if(kind %in% c('cor','pb'))cor_fit(d)
- model<-fit_design(d)
+ if(is.null(model))model<-fit_design(d)
  x<-d[[2]];y<-d$y
  mult<-kind=='lm'&&ncol(d)>2
  named_design<-mult||kind=='dummy'
@@ -143,7 +143,7 @@ plot_equation <- function(a,zx,zy){
   if(mult)p('圖的 X 軸是模型預測值；方程式列的是完整模型的原始預測變數。'),
   if(named_design&&zx)p('X 軸的 z 分數只套用到圖上的橫軸。'))
 }
-draw_equation <- function(label,x,y,quadrants){
+draw_equation <- function(label,r_squared,x,y,quadrants){
  corners<-c('topright','topleft','bottomright','bottomleft')
  width<-diff(par('usr')[1:2])
  inset<-c(.07,if(quadrants).10 else .045)
@@ -163,6 +163,7 @@ draw_equation <- function(label,x,y,quadrants){
  }
  lines<-wrap(cex)
  if(length(lines)>2){cex<-.78;lines<-wrap(cex)}
+ lines<-c(lines,paste0('R² = ',num(r_squared)))
  overlap<-vapply(corners,function(corner){
   box<-legend(corner,legend=lines,plot=FALSE,inset=inset,cex=cex)$rect
   sum(x>=box$left & x<=box$left+box$w & y<=box$top & y>=box$top-box$h)
@@ -233,7 +234,11 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALS
    col=adjustcolor(point_colors,.8),bg=adjustcolor(point_colors,if(nrow(d)>100).38 else .66))
  }
  if(quadrants)points(mean(x_plot),mean(d$y),pch=21,col='#244c55',bg='white',cex=1.23,lwd=1.6)
- if(show_equation)draw_equation(equation_label(a,zx,zy,plot_label=TRUE),x_plot,d$y,quadrants)
+ if(show_equation){
+  equation_fit<-if(is.null(fit))fit_design(d) else fit
+  draw_equation(equation_label(a,zx,zy,plot_label=TRUE,model=equation_fit),
+   summary(equation_fit)$r.squared,x_plot,d$y,quadrants)
+ }
 }
 plot_key <- function(a){
  labels<-a$labels
