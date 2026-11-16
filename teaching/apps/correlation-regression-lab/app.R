@@ -101,12 +101,12 @@ axis_scale <- function(values, limits, standardize, discrete=NULL) {
 }
 plot_controls <- function(prefix) {
  div(class='plot-controls',
-  checkboxInput(paste0(prefix,'_quadrants'),'顯示 X̄、Ȳ 與四象限'),
-  checkboxInput(paste0(prefix,'_mean'),'標示平均數交點'),
-  checkboxInput(paste0(prefix,'_point_ids'),'標示觀察值編號'),
-  checkboxInput(paste0(prefix,'_equation'),'顯示迴歸方程式'),
-  checkboxInput(paste0(prefix,'_zx'),'X 軸用 z 分數'),
-  checkboxInput(paste0(prefix,'_zy'),'Y 軸用 z 分數'))
+  checkboxInput(paste0(prefix,'_quadrants'),'四象限'),
+  checkboxInput(paste0(prefix,'_mean'),'平均交點'),
+  checkboxInput(paste0(prefix,'_point_ids'),'點編號'),
+  checkboxInput(paste0(prefix,'_equation'),'方程式'),
+  checkboxInput(paste0(prefix,'_zx'),'X 軸 z'),
+  checkboxInput(paste0(prefix,'_zy'),'Y 軸 z'))
 }
 equation_label <- function(a,zx,zy,plot_label=FALSE,model=NULL){
  d<-a$data;kind<-a$kind
