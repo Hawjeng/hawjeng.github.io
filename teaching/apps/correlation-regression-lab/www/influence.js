@@ -3,10 +3,13 @@ const original = [[4.0, 66.0], [27.0, 87.0], [18.0, 83.0], [7.0, 73.0], [30.0, 8
 const chart = document.getElementById('scatter');
 const selectPoint = document.getElementById('point');
 const metrics = document.getElementById('metrics');
-const bounds = {x0: 62, y0: 22, width: 766, height: 390, xmin: -5, xmax: 40, ymin: 48, ymax: 112};
+const originalBounds = {x0: 62, y0: 22, width: 766, height: 390, xmin: -5, xmax: 40, ymin: 48, ymax: 112};
+let bounds = {...originalBounds};
 let points = original.map(point => [...point]);
 let selected = 1;
 let pointer = null;
+const rightEdge = () => bounds.x0+bounds.width;
+const bottomEdge = () => bounds.y0+bounds.height;
 const xScale = x => bounds.x0 + (x-bounds.xmin)/(bounds.xmax-bounds.xmin)*bounds.width;
 const yScale = y => bounds.y0 + (bounds.ymax-y)/(bounds.ymax-bounds.ymin)*bounds.height;
 const svg = (name, properties) => {
@@ -40,13 +43,28 @@ const zy = document.getElementById('zy');
 const equationOption = document.getElementById('equation');
 const equationText = document.getElementById('equation-text');
 const equationOverlay = document.getElementById('equation-overlay');
+function configureBounds(model,sx,sy) {
+  bounds={...originalBounds};
+  if(zx.checked&&zy.checked&&sx>0&&sy>0){
+    const range=points.flatMap(([x,y])=>[(x-model.mx)/sx,(y-model.my)/sy]);
+    const min=Math.min(...range,0), max=Math.max(...range,0), pad=(max-min)*.15;
+    bounds.x0=250;
+    bounds.width=bounds.height;
+    bounds.xmin=model.mx+(min-pad)*sx;
+    bounds.xmax=model.mx+(max+pad)*sx;
+    bounds.ymin=model.my+(min-pad)*sy;
+    bounds.ymax=model.my+(max+pad)*sy;
+  }
+  const clip=chart.querySelector('#plot-area rect');
+  for(const [key,value] of Object.entries({x:bounds.x0,y:bounds.y0,width:bounds.width,height:bounds.height}))clip.setAttribute(key,value);
+}
 function placeEquation(label,r2){
   const texts=[...equationOverlay.querySelectorAll('text')];
   const rect=equationOverlay.querySelector('rect');
   texts[0].textContent=label;
   texts[1].textContent=r2;
   const w=Math.max(...texts.map(text=>text.getComputedTextLength()))+22, h=49;
-  const [left,right,top,bottom]=[99,805-w,54,385-h];
+  const [left,right,top,bottom]=[bounds.x0+36,rightEdge()-24-w,bounds.y0+32,bottomEdge()-27-h];
   const candidates=[[right,top],[left,top],[right,bottom],[left,bottom]];
   const count=([x,y])=>points.filter(([px,py])=>xScale(px)>=x-9&&xScale(px)<=x+w+9&&yScale(py)>=y-9&&yScale(py)<=y+h+9).length;
   const [x,y]=candidates.reduce((best,next)=>count(next)<count(best)?next:best);
@@ -68,15 +86,15 @@ function renderAxes(model, sx, sy) {
   const xticks=zx.checked?zTicks(bounds.xmin,bounds.xmax,model.mx,sx):Array.from({length:9},(_,i)=>[5*i,5*i]);
   const yticks=zy.checked?zTicks(bounds.ymin,bounds.ymax,model.my,sy):Array.from({length:7},(_,i)=>[50+10*i,50+10*i]);
   xticks.forEach(([x,tick])=>{
-    axis.append(svg('line',{x1:xScale(x),x2:xScale(x),y1:22,y2:412,stroke:'#d4e4e6'}));
+    axis.append(svg('line',{x1:xScale(x),x2:xScale(x),y1:bounds.y0,y2:bottomEdge(),stroke:'#d4e4e6'}));
     label(axis,xScale(x),435,tick);
   });
   yticks.forEach(([y,tick])=>{
-    axis.append(svg('line',{x1:62,x2:828,y1:yScale(y),y2:yScale(y),stroke:'#d4e4e6'}));
-    if(yticks.length<=19||Number.isInteger(tick))label(axis,51,yScale(y)+5,tick,'end');
+    axis.append(svg('line',{x1:bounds.x0,x2:rightEdge(),y1:yScale(y),y2:yScale(y),stroke:'#d4e4e6'}));
+    if(yticks.length<=19||Number.isInteger(tick))label(axis,bounds.x0-11,yScale(y)+5,tick,'end');
   });
   label(axis,445,469,zx.checked ? '認真程度 zₓ' : '認真程度 X');
-  label(axis,66,17,zy.checked ? '考試成績 zᵧ' : '考試成績 Y','start');
+  label(axis,bounds.x0+4,17,zy.checked ? '考試成績 zᵧ' : '考試成績 Y','start');
 }
 const circles = original.map((_,i)=>{
   const node = svg('circle',{r:8,tabindex:0,class:'point','data-index':i,role:'button'});
@@ -91,6 +109,24 @@ const quadrantShading = document.getElementById('quadrant-shading');
 const quadrantCounts = document.getElementById('quadrant-counts');
 const meanIntersection = document.getElementById('mean-intersection');
 const meanPair = document.getElementById('mean-pair');
+const meanLabel = document.getElementById('mean-label');
+const meanOption = document.getElementById('show-mean');
+function drawMean(model) {
+  const visibility=meanOption.checked?'visible':'hidden';
+  meanPair.hidden=!meanOption.checked;
+  meanIntersection.setAttribute('visibility',visibility);
+  meanLabel.setAttribute('visibility',visibility);
+  if(!meanOption.checked)return;
+  const x=xScale(model.mx), y=yScale(model.my);
+  const pair='('+(zx.checked?'0':fmt(model.mx))+', '+(zy.checked?'0':fmt(model.my))+')';
+  meanIntersection.setAttribute('cx',x);
+  meanIntersection.setAttribute('cy',y);
+  meanLabel.setAttribute('x',x+11);
+  meanLabel.setAttribute('y',y-9);
+  meanLabel.textContent=pair;
+  meanPair.textContent='平均線交點 '+pair+
+    (zx.checked||zy.checked?'｜原始平均數 ('+fmt(model.mx)+', '+fmt(model.my)+')':'');
+}
 const pointPalette=['#147684','#a64b22','#6953a0','#35663d','#626d77'];
 function quadrantOf(px,py,model){
   const dx=px-model.mx,dy=py-model.my;
@@ -101,27 +137,22 @@ function quadrantOf(px,py,model){
 function drawQuadrants(model){
   quadrantLines.replaceChildren();
   quadrantShading.replaceChildren();
-  quadrantCounts.hidden=meanPair.hidden=!quadrantOption.checked;
-  meanIntersection.setAttribute('visibility',quadrantOption.checked?'visible':'hidden');
+  quadrantCounts.hidden=!quadrantOption.checked;
   if(!quadrantOption.checked)return;
   const x=xScale(model.mx), y=yScale(model.my);
-  meanIntersection.setAttribute('cx',x);
-  meanIntersection.setAttribute('cy',y);
-  meanPair.textContent='平均線交點 ('+(zx.checked?'0':fmt(model.mx))+', '+(zy.checked?'0':fmt(model.my))+')'+
-    (zx.checked||zy.checked?'｜原始平均數 ('+fmt(model.mx)+', '+fmt(model.my)+')':'');
   const mint='#e8f4f1', sand='#f6f0e7';
   quadrantShading.append(
-    svg('rect',{x,y:22,width:828-x,height:y-22,fill:mint}),
-    svg('rect',{x:62,y:22,width:x-62,height:y-22,fill:sand}),
-    svg('rect',{x:62,y,width:x-62,height:412-y,fill:mint}),
-    svg('rect',{x,y,width:828-x,height:412-y,fill:sand}));
+    svg('rect',{x,y:bounds.y0,width:rightEdge()-x,height:y-bounds.y0,fill:mint}),
+    svg('rect',{x:bounds.x0,y:bounds.y0,width:x-bounds.x0,height:y-bounds.y0,fill:sand}),
+    svg('rect',{x:bounds.x0,y,width:x-bounds.x0,height:bottomEdge()-y,fill:mint}),
+    svg('rect',{x,y,width:rightEdge()-x,height:bottomEdge()-y,fill:sand}));
   const style={stroke:'#687e83','stroke-dasharray':'5 5','stroke-width':2};
   quadrantLines.append(
-    svg('line',{x1:x,x2:x,y1:22,y2:412,...style}),
-    svg('line',{x1:62,x2:828,y1:y,y2:y,...style}));
+    svg('line',{x1:x,x2:x,y1:bounds.y0,y2:bottomEdge(),...style}),
+    svg('line',{x1:bounds.x0,x2:rightEdge(),y1:y,y2:y,...style}));
   label(quadrantLines,x,452,'X̄');
-  label(quadrantLines,55,y+5,'Ȳ','end');
-  [[809,45],[81,45],[81,398],[809,398]].forEach(([cornerX,cornerY],i)=>{
+  label(quadrantLines,bounds.x0-27,y+5,'Ȳ','end');
+  [[rightEdge()-19,45],[bounds.x0+19,45],[bounds.x0+19,398],[rightEdge()-19,398]].forEach(([cornerX,cornerY],i)=>{
     label(quadrantLines,cornerX,cornerY,'Q'+(i+1));
   });
   const n=[0,0,0,0,0];
@@ -134,13 +165,15 @@ function drawQuadrants(model){
     return item;
   }));
 }
-const fmt = number => Number.isFinite(number) ? number.toFixed(4) : '—';
+const fmt = number => Number.isFinite(number) ? (Math.abs(number)<.00005?0:number).toFixed(4) : '—';
 function render(){
   const full = fit(points);
   const sx=Math.sqrt(full.xx/(points.length-1));
   const sy=Math.sqrt(full.yy/(points.length-1));
+  configureBounds(full,sx,sy);
   renderAxes(full,sx,sy);
   drawQuadrants(full);
+  drawMean(full);
   equationText.hidden=!equationOption.checked;
   equationOverlay.setAttribute('visibility',equationOption.checked?'visible':'hidden');
   if(equationOption.checked){
@@ -182,8 +215,8 @@ function render(){
 }
 function move(x,y){
   points[selected]=[
-    Math.max(bounds.xmin,Math.min(bounds.xmax,x)),
-    Math.max(bounds.ymin,Math.min(bounds.ymax,y))
+    Math.max(originalBounds.xmin,Math.min(originalBounds.xmax,x)),
+    Math.max(originalBounds.ymin,Math.min(originalBounds.ymax,y))
   ];
   render();
 }
@@ -208,7 +241,23 @@ chart.addEventListener('keydown',event=>{
   selected=Number(event.target.dataset.index);
   move(points[selected][0]+delta[0],points[selected][1]+delta[1]);
 });
-quadrantOption.onchange=equationOption.onchange=zx.onchange=zy.onchange=render;
+meanOption.onchange=quadrantOption.onchange=equationOption.onchange=zx.onchange=zy.onchange=render;
 selectPoint.onchange=()=>{selected=Number(selectPoint.value);render();};
+document.getElementById('download-chart').onclick=()=>{
+  const copy=chart.cloneNode(true);
+  copy.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  copy.setAttribute('width','860');
+  copy.setAttribute('height','485');
+  copy.setAttribute('font-family','Microsoft JhengHei, Arial, sans-serif');
+  copy.setAttribute('font-size','15');
+  copy.setAttribute('fill','#173b44');
+  copy.prepend(svg('rect',{x:0,y:0,width:860,height:485,fill:'#f5f9f9',rx:8}));
+  const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(copy)],{type:'image/svg+xml'}));
+  const link=document.createElement('a');
+  link.href=url;
+  link.download='regression-influence.svg';
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+};
 document.getElementById('reset').onclick=()=>{points=original.map(p=>[...p]);selected=1;render();};
 render();

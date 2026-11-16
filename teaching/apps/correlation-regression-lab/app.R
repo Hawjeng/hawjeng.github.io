@@ -98,6 +98,7 @@ axis_scale <- function(values, limits, standardize, discrete=NULL) {
 plot_controls <- function(prefix) {
  div(class='plot-controls',
   checkboxInput(paste0(prefix,'_quadrants'),'顯示 X̄、Ȳ 與四象限'),
+  checkboxInput(paste0(prefix,'_mean'),'標示平均數交點'),
   checkboxInput(paste0(prefix,'_equation'),'顯示迴歸方程式'),
   checkboxInput(paste0(prefix,'_zx'),'X 軸用 z 分數'),
   checkboxInput(paste0(prefix,'_zy'),'Y 軸用 z 分數'))
@@ -130,6 +131,7 @@ equation_label <- function(a,zx,zy,plot_label=FALSE,model=NULL){
   powers<-if(plot_label)c('^2','^3') else c('²','³')
   terms<-c(term,if(length(beta)>2)paste0(term,powers[seq_len(length(beta)-2L)]))
  }
+ coefs[abs(coefs)<.00005]<-0
  paste0(target,' = ',num(coefs[1]),paste(sprintf(' %s %s %s %s',
   ifelse(coefs[-1]<0,if(plot_label)'-' else '−','+'),num(abs(coefs[-1])),if(plot_label)'*' else '×',terms),collapse=''))
 }
@@ -177,26 +179,36 @@ plot_x <- function(a,fit=NULL){
  if(a$kind=='dummy'&&ncol(d)>2)return(max.col(cbind(1-rowSums(d[-1]),d[-1]))-1L)
  d[[2]]
 }
+pair_label <- function(x,y,zx,zy)paste0('(',paste(ifelse(c(zx,zy),'0',num(c(x,y))),collapse=', '),')')
 mean_pair <- function(a,zx,zy){
  original<-c(mean(plot_x(a)),mean(a$data$y))
- in_view<-ifelse(c(zx,zy),'0',num(original))
- p(class='mean-pair',strong('平均線交點 '),paste0('(',paste(in_view,collapse=', '),')'),
+ p(class='mean-pair',strong('平均線交點 '),pair_label(original[1],original[2],zx,zy),
    if(zx||zy)paste0('｜原始平均數 (',paste(num(original),collapse=', '),')'))
 }
-plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALSE){
+plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALSE,show_mean=FALSE){
  d<-a$data;kind<-a$kind
  model_plot<-kind=='lm'&&ncol(d)>2
  group_plot<-kind %in% c('dummy','pb')
  fit<-if(kind %in% c('cor','pb'))NULL else fit_design(d)
  palette<-c('#176f7a','#ac512e','#7465a1','#567537','#a15378')
- par(mar=c(if(quadrants)5.3 else 3.8,4.2,.7,1.1),family='sans',las=1,
-  cex.axis=1.0,cex.lab=1.03,col.axis='#456168',col.lab='#244c55',fg='#9bb1b5')
  x_plot<-plot_x(a,fit)
  groups<-sort(unique(x_plot))
  point_colors<-if(quadrants)quadrant_colors[quadrant_index(x_plot,d$y)] else rep('#176f7a',nrow(d))
  xlim<-if(group_plot)range(groups)+c(-.62,.62) else range(x_plot)
  ylim<-extendrange(d$y,f=.11)
+ sx<-sd(x_plot);sy<-sd(d$y)
+ equal_z<-zx&&zy&&is.finite(sx)&&sx>0&&is.finite(sy)&&sy>0
+ if(equal_z){
+  mx<-mean(x_plot);my<-mean(d$y)
+  zlim<-extendrange(c((xlim-mx)/sx,(range(d$y)-my)/sy,0),f=.07)
+  xlim<-mx+sx*zlim
+  ylim<-my+sy*zlim
+ }
+ par(mar=c(if(quadrants)5.3 else 3.8,4.2,.7,1.1),family='sans',las=1,
+  pty=if(equal_z)'s' else 'm',
+  cex.axis=1.0,cex.lab=1.03,col.axis='#456168',col.lab='#244c55',fg='#9bb1b5')
  plot(x_plot,d$y,type='n',xlim=xlim,ylim=ylim,axes=FALSE,
+  asp=if(equal_z)sx/sy else NA_real_,
   xlab=paste0(if(group_plot)'Group' else if(model_plot)'Fitted Y' else 'X',if(zx)' (z)'),
   ylab=paste0(if(model_plot)'Observed Y' else 'Y',if(zy)' (z)'))
  limits<-par('usr')
@@ -233,7 +245,11 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALS
   points(x_plot,d$y,pch=21,cex=if(nrow(d)>100).82 else 1.16,lwd=.8,
    col=adjustcolor(point_colors,.8),bg=adjustcolor(point_colors,if(nrow(d)>100).38 else .66))
  }
- if(quadrants)points(mean(x_plot),mean(d$y),pch=21,col='#244c55',bg='white',cex=1.23,lwd=1.6)
+ if(show_mean){
+  mx<-mean(x_plot);my<-mean(d$y)
+  points(mx,my,pch=21,col='#244c55',bg='white',cex=1.27,lwd=1.6)
+  text(mx,my,pair_label(mx,my,zx,zy),pos=4,offset=.55,cex=.95,font=2,col='#244c55')
+ }
  if(show_equation){
   equation_fit<-if(is.null(fit))fit_design(d) else fit
   draw_equation(equation_label(a,zx,zy,plot_label=TRUE,model=equation_fit),
@@ -275,9 +291,9 @@ ui <- fluidPage(
  tabsetPanel(id='unit',
   tabPanel('原理說明',includeHTML('www/theory.html')),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
-   card(uiOutput('book_result'),plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),plotOutput('book_plot',height=465),uiOutput('book_equation_text')),uiOutput('book_quadrant_note'),uiOutput('critical_demo'))),
+   card(uiOutput('book_result'),plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),plotOutput('book_plot',height=465),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('book_quadrant_note'),uiOutput('critical_demo'))),
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
-   card(uiOutput('exercise_result'),plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),plotOutput('exercise_plot',height=465),uiOutput('exercise_equation_text')),uiOutput('exercise_quadrant_note'),uiOutput('worked_answers'))),
+   card(uiOutput('exercise_result'),plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),plotOutput('exercise_plot',height=465),uiOutput('exercise_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('exercise_quadrant_note'),uiOutput('worked_answers'))),
   tabPanel('調查習作',
    card(h3('手機使用行為調查'),p('預設案例為玩手遊時間與手機遊戲成癮的 Pearson 相關。可切換全體或單一星座，也可改選變數。'),
     tags$details(tags$summary('載入其他調查資料'),
@@ -285,7 +301,7 @@ ui <- fluidPage(
      fileInput('survey_file','選擇調查逐筆資料 CSV',accept='.csv')),
     row_controls(uiOutput('survey_group'),select('survey_method','分析方法',methods)),uiOutput('survey_options'),uiOutput('survey_levels'),
     downloadButton('raw_survey','下載逐筆分析資料 CSV')),
-   card(uiOutput('survey_result'),plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),plotOutput('survey_plot',height=465),uiOutput('survey_equation_text')),uiOutput('survey_quadrant_note')),
+   card(uiOutput('survey_result'),plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),plotOutput('survey_plot',height=465),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('survey_quadrant_note')),
    includeHTML('www/survey-practice.html')),
   tabPanel('殘差與影響點',includeHTML('www/diagnostics.html')),
   tabPanel('R 與 Python 語法',
@@ -301,7 +317,7 @@ ui <- fluidPage(
    card(h3('輸入逐筆資料'),p('第一列填變數名稱，欄位以逗號分隔。類別可填文字，缺失值留空。'),
     textAreaInput('manual_csv','CSV 資料','學習時間,練習次數,成績\n2,3,61\n4,4,68\n5,8,75\n7,5,77\n8,7,83\n9,10,88\n10,8,91',rows=8,width='100%'),
     select('manual_method','分析方法',methods),uiOutput('manual_options'),uiOutput('manual_levels')),
-   card(uiOutput('manual_result'),plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),plotOutput('manual_plot',height=465),uiOutput('manual_equation_text')),uiOutput('manual_quadrant_note')))))
+   card(uiOutput('manual_result'),plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),plotOutput('manual_plot',height=465),uiOutput('manual_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('manual_quadrant_note')))))
 server <- function(input,output,session){
  survey_raw <- reactive({
   default_file<-if(file.exists('../private/survey.csv'))'../private/survey.csv' else 'data/survey-teaching.csv'
@@ -423,8 +439,9 @@ server <- function(input,output,session){
   }))
   output[[paste0(id,'_plot_key')]]<-renderUI(checks(plot_key(get_analysis())))
   selected_option<-function(name)isTRUE(input[[paste0(id,'_',name)]])
-  output[[paste0(id,'_plot')]]<-renderPlot(checks(plot_analysis(get_analysis(),selected_option('quadrants'),
-   selected_option('zx'),selected_option('zy'),selected_option('equation'))))
+  draw_current_plot<-function()plot_analysis(get_analysis(),selected_option('quadrants'),
+   selected_option('zx'),selected_option('zy'),selected_option('equation'),selected_option('mean'))
+  output[[paste0(id,'_plot')]]<-renderPlot(checks(draw_current_plot()))
   output[[paste0(id,'_equation_text')]]<-renderUI({
    if(selected_option('equation'))checks({
     a<-get_analysis()
@@ -434,11 +451,12 @@ server <- function(input,output,session){
    })
   })
   output[[paste0(id,'_quadrant_note')]]<-renderUI({
-   if(selected_option('quadrants'))checks(tagList(
-    mean_pair(get_analysis(),selected_option('zx'),selected_option('zy')),
-    div(class='quadrant-key',lapply(seq_along(quadrant_colors),function(i)
-     span(style=paste0('color:',quadrant_colors[i]),if(i<5)paste0('● Q',i) else '● 平均線上'))),
-    p(class='quadrant-note','Q1、Q3 淺綠，Q2、Q4 淺米色。落在 X̄ 或 Ȳ 平均線上的觀察值另計。')))
+   tagList(
+    if(selected_option('mean'))checks(mean_pair(get_analysis(),selected_option('zx'),selected_option('zy'))),
+    if(selected_option('quadrants'))tagList(
+     div(class='quadrant-key',lapply(seq_along(quadrant_colors),function(i)
+      span(style=paste0('color:',quadrant_colors[i]),if(i<5)paste0('● Q',i) else '● 平均線上'))),
+     p(class='quadrant-note','Q1、Q3 淺綠，Q2、Q4 淺米色。落在 X̄ 或 Ȳ 平均線上的觀察值另計。')))
   })
  })
  output$raw_survey<-downloadHandler(function()'survey-observations.csv',function(file){

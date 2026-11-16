@@ -34,3 +34,26 @@ async function copyCode(button) {
     selection.addRange(range);
   }
 }
+async function downloadPlot(button) {
+  const image = button.closest('.chart-panel').querySelector('.shiny-plot-output img');
+  if (!image || !image.complete || !image.naturalWidth) return;
+  const label = button.textContent;
+  button.disabled = true;
+  try {
+    const response = await fetch(image.currentSrc || image.src);
+    if (!response.ok) throw new Error('無法讀取圖形');
+    const url = URL.createObjectURL(await response.blob());
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = image.closest('.shiny-plot-output').id.replace('_plot','') + '-scatterplot.png';
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  } catch {
+    button.textContent = '下載失敗，請再試一次';
+    setTimeout(() => { button.textContent = label; }, 2000);
+  } finally {
+    button.disabled = false;
+  }
+}
