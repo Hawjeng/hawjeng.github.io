@@ -26,6 +26,25 @@ checks <- function(expr) tryCatch(expr,error=function(e){
  if(inherits(e,"shiny.silent.error"))stop(e)
  validate(need(FALSE,conditionMessage(e)))
 })
+show_table <- function(t) HTML(paste0('<div class="table-scroll"><table><thead><tr>',
+  paste0('<th>',htmltools::htmlEscape(names(t)),'</th>',collapse=''),'</tr></thead><tbody>',
+  paste(apply(t,1,function(row)paste0('<tr>',paste0('<td>',htmltools::htmlEscape(row),'</td>',collapse=''),'</tr>')),collapse=''),'</tbody></table></div>'))
+diagnostic_data <- function(a){
+ fit<-fit_design(a$data)
+ external<-suppressWarnings(rstudent(fit))
+ df<-df.residual(fit)-1L
+ p<-rep(NA_real_,nrow(a$data))
+ if(df>0){
+  valid<-!is.na(external)
+  p[valid]<-2*pt(-abs(external[valid]),df)
+ }
+ adjusted<-p.adjust(p,method='bonferroni')
+ data.frame(編號=a$observation,觀察值=a$data$y,預測值=unname(fitted(fit)),
+  殘差=unname(residuals(fit)),標準化殘差=unname(rstandard(fit)),
+  外部學生化殘差=unname(external),自由度=if(df>0L)df else NA_integer_,
+  p=unname(p),校正後p=unname(adjusted),
+  顯著異常=ifelse(is.na(adjusted),'—',ifelse(adjusted<.05,'是','否')),check.names=FALSE)
+}
 display_result <- function(analysis, extra=NULL) {
  d <- analysis$data
  kind <- analysis$kind
@@ -45,11 +64,9 @@ display_result <- function(analysis, extra=NULL) {
  coef <- s$coefficients
  ci <- confint(fit)
  diag <- vif_table(fit)
- show_table <- function(t) HTML(paste0('<div class="table-scroll"><table><thead><tr>',
-  paste0('<th>',htmltools::htmlEscape(names(t)),'</th>',collapse=''),'</tr></thead><tbody>',
-  paste(apply(t,1,function(row)paste0('<tr>',paste0('<td>',htmltools::htmlEscape(row),'</td>',collapse=''),'</tr>')),collapse=''),'</tbody></table></div>'))
  t <- data.frame(變數=c('截距',unname(labels[-1])),b=num(coef[,1]),SE=num(coef[,2]),t=num(coef[,3]),
-  p=format.pval(coef[,4],digits=4),下限=num(ci[,1]),上限=num(ci[,2]))
+  p=format.pval(coef[,4],digits=4),下限=num(ci[,1]),上限=num(ci[,2]),
+  顯著不為零=ifelse(is.na(coef[,4]),'—',ifelse(coef[,4]<.05,'是','否')))
  tagList(h3(paste0('結果變數｜',labels[1])),
   p('有效 n = ',nrow(d),'｜R² = ',num(s$r.squared),'｜調整後 R² = ',num(s$adj.r.squared),'｜殘差 SE = ',num(s$sigma)),
   p('F(',f[2],', ',f[3],') = ',num(f[1]),'｜p = ',format.pval(pf(f[1],f[2],f[3],lower.tail=FALSE),digits=4)),
@@ -291,9 +308,9 @@ ui <- fluidPage(
  tabsetPanel(id='unit',
   tabPanel('原理說明',includeHTML('www/theory.html'),critical_controls()),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
-   card(plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520,hover=hoverOpts('book_hover',delay=75,nullOutside=TRUE)),uiOutput('book_point_tip',class='plot-label-layer'),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('book_result')))),
+   card(plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520,hover=hoverOpts('book_hover',delay=75,nullOutside=TRUE)),uiOutput('book_point_tip',class='plot-label-layer'),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('book_result'),uiOutput('book_diagnostics')))),
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
-   card(plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),div(class='plot-surface',plotOutput('exercise_plot',height=520,hover=hoverOpts('exercise_hover',delay=75,nullOutside=TRUE)),uiOutput('exercise_point_tip',class='plot-label-layer'),uiOutput('exercise_plot_label',class='plot-label-layer')),uiOutput('exercise_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('exercise_result')),uiOutput('worked_answers'))),
+   card(plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),div(class='plot-surface',plotOutput('exercise_plot',height=520,hover=hoverOpts('exercise_hover',delay=75,nullOutside=TRUE)),uiOutput('exercise_point_tip',class='plot-label-layer'),uiOutput('exercise_plot_label',class='plot-label-layer')),uiOutput('exercise_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('exercise_result'),uiOutput('exercise_diagnostics')),uiOutput('worked_answers'))),
   tabPanel('調查習作',
    card(h3('手機使用行為調查'),p('預設案例為玩手遊時間與手機遊戲成癮的 Pearson 相關。可切換全體或單一星座，也可改選變數。'),
     tags$details(tags$summary('載入其他調查資料'),
@@ -301,7 +318,7 @@ ui <- fluidPage(
      fileInput('survey_file','選擇調查逐筆資料 CSV',accept='.csv')),
     row_controls(uiOutput('survey_group'),select('survey_method','分析方法',methods)),uiOutput('survey_options'),uiOutput('survey_levels'),
     downloadButton('raw_survey','下載逐筆分析資料 CSV')),
-   card(plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=520,hover=hoverOpts('survey_hover',delay=75,nullOutside=TRUE)),uiOutput('survey_point_tip',class='plot-label-layer'),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('survey_result'))),
+   card(plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=520,hover=hoverOpts('survey_hover',delay=75,nullOutside=TRUE)),uiOutput('survey_point_tip',class='plot-label-layer'),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('survey_result'),uiOutput('survey_diagnostics'))),
    includeHTML('www/survey-practice.html')),
   tabPanel('殘差與影響點',includeHTML('www/diagnostics.html')),
   tabPanel('R 與 Python 語法',
@@ -317,7 +334,7 @@ ui <- fluidPage(
    card(h3('輸入逐筆資料'),p('第一列填變數名稱，欄位以逗號分隔。類別可填文字，缺失值留空。'),
     textAreaInput('manual_csv','CSV 資料','學習時間,練習次數,成績\n2,3,61\n4,4,68\n5,8,75\n7,5,77\n8,7,83\n9,10,88\n10,8,91',rows=8,width='100%'),
     select('manual_method','分析方法',methods),uiOutput('manual_options'),uiOutput('manual_levels')),
-   card(plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),div(class='plot-surface',plotOutput('manual_plot',height=520,hover=hoverOpts('manual_hover',delay=75,nullOutside=TRUE)),uiOutput('manual_point_tip',class='plot-label-layer'),uiOutput('manual_plot_label',class='plot-label-layer')),uiOutput('manual_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('manual_result'))))))
+   card(plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),div(class='plot-surface',plotOutput('manual_plot',height=520,hover=hoverOpts('manual_hover',delay=75,nullOutside=TRUE)),uiOutput('manual_point_tip',class='plot-label-layer'),uiOutput('manual_plot_label',class='plot-label-layer')),uiOutput('manual_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('manual_result'),uiOutput('manual_diagnostics'))))))
 server <- function(input,output,session){
  critical_settings<-reactive({
   req(input$critical_n,input$critical_alpha,input$critical_tails)
@@ -456,6 +473,20 @@ server <- function(input,output,session){
    tagList(if(!is.null(a$reduced))tags$details(tags$summary('查看縮減模型與共線性診斷'),display_result(a$reduced)),
     display_result(a,a$comparison))
   }))
+  diagnostics<-reactive(checks(diagnostic_data(get_analysis())))
+  output[[paste0(id,'_diagnostics')]]<-renderUI({
+   if(get_analysis()$kind %in% c('cor','pb'))return(NULL)
+   d<-diagnostics()
+   for(column in c('觀察值','預測值','殘差','標準化殘差','外部學生化殘差'))d[[column]]<-num(d[[column]])
+   for(column in c('p','校正後p'))d[[column]]<-ifelse(is.na(d[[column]]),'—',format.pval(d[[column]],digits=4))
+   tags$details(tags$summary('逐筆殘差診斷'),
+    p('逐筆雙尾檢定使用外部學生化殘差。Bonferroni 校正後 p < .05 標為顯著異常。'),
+    downloadButton(paste0(id,'_residual_csv'),'下載殘差 CSV'),
+    show_table(d))
+  })
+  output[[paste0(id,'_residual_csv')]]<-downloadHandler(
+   function()paste0(id,'-regression-residuals.csv'),
+   function(file)write.csv(diagnostics(),file,row.names=FALSE,fileEncoding='UTF-8',na=''))
   output[[paste0(id,'_plot_key')]]<-renderUI(checks(plot_key(get_analysis())))
   selected_option<-function(name)isTRUE(input[[paste0(id,'_',name)]])
   draw_current_plot<-function()plot_analysis(get_analysis(),selected_option('quadrants'),
