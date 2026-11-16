@@ -22,6 +22,6 @@ details{padding:10px 0}summary{cursor:pointer;font-weight:650;color:var(--accent
 
 .quadrant-key:not([hidden]),.line-key{display:flex;flex-wrap:wrap;gap:3px 15px;font-size:14px;margin:8px 0}.quadrant-key span,.line-key span{white-space:nowrap}
 
-.plot-surface{position:relative}.plot-label-layer{position:absolute;inset:0;pointer-events:none}.plot-equation-label{position:absolute;top:var(--eq-top,12%);right:var(--eq-right,24%);max-width:57%;color:#233d65;font-size:clamp(12px,1.55vw,16px);font-weight:650;cursor:grab;touch-action:none;user-select:none;pointer-events:auto;text-shadow:0 1px 2px #fff}.plot-equation-label:active{cursor:grabbing}.plot-equation-label span{display:block}.plot-equation-label:focus-visible{outline:1px dashed #51738b}
+.plot-surface{position:relative}.plot-label-layer{position:absolute;inset:0;pointer-events:none}.plot-equation-label{position:absolute;top:var(--eq-top,12%);right:var(--eq-right,24%);max-width:57%;color:#233d65;font-size:clamp(12px,1.55vw,16px);font-weight:650;cursor:grab;touch-action:none;user-select:none;pointer-events:auto;background:none;border:0;box-shadow:none}.plot-equation-label:active{cursor:grabbing}.plot-equation-label span{display:block}.plot-equation-label:focus-visible{outline:1px dashed #51738b}
 
 .critical-table{max-height:365px}.critical-table thead th{position:sticky;top:0}.active-critical td{background:#d6efea;font-weight:700}

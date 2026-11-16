@@ -150,34 +150,6 @@ plot_equation <- function(a,zx,zy){
   if(mult)p('圖的 X 軸是模型預測值；方程式列的是完整模型的原始預測變數。'),
   if(named_design&&zx)p('X 軸的 z 分數只套用到圖上的橫軸。'))
 }
-draw_equation <- function(label,r_squared,x,y,quadrants){
- corners<-c('topright','topleft','bottomright','bottomleft')
- width<-diff(par('usr')[1:2])
- inset<-c(.07,if(quadrants).10 else .045)
- cex<-.92
- # Resize or wrap lengthy models so the label stays within the plotting frame.
- limit<-.81*width
- words<-strsplit(label,' ',fixed=TRUE)[[1]]
- wrap<-function(cex){
-  lines<-character()
-  line<-''
-  for(word in words){
-   next_line<-trimws(paste(line,word))
-   if(nzchar(line)&&strwidth(next_line,cex=cex)>limit){lines<-c(lines,line);line<-word}
-   else line<-next_line
-  }
-  c(lines,line)
- }
- lines<-wrap(cex)
- if(length(lines)>2){cex<-.78;lines<-wrap(cex)}
- lines<-c(lines,paste0('R² = ',chart_num(r_squared)))
- overlap<-vapply(corners,function(corner){
-  box<-legend(corner,legend=lines,plot=FALSE,inset=inset,cex=cex)$rect
-  sum(x>=box$left & x<=box$left+box$w & y<=box$top & y>=box$top-box$h)
- },numeric(1))
- legend(corners[which.min(overlap)],legend=lines,inset=inset,cex=cex,text.col='#233d65',
-  bg='#ffffff',box.col='#9bb1c4')
-}
 plot_x <- function(a,fit=NULL){
  d<-a$data
  if(a$kind=='lm'&&ncol(d)>2)return(fitted(if(is.null(fit))fit_design(d) else fit))
@@ -190,7 +162,7 @@ mean_pair <- function(a,zx,zy){
  p(class='mean-pair',strong('平均線交點 '),pair_label(original[1],original[2],zx,zy),
    if(zx||zy)paste0('｜原始平均數 (',paste(chart_num(original),collapse=', '),')'))
 }
-plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALSE,show_mean=FALSE,show_numbers=FALSE){
+plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_mean=FALSE,show_numbers=FALSE){
  d<-a$data;kind<-a$kind
  model_plot<-kind=='lm'&&ncol(d)>2
  group_plot<-kind %in% c('dummy','pb')
@@ -269,11 +241,7 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALS
   location<-candidates[which.min(overlap),]
   text(location[1],location[2],label,adj=c(0,0),cex=.86,font=2,col='#244c55')
  }
- if(show_equation){
-  equation_fit<-if(is.null(fit))fit_design(d) else fit
-  draw_equation(equation_label(a,zx,zy,plot_label=TRUE,model=equation_fit),
-   summary(equation_fit)$r.squared,x_plot,d$y,quadrants)
- }
+
 }
 plot_key <- function(a){
  labels<-a$labels
@@ -317,7 +285,7 @@ critical_controls <- function(){
   uiOutput('critical_lookup'),uiOutput('critical_table'))
 }
 ui <- fluidPage(
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css'),tags$script(src='console.js')),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=movable-label'),tags$script(src='console.js?v=movable-label')),
  div(class='mast',p(class='eyebrow','STATISTICS LAB'),
   h1('相關與迴歸'),p('從兩個變數的散布圖，到多元模型與個案診斷。')),
  tabsetPanel(id='unit',
@@ -500,7 +468,7 @@ server <- function(input,output,session){
   output[[paste0(id,'_plot_key')]]<-renderUI(checks(plot_key(get_analysis())))
   selected_option<-function(name)isTRUE(input[[paste0(id,'_',name)]])
   draw_current_plot<-function()plot_analysis(get_analysis(),selected_option('quadrants'),
-   selected_option('zx'),selected_option('zy'),FALSE,selected_option('mean'),selected_option('point_ids'))
+   selected_option('zx'),selected_option('zy'),selected_option('mean'),selected_option('point_ids'))
   output[[paste0(id,'_plot')]]<-renderPlot(checks(draw_current_plot()))
   output[[paste0(id,'_plot_label')]]<-renderUI({
    if(selected_option('equation'))checks({
