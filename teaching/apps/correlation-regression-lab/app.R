@@ -60,6 +60,14 @@ shade_quadrants <- function(x,y,limits){
       c(limits[2],mx,mx,limits[2]),c(limits[4],limits[4],my,my),
       col=c('#e8f4f1','#f6f0e7','#e8f4f1','#f6f0e7'),border=NA)
 }
+quadrant_colors <- c('#147684','#a64b22','#6953a0','#35663d','#626d77')
+quadrant_index <- function(x,y,mx=mean(x),my=mean(y)){
+ dx<-x-mx;dy<-y-my
+ on_axis<-abs(dx)<=1e-10*pmax(1,abs(x),abs(mx)) | abs(dy)<=1e-10*pmax(1,abs(y),abs(my))
+ q<-ifelse(dx>0,ifelse(dy>0,1L,4L),ifelse(dy>0,2L,3L))
+ q[on_axis]<-5L
+ q
+}
 add_quadrants <- function(x,y) {
  center_x<-mean(x);center_y<-mean(y)
  limits<-par('usr')
@@ -70,18 +78,20 @@ add_quadrants <- function(x,y) {
  text(limits[c(2,1,1,2)]+c(-1,1,1,-1)*margin_x,
       c(rep(limits[4]-margin_y,2),rep(limits[3]+margin_y,2)),
       paste0('Q',1:4),col='#465e63',font=2,cex=.87)
- dx<-x-center_x;dy<-y-center_y
- on_axis<-abs(dx)<=1e-10*pmax(1,abs(x),abs(center_x)) | abs(dy)<=1e-10*pmax(1,abs(y),abs(center_y))
- q<-ifelse(dx>0,ifelse(dy>0,1L,4L),ifelse(dy>0,2L,3L))
- counts<-tabulate(q[!on_axis],nbins=4)
- caption<-paste0(paste0('Q',1:4,': ',counts,collapse='   |   '),'   |   On mean lines: ',sum(on_axis))
+ counts<-tabulate(quadrant_index(x,y,mx=center_x,my=center_y),nbins=5)
+ caption<-paste0(paste0('Q',1:4,': ',counts[1:4],collapse='   |   '),'   |   On mean lines: ',counts[5])
  mtext(caption,side=1,line=4.35,cex=.82,col='#465e63')
 }
 axis_scale <- function(values, limits, standardize, discrete=NULL) {
  center<-mean(values);spread<-sd(values)
  if(standardize&&is.finite(spread)&&spread>0){
-  labels<-if(is.null(discrete)) pretty((limits-center)/spread,n=5) else (discrete-center)/spread
-  return(list(at=center+spread*labels,labels=format(round(labels,2),trim=TRUE)))
+  bound<-(limits-center)/spread
+  first<-ceiling(2*bound[1]);last<-floor(2*bound[2])
+  ticks<-if(first<=last)seq.int(first,last)/2 else numeric()
+  # Keep half-step grid lines. On unusually long axes, label a subset to avoid overlap.
+  step<-if(length(ticks)>30)2 else if(length(ticks)>17)1 else .5
+  labels<-ifelse(abs(ticks/step-round(ticks/step))<1e-10,as.character(ticks),'')
+  return(list(at=center+spread*ticks,labels=labels))
  }
  list(at=discrete,labels=TRUE)
 }
@@ -149,6 +159,7 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE){
   cex.axis=1.0,cex.lab=1.03,col.axis='#456168',col.lab='#244c55',fg='#9bb1b5')
  x_plot<-plot_x(a,fit)
  groups<-sort(unique(x_plot))
+ point_colors<-if(quadrants)quadrant_colors[quadrant_index(x_plot,d$y)] else rep('#176f7a',nrow(d))
  xlim<-if(group_plot)range(groups)+c(-.62,.62) else range(x_plot)
  ylim<-extendrange(d$y,f=.11)
  plot(x_plot,d$y,type='n',xlim=xlim,ylim=ylim,axes=FALSE,
@@ -171,21 +182,22 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE){
    # Deterministic offsets prevent point movement when toggling overlays.
    offset<-if(length(y)>1) .16*sin(seq_along(y)*2.399963) else 0
    color<-palette[(i-1L)%%length(palette)+1L]
+   dot_color<-if(quadrants)point_colors[x_plot==x] else color
    points(x+offset,y,pch=21,cex=if(length(y)>60).85 else 1.18,
-    col=adjustcolor(color,.67),bg=adjustcolor(color,.32),lwd=.8)
+    col=adjustcolor(dot_color,.83),bg=adjustcolor(dot_color,.52),lwd=.8)
    segments(x-.22,mean(y),x+.22,mean(y),col=color,lwd=3)
    points(x,mean(y),pch=23,bg=color,col='white',cex=1.42,lwd=1)
   }
  }else{
-  if(model_plot)abline(0,1,col='#ac512e',lwd=2,lty=2)
+  if(model_plot)abline(0,1,col='#284e85',lwd=2,lty=2)
   else if(kind=='poly'){
    x<-seq(min(x_plot),max(x_plot),length.out=150)
    nd<-as.data.frame(lapply(seq_len(ncol(d)-1),function(i)x^i))
    names(nd)<-names(d)[-1]
-   lines(x,predict(fit,nd),col='#ac512e',lwd=2.6)
-  }else abline(lm(y~x1,d),col='#ac512e',lwd=2.6)
+   lines(x,predict(fit,nd),col='#284e85',lwd=2.6)
+  }else abline(lm(y~x1,d),col='#284e85',lwd=2.6)
   points(x_plot,d$y,pch=21,cex=if(nrow(d)>100).82 else 1.16,lwd=.8,
-   col=adjustcolor('#176f7a',.62),bg=adjustcolor('#176f7a',if(nrow(d)>100).26 else .52))
+   col=adjustcolor(point_colors,.8),bg=adjustcolor(point_colors,if(nrow(d)>100).38 else .66))
  }
  if(quadrants)points(mean(x_plot),mean(d$y),pch=21,col='#244c55',bg='white',cex=1.23,lwd=1.6)
 }
@@ -197,8 +209,8 @@ plot_key <- function(a){
    lapply(seq_along(a$groups),function(i)span(paste0(i-1L,'｜',a$groups[i]))),
    span('◆ 組別平均')))
  }
- if(a$kind=='lm'&&ncol(a$data)>2)return(div(class='plot-key',span(paste0('Y｜',labels[1])),span('橫軸為預測值；橘色虛線為預測等於觀測')))
- div(class='plot-key',span(paste0('X｜',labels[2])),span(paste0('Y｜',labels[1])),span('橘色線｜擬合值'))
+ if(a$kind=='lm'&&ncol(a$data)>2)return(div(class='plot-key',span(paste0('Y｜',labels[1])),span('橫軸為預測值；藍色虛線為預測等於觀測')))
+ div(class='plot-key',span(paste0('X｜',labels[2])),span(paste0('Y｜',labels[1])),span('藍色線｜擬合值'))
 }
 data_controls <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
  numeric_names <- names(d)[vapply(d,is.numeric,logical(1))]
@@ -380,6 +392,8 @@ server <- function(input,output,session){
   output[[paste0(id,'_quadrant_note')]]<-renderUI({
    if(selected_option('quadrants'))checks(tagList(
     mean_pair(get_analysis(),selected_option('zx'),selected_option('zy')),
+    div(class='quadrant-key',lapply(seq_along(quadrant_colors),function(i)
+     span(style=paste0('color:',quadrant_colors[i]),if(i<5)paste0('● Q',i) else '● 平均線上'))),
     p(class='quadrant-note','Q1、Q3 淺綠，Q2、Q4 淺米色。落在 X̄ 或 Ȳ 平均線上的觀察值另計。')))
   })
  })

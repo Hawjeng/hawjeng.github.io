@@ -40,17 +40,27 @@ const zy = document.getElementById('zy');
 const equationOption = document.getElementById('equation');
 const equationText = document.getElementById('equation-text');
 
+function zTicks(min,max,center,spread){
+  if(!Number.isFinite(spread)||spread<=0)return [];
+  const ticks=[];
+  const first=Math.ceil(2*(min-center)/spread), last=Math.floor(2*(max-center)/spread);
+  const stride=Math.max(1,Math.ceil((last-first+1)/80));
+  if(!Number.isFinite(stride))return [];
+  for(let half=Math.ceil(first/stride)*stride;half<=last;half+=stride)ticks.push([center+spread*half/2,half/2]);
+  return ticks;
+}
 function renderAxes(model, sx, sy) {
   axis.replaceChildren();
-  const tick = n => String(Number(n.toFixed(1)));
-  for(let x=0;x<=40;x+=5){
+  const xticks=zx.checked?zTicks(bounds.xmin,bounds.xmax,model.mx,sx):Array.from({length:9},(_,i)=>[5*i,5*i]);
+  const yticks=zy.checked?zTicks(bounds.ymin,bounds.ymax,model.my,sy):Array.from({length:7},(_,i)=>[50+10*i,50+10*i]);
+  xticks.forEach(([x,tick])=>{
     axis.append(svg('line',{x1:xScale(x),x2:xScale(x),y1:22,y2:412,stroke:'#d4e4e6'}));
-    label(axis,xScale(x),435,zx.checked ? tick((x-model.mx)/sx) : x);
-  }
-  for(let y=50;y<=110;y+=10){
+    label(axis,xScale(x),435,tick);
+  });
+  yticks.forEach(([y,tick])=>{
     axis.append(svg('line',{x1:62,x2:828,y1:yScale(y),y2:yScale(y),stroke:'#d4e4e6'}));
-    label(axis,51,yScale(y)+5,zy.checked ? tick((y-model.my)/sy) : y,'end');
-  }
+    if(yticks.length<=19||Number.isInteger(tick))label(axis,51,yScale(y)+5,tick,'end');
+  });
   label(axis,445,469,zx.checked ? '認真程度 zₓ' : '認真程度 X');
   label(axis,66,17,zy.checked ? '考試成績 zᵧ' : '考試成績 Y','start');
 }
@@ -67,6 +77,13 @@ const quadrantShading = document.getElementById('quadrant-shading');
 const quadrantCounts = document.getElementById('quadrant-counts');
 const meanIntersection = document.getElementById('mean-intersection');
 const meanPair = document.getElementById('mean-pair');
+const pointPalette=['#147684','#a64b22','#6953a0','#35663d','#626d77'];
+function quadrantOf(px,py,model){
+  const dx=px-model.mx,dy=py-model.my;
+  if(Math.abs(dx)<=1e-10*Math.max(1,Math.abs(px),Math.abs(model.mx)) ||
+     Math.abs(dy)<=1e-10*Math.max(1,Math.abs(py),Math.abs(model.my)))return 4;
+  return dx>0?(dy>0?0:3):(dy>0?1:2);
+}
 function drawQuadrants(model){
   quadrantLines.replaceChildren();
   quadrantShading.replaceChildren();
@@ -93,16 +110,15 @@ function drawQuadrants(model){
   [[809,45],[81,45],[81,398],[809,398]].forEach(([cornerX,cornerY],i)=>{
     label(quadrantLines,cornerX,cornerY,'Q'+(i+1));
   });
-  const n=[0,0,0,0];
-  let onLines=0;
-  for(const [px,py] of points){
-    const dx=px-model.mx, dy=py-model.my;
-    if(Math.abs(dx)<=1e-10*Math.max(1,Math.abs(px),Math.abs(model.mx)) ||
-       Math.abs(dy)<=1e-10*Math.max(1,Math.abs(py),Math.abs(model.my)))onLines++;
-    else n[dx>0?(dy>0?0:3):(dy>0?1:2)]++;
-  }
-  quadrantCounts.textContent=n.map((count,i)=>'第 '+(i+1)+' 象限 '+count+' 筆').join('｜')+'｜落在平均線上 '+onLines+' 筆';
-
+  const n=[0,0,0,0,0];
+  points.forEach(([px,py])=>n[quadrantOf(px,py,model)]++);
+  const text=n.map((count,i)=>(i===4?'落在平均線上':'第 '+(i+1)+' 象限')+' '+count+' 筆');
+  quadrantCounts.replaceChildren(...text.map((label,i)=>{
+    const item=document.createElement('span');
+    item.textContent='● '+label;
+    item.style.color=pointPalette[i];
+    return item;
+  }));
 }
 const fmt = number => Number.isFinite(number) ? number.toFixed(4) : '—';
 function render(){
@@ -130,7 +146,9 @@ function render(){
   circles.forEach((node,i)=>{
     node.setAttribute('cx',xScale(points[i][0]));
     node.setAttribute('cy',yScale(points[i][1]));
-    node.setAttribute('fill',i===selected?'#b94723':'#286d79');
+    node.setAttribute('fill',quadrantOption.checked?pointPalette[quadrantOf(...points[i],full)]:'#147684');
+    node.setAttribute('stroke',i===selected?'#17283c':'#fff');
+    node.setAttribute('stroke-width',i===selected?3:1);
     node.setAttribute('aria-label','第 '+(i+1)+' 筆，X '+points[i][0].toFixed(1)+'，Y '+points[i][1].toFixed(1));
   });
   selectPoint.value=selected;
