@@ -102,7 +102,7 @@ plot_controls <- function(prefix) {
   checkboxInput(paste0(prefix,'_zx'),'X 軸用 z 分數'),
   checkboxInput(paste0(prefix,'_zy'),'Y 軸用 z 分數'))
 }
-plot_equation <- function(a,zx,zy){
+equation_label <- function(a,zx,zy,plot_label=FALSE){
  d<-a$data;kind<-a$kind
  if(kind %in% c('cor','pb'))cor_fit(d)
  model<-fit_design(d)
@@ -111,11 +111,11 @@ plot_equation <- function(a,zx,zy){
  named_design<-mult||kind=='dummy'
  center_y<-if(zy)mean(y) else 0
  scale_y<-if(zy)sd(y) else 1
- target<-if(zy)'ẑᵧ' else 'ŷ'
+ target<-if(plot_label){if(zy)'zY_hat' else 'Y_hat'} else if(zy)'ẑᵧ' else 'ŷ'
  beta<-unname(coef(model))
  if(named_design){
   coefs<-c((beta[1]-center_y)/scale_y,beta[-1]/scale_y)
-  terms<-unname(a$labels[-1])
+  terms<-if(plot_label){if(mult)paste0('X',seq_len(ncol(d)-1L)) else paste0('D',seq_len(ncol(d)-1L))}else unname(a$labels[-1])
  }else{
   center_x<-if(zx)mean(x) else 0
   scale_x<-if(zx)sd(x) else 1
@@ -126,16 +126,49 @@ plot_equation <- function(a,zx,zy){
    sum(beta[k+1L]*choose(k,j)*center_x^(k-j)*scale_x^j)/scale_y
   },numeric(1))
   coefs[1]<-coefs[1]-center_y/scale_y
-  term<-if(zx)'zₓ' else 'X'
-  terms<-c(term,if(length(beta)>2)paste0(term,c('²','³')[seq_len(length(beta)-2L)]))
+  term<-if(zx){if(plot_label)'zX' else 'zₓ'} else 'X'
+  powers<-if(plot_label)c('^2','^3') else c('²','³')
+  terms<-c(term,if(length(beta)>2)paste0(term,powers[seq_len(length(beta)-2L)]))
  }
- value<-paste0(target,' = ',num(coefs[1]),paste(sprintf(' %s %s × %s',
-  ifelse(coefs[-1]<0,'−','+'),num(abs(coefs[-1])),terms),collapse=''))
- div(class='equation-box',strong('迴歸方程式'),p(value),
-  if(kind=='pb')p('X 為 0／1 組別編碼。'),
-  if(kind=='dummy')p('方程式的預測欄為組別的 0／1 指標。'),
+ paste0(target,' = ',num(coefs[1]),paste(sprintf(' %s %s %s %s',
+  ifelse(coefs[-1]<0,if(plot_label)'-' else '−','+'),num(abs(coefs[-1])),if(plot_label)'*' else '×',terms),collapse=''))
+}
+plot_equation <- function(a,zx,zy){
+ d<-a$data;kind<-a$kind
+ mult<-kind=='lm'&&ncol(d)>2
+ named_design<-mult||kind=='dummy'
+ div(class='equation-box',span(class='sr-only','迴歸方程式 ',equation_label(a,zx,zy)),
+  if(kind=='pb')p('方程式中的 X 為 0／1 組別編碼。'),
+  if(named_design)p(paste(paste0(if(mult)'X' else 'D',seq_len(ncol(d)-1L),' = ',unname(a$labels[-1])),collapse='｜')),
   if(mult)p('圖的 X 軸是模型預測值；方程式列的是完整模型的原始預測變數。'),
   if(named_design&&zx)p('X 軸的 z 分數只套用到圖上的橫軸。'))
+}
+draw_equation <- function(label,x,y,quadrants){
+ corners<-c('topright','topleft','bottomright','bottomleft')
+ width<-diff(par('usr')[1:2])
+ inset<-c(.07,if(quadrants).10 else .045)
+ cex<-.92
+ # Resize or wrap lengthy models so the label stays within the plotting frame.
+ limit<-.81*width
+ words<-strsplit(label,' ',fixed=TRUE)[[1]]
+ wrap<-function(cex){
+  lines<-character()
+  line<-''
+  for(word in words){
+   next_line<-trimws(paste(line,word))
+   if(nzchar(line)&&strwidth(next_line,cex=cex)>limit){lines<-c(lines,line);line<-word}
+   else line<-next_line
+  }
+  c(lines,line)
+ }
+ lines<-wrap(cex)
+ if(length(lines)>2){cex<-.78;lines<-wrap(cex)}
+ overlap<-vapply(corners,function(corner){
+  box<-legend(corner,legend=lines,plot=FALSE,inset=inset,cex=cex)$rect
+  sum(x>=box$left & x<=box$left+box$w & y<=box$top & y>=box$top-box$h)
+ },numeric(1))
+ legend(corners[which.min(overlap)],legend=lines,inset=inset,cex=cex,text.col='#233d65',
+  bg='#ffffff',box.col='#9bb1c4')
 }
 plot_x <- function(a,fit=NULL){
  d<-a$data
@@ -149,7 +182,7 @@ mean_pair <- function(a,zx,zy){
  p(class='mean-pair',strong('平均線交點 '),paste0('(',paste(in_view,collapse=', '),')'),
    if(zx||zy)paste0('｜原始平均數 (',paste(num(original),collapse=', '),')'))
 }
-plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE){
+plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALSE){
  d<-a$data;kind<-a$kind
  model_plot<-kind=='lm'&&ncol(d)>2
  group_plot<-kind %in% c('dummy','pb')
@@ -200,6 +233,7 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE){
    col=adjustcolor(point_colors,.8),bg=adjustcolor(point_colors,if(nrow(d)>100).38 else .66))
  }
  if(quadrants)points(mean(x_plot),mean(d$y),pch=21,col='#244c55',bg='white',cex=1.23,lwd=1.6)
+ if(show_equation)draw_equation(equation_label(a,zx,zy,plot_label=TRUE),x_plot,d$y,quadrants)
 }
 plot_key <- function(a){
  labels<-a$labels
@@ -385,9 +419,14 @@ server <- function(input,output,session){
   output[[paste0(id,'_plot_key')]]<-renderUI(checks(plot_key(get_analysis())))
   selected_option<-function(name)isTRUE(input[[paste0(id,'_',name)]])
   output[[paste0(id,'_plot')]]<-renderPlot(checks(plot_analysis(get_analysis(),selected_option('quadrants'),
-   selected_option('zx'),selected_option('zy'))))
+   selected_option('zx'),selected_option('zy'),selected_option('equation'))))
   output[[paste0(id,'_equation_text')]]<-renderUI({
-   if(selected_option('equation'))checks(plot_equation(get_analysis(),selected_option('zx'),selected_option('zy')))
+   if(selected_option('equation'))checks({
+    a<-get_analysis()
+    details<-plot_equation(a,selected_option('zx'),selected_option('zy'))
+    if(a$kind %in% c('pb','dummy')||(a$kind=='lm'&&ncol(a$data)>2))details
+    else span(class='sr-only','迴歸方程式 ',equation_label(a,selected_option('zx'),selected_option('zy')))
+   })
   })
   output[[paste0(id,'_quadrant_note')]]<-renderUI({
    if(selected_option('quadrants'))checks(tagList(
