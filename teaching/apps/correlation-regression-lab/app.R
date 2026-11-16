@@ -295,11 +295,18 @@ cor_critical <- function(n,alpha,tails){
 }
 critical_controls <- function(){
  card(h3('樣本數與相關係數臨界值'),
-  p('對應第 13 章圖 13.6。檢定 H₀：ρ = 0 時，df = N − 2。先查 t 臨界值，再換算 r 臨界值。'),
+  p('檢定 H₀：ρ = 0 時，df = N − 2。拖動 N，可對照兩張圖與臨界值表。'),
   row_controls(select('critical_tails','檢定方向',c('雙尾'='2','右尾'='right','左尾'='left')),
    select('critical_alpha','顯著水準 α',c('0.10'='.10','0.05'='.05','0.02'='.02','0.01'='.01'),selected='.05')),
-  sliderInput('critical_n','配對樣本數 N',min=3,max=500,value=10,step=1,width='100%',sep=''),
-  uiOutput('critical_lookup'),uiOutput('critical_table'))
+  sliderInput('critical_n','配對樣本數 N',min=3,max=2000,value=10,step=1,width='100%',sep=''),
+  h4('圖 13.6｜自由度與相關係數臨界值'),
+  p('雙尾檢定。三條曲線分別對應 α = .01、.05、.10，縱軸取臨界值的正值。'),
+  div(class='chart-panel',plotOutput('critical_curve',height=350)),
+  uiOutput('critical_lookup'),tags$details(tags$summary('查看臨界值對照表'),uiOutput('critical_table')),
+  h4('圖 13.7｜樣本數與雙尾 p 值'),
+  sliderInput('critical_r','觀察相關 |r|',min=.01,max=.99,value=.10,step=.01,width='100%'),
+  div(class='chart-panel',plotOutput('p_curve',height=350)),
+  uiOutput('p_lookup'))
 }
 ui <- fluidPage(
  tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=square-plots'),tags$script(src='console.js?v=square-plots')),
@@ -342,6 +349,45 @@ server <- function(input,output,session){
   list(n=input$critical_n,alpha=as.numeric(input$critical_alpha),tails=if(direction=='2')2L else 1L,
        sign=if(direction=='2')'±' else if(direction=='left')'−' else '')
  })
+ critical_plot <- function(x,curves,labels,ylab,xlab,selected_x,selected_y,threshold=NULL){
+  colors<-c('#7958a4','#176f7a','#ac512e','#284e85')
+  par(mar=c(4,4,1,1),las=1,fg='#9bb1b5',col.lab='#244c55')
+  plot(range(x),range(curves,threshold,selected_y),type='n',xlab=xlab,ylab=ylab)
+  abline(h=axTicks(2),col='#e5eef0')
+  for(i in seq_along(curves))lines(x,curves[[i]],col=colors[i],lwd=2,lty=if(i==4)2 else 1)
+  if(!is.null(threshold))abline(h=threshold,col='#687e83',lty=3)
+  abline(v=selected_x,col='#687e83',lty=3)
+  points(rep(selected_x,length(selected_y)),selected_y,pch=21,bg=colors[seq_along(selected_y)],col='white',cex=1.2)
+  legend('topright',labels,col=colors[seq_along(labels)],lty=c(1,1,1,2)[seq_along(labels)],lwd=2,bty='n',cex=.9)
+ }
+ output$critical_curve<-renderPlot({
+  q<-critical_settings()
+  alpha<-c(.01,.05,.10)
+  n<-3:max(502,q$n)
+  critical_plot(n-2,lapply(alpha,function(a)cor_critical(n,a,2)$r),paste('alpha =',alpha),
+   'Critical |r|','Degrees of freedom (N - 2)',q$n-2,
+   vapply(alpha,function(a)cor_critical(q$n,a,2)$r,numeric(1)))
+ })
+ p_for_r<-function(n,r)2*pt(-r*sqrt((n-2)/(1-r^2)),df=n-2)
+ output$p_curve<-renderPlot({
+  q<-critical_settings();r<-req(input$critical_r)
+  n<-3:2000
+  values<-c(.05,.10,.30,r)
+  critical_plot(n,lapply(values,function(v)p_for_r(n,v)),c(paste('|r| =',values[1:3]),paste('Selected |r| =',r)),
+   'Two-sided p','Paired sample size N',q$n,p_for_r(q$n,values),q$alpha)
+ })
+ output$p_lookup<-renderUI({
+  q<-critical_settings();r<-req(input$critical_r)
+  p<-p_for_r(q$n,r)
+  candidates<-3:2000
+  minimum<-candidates[which(p_for_r(candidates,r)<q$alpha)[1]]
+  div(class='equation-box',
+   p(paste0('N = ',q$n,'｜|r| = ',num(r),'｜雙尾 p = ',format.pval(p,digits=4),
+    if(p<q$alpha)' < ' else ' ≥ ','α = ',num(q$alpha))),
+   p(if(is.na(minimum))'在 N ≤ 2,000 的範圍內，雙尾 p 仍未低於所選 α。'
+    else paste0('在這個 |r| 下，雙尾 p 首次低於 α 的樣本數是 N = ',minimum,'。')),
+   p('灰色水平線是所選的 α。'))
+ })
  output$critical_lookup<-renderUI({
   q<-critical_settings();v<-cor_critical(q$n,q$alpha,q$tails)
   div(class='equation-box',p(strong('目前 N = ',v$N),'｜df = ',v$df,
@@ -350,7 +396,7 @@ server <- function(input,output,session){
  })
  output$critical_table<-renderUI({
   q<-critical_settings()
-  n<-sort(unique(c(3:12,15,20,25,30,40,50,75,100,200,500,q$n)))
+  n<-sort(unique(c(3:12,15,20,25,30,40,50,52,75,100,102,200,385,500,1000,1538,2000,q$n)))
   d<-cor_critical(n,q$alpha,q$tails)
   row<-function(i)tags$tr(class=if(d$N[i]==q$n)'active-critical',
    tags$td(d$N[i]),tags$td(d$df[i]),tags$td(paste0(q$sign,num(d$t[i]))),tags$td(paste0(q$sign,num(d$r[i]))))
