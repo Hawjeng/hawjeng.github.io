@@ -103,7 +103,6 @@ plot_controls <- function(prefix) {
  div(class='plot-controls',
   checkboxInput(paste0(prefix,'_quadrants'),'四象限'),
   checkboxInput(paste0(prefix,'_mean'),'平均交點'),
-  checkboxInput(paste0(prefix,'_point_ids'),'點編號'),
   checkboxInput(paste0(prefix,'_equation'),'方程式'),
   checkboxInput(paste0(prefix,'_zx'),'X 軸 z'),
   checkboxInput(paste0(prefix,'_zy'),'Y 軸 z'))
@@ -156,8 +155,16 @@ plot_x <- function(a,fit=NULL){
  if(a$kind=='dummy'&&ncol(d)>2)return(max.col(cbind(1-rowSums(d[-1]),d[-1]))-1L)
  d[[2]]
 }
+plot_offsets <- function(x) {
+ offset<-numeric(length(x))
+ for(group in unique(x)){
+  rows<-which(x==group)
+  if(length(rows)>1L)offset[rows]<-.16*sin(seq_along(rows)*2.399963)
+ }
+ offset
+}
 pair_label <- function(x,y,zx,zy)paste0('(',paste(ifelse(c(zx,zy),'0',chart_num(c(x,y))),collapse=', '),')')
-plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_mean=FALSE,show_numbers=FALSE){
+plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_mean=FALSE){
  d<-a$data;kind<-a$kind
  model_plot<-kind=='lm'&&ncol(d)>2
  group_plot<-kind %in% c('dummy','pb')
@@ -199,7 +206,7 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_mean=FALSE,sh
    x<-groups[i]
    y<-d$y[x_plot==x]
    # Deterministic offsets prevent point movement when toggling overlays.
-   offset<-if(length(y)>1) .16*sin(seq_along(y)*2.399963) else 0
+   offset<-plot_offsets(x_plot)[x_plot==x]
    color<-palette[(i-1L)%%length(palette)+1L]
    plot_locations[x_plot==x]<-x+offset
    dot_color<-if(quadrants)point_colors[x_plot==x] else color
@@ -219,8 +226,6 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_mean=FALSE,sh
   points(x_plot,d$y,pch=21,cex=if(nrow(d)>100).82 else 1.16,lwd=.8,
    col=adjustcolor(point_colors,.8),bg=adjustcolor(point_colors,if(nrow(d)>100).38 else .66))
  }
- if(show_numbers)text(plot_locations,d$y,a$observation,pos=3,offset=.35,
-  col='#294650',cex=if(nrow(d)>100).59 else .83)
  if(show_mean){
   mx<-mean(x_plot);my<-mean(d$y)
   points(mx,my,pch=21,col='#244c55',bg='white',cex=1.27,lwd=1.6)
@@ -286,9 +291,9 @@ ui <- fluidPage(
  tabsetPanel(id='unit',
   tabPanel('原理說明',includeHTML('www/theory.html'),critical_controls()),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
-   card(plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('book_result')))),
+   card(plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520,hover=hoverOpts('book_hover',delay=75,nullOutside=TRUE)),uiOutput('book_point_tip',class='plot-label-layer'),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('book_result')))),
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
-   card(plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),div(class='plot-surface',plotOutput('exercise_plot',height=520),uiOutput('exercise_plot_label',class='plot-label-layer')),uiOutput('exercise_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('exercise_result')),uiOutput('worked_answers'))),
+   card(plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),div(class='plot-surface',plotOutput('exercise_plot',height=520,hover=hoverOpts('exercise_hover',delay=75,nullOutside=TRUE)),uiOutput('exercise_point_tip',class='plot-label-layer'),uiOutput('exercise_plot_label',class='plot-label-layer')),uiOutput('exercise_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('exercise_result')),uiOutput('worked_answers'))),
   tabPanel('調查習作',
    card(h3('手機使用行為調查'),p('預設案例為玩手遊時間與手機遊戲成癮的 Pearson 相關。可切換全體或單一星座，也可改選變數。'),
     tags$details(tags$summary('載入其他調查資料'),
@@ -296,7 +301,7 @@ ui <- fluidPage(
      fileInput('survey_file','選擇調查逐筆資料 CSV',accept='.csv')),
     row_controls(uiOutput('survey_group'),select('survey_method','分析方法',methods)),uiOutput('survey_options'),uiOutput('survey_levels'),
     downloadButton('raw_survey','下載逐筆分析資料 CSV')),
-   card(plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=520),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('survey_result'))),
+   card(plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=520,hover=hoverOpts('survey_hover',delay=75,nullOutside=TRUE)),uiOutput('survey_point_tip',class='plot-label-layer'),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('survey_result'))),
    includeHTML('www/survey-practice.html')),
   tabPanel('殘差與影響點',includeHTML('www/diagnostics.html')),
   tabPanel('R 與 Python 語法',
@@ -312,7 +317,7 @@ ui <- fluidPage(
    card(h3('輸入逐筆資料'),p('第一列填變數名稱，欄位以逗號分隔。類別可填文字，缺失值留空。'),
     textAreaInput('manual_csv','CSV 資料','學習時間,練習次數,成績\n2,3,61\n4,4,68\n5,8,75\n7,5,77\n8,7,83\n9,10,88\n10,8,91',rows=8,width='100%'),
     select('manual_method','分析方法',methods),uiOutput('manual_options'),uiOutput('manual_levels')),
-   card(plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),div(class='plot-surface',plotOutput('manual_plot',height=520),uiOutput('manual_plot_label',class='plot-label-layer')),uiOutput('manual_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('manual_result'))))))
+   card(plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),div(class='plot-surface',plotOutput('manual_plot',height=520,hover=hoverOpts('manual_hover',delay=75,nullOutside=TRUE)),uiOutput('manual_point_tip',class='plot-label-layer'),uiOutput('manual_plot_label',class='plot-label-layer')),uiOutput('manual_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('manual_result'))))))
 server <- function(input,output,session){
  critical_settings<-reactive({
   req(input$critical_n,input$critical_alpha,input$critical_tails)
@@ -454,8 +459,34 @@ server <- function(input,output,session){
   output[[paste0(id,'_plot_key')]]<-renderUI(checks(plot_key(get_analysis())))
   selected_option<-function(name)isTRUE(input[[paste0(id,'_',name)]])
   draw_current_plot<-function()plot_analysis(get_analysis(),selected_option('quadrants'),
-   selected_option('zx'),selected_option('zy'),selected_option('mean'),selected_option('point_ids'))
+   selected_option('zx'),selected_option('zy'),selected_option('mean'))
   output[[paste0(id,'_plot')]]<-renderPlot(checks(draw_current_plot()))
+  hover_model<-reactive({
+   a<-get_analysis();d<-a$data;fit<-fit_design(d);x<-plot_x(a,fit)
+   locations<-if(a$kind %in% c('pb','dummy'))x+plot_offsets(x) else x
+   list(a=a,x=x,locations=data.frame(x=locations,y=d$y,index=seq_len(nrow(d))),
+    residual=residuals(fit),standardized=rstandard(fit))
+  })
+  output[[paste0(id,'_point_tip')]]<-renderUI({
+   hover<-input[[paste0(id,'_hover')]]
+   req(hover,hover$coords_css)
+   h<-hover_model()
+   point<-nearPoints(h$locations,hover,xvar='x',yvar='y',threshold=13,maxpoints=1)
+   if(!nrow(point))return(NULL)
+   i<-point$index;y<-h$a$data$y
+   zx<-selected_option('zx');zy<-selected_option('zy')
+   xval<-if(zx)(h$x[i]-mean(h$x))/sd(h$x) else h$x[i]
+   yval<-if(zy)(y[i]-mean(y))/sd(y) else y[i]
+   e<-if(zy)h$residual[i]/sd(y) else h$residual[i]
+   width<-session$clientData[[paste0('output_',id,'_plot_width')]]
+   flip<-isTRUE(hover$coords_css$x>(if(is.null(width))600 else width)*.67)
+   div(class=paste('point-tip',if(flip)'tip-left'),
+    style=sprintf('left:%dpx;top:%dpx',round(hover$coords_css$x),round(hover$coords_css$y)),
+    strong(paste('第',h$a$observation[i],'筆')),
+    div(paste0(if(zx)'zX' else 'X',' = ',chart_num(xval),'，',if(zy)'zY' else 'Y',' = ',chart_num(yval))),
+    div(paste0(if(zy)'z 尺度殘差' else '殘差',' = ',chart_num(e))),
+    if(zy)div(paste0('內部標準化殘差 = ',chart_num(h$standardized[i]))))
+  })
   output[[paste0(id,'_plot_label')]]<-renderUI({
    if(selected_option('equation'))checks({
     a<-get_analysis()

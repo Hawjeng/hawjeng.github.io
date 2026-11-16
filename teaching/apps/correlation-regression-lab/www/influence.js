@@ -101,6 +101,7 @@ function renderAxes(model, sx, sy) {
 const circles = original.map((_,i)=>{
   const node = svg('circle',{r:8,tabindex:0,class:'point','data-index':i,role:'button'});
   const option = new Option('第 '+(i+1)+' 筆',i);
+  node.append(svg('title',{}));
   selectPoint.add(option);
   document.getElementById('points').append(node);
   return node;
@@ -113,8 +114,6 @@ const meanIntersection = document.getElementById('mean-intersection');
 const meanPair = document.getElementById('mean-pair');
 const meanLabel = document.getElementById('mean-label');
 const meanOption = document.getElementById('show-mean');
-const numbersOption = document.getElementById('show-numbers');
-const pointNumbers = document.getElementById('point-numbers');
 function drawMean(model) {
   const visibility=meanOption.checked?'visible':'hidden';
   meanPair.hidden=!meanOption.checked;
@@ -209,10 +208,17 @@ function render(){
     node.setAttribute('fill',quadrantOption.checked?pointPalette[quadrantOf(...points[i],full)]:'#147684');
     node.setAttribute('stroke',i===selected?'#17283c':'#fff');
     node.setAttribute('stroke-width',i===selected?3:1);
-    node.setAttribute('aria-label','第 '+(i+1)+' 筆，X '+points[i][0].toFixed(1)+'，Y '+points[i][1].toFixed(1));
+    const [px,py]=points[i];
+    const residual=py-full.predict(px);
+    const leverage=1/points.length+(px-full.mx)**2/full.xx;
+    const studentized=residual/Math.sqrt(full.mse*(1-leverage));
+    const tip='第 '+(i+1)+' 筆\n'+(zx.checked?'zX':'X')+' = '+fmt(zx.checked?(px-full.mx)/sx:px)+
+      '，'+(zy.checked?'zY':'Y')+' = '+fmt(zy.checked?(py-full.my)/sy:py)+
+      '\n'+(zy.checked?'z 尺度殘差':'殘差')+' = '+fmt(zy.checked?residual/sy:residual)+
+      (zy.checked?'\n內部標準化殘差 = '+fmt(studentized):'');
+    node.querySelector('title').textContent=tip;
+    node.setAttribute('aria-label',tip.replaceAll('\n','，'));
   });
-  pointNumbers.replaceChildren();
-  if(numbersOption.checked)points.forEach(([px,py],i)=>label(pointNumbers,xScale(px),yScale(py)-12,i+1));
   selectPoint.value=selected;
   metrics.replaceChildren(...[
     ['Pearson r',full.r],['全部點斜率',full.slope],['刪除該點後斜率',removed.slope],
@@ -269,7 +275,7 @@ chart.addEventListener('keydown',event=>{
   selected=Number(event.target.dataset.index);
   move(points[selected][0]+delta[0],points[selected][1]+delta[1]);
 });
-numbersOption.onchange=meanOption.onchange=quadrantOption.onchange=equationOption.onchange=zx.onchange=zy.onchange=render;
+meanOption.onchange=quadrantOption.onchange=equationOption.onchange=zx.onchange=zy.onchange=render;
 selectPoint.onchange=()=>{selected=Number(selectPoint.value);render();};
 document.getElementById('download-chart').onclick=()=>{
   const copy=chart.cloneNode(true);
