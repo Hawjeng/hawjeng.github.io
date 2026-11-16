@@ -6,7 +6,7 @@ read_data <- function(file) read.csv(file,fileEncoding="UTF-8-BOM",check.names=F
 survey_labels <- c(Zname='星座',學院別='學院',性別='性別',性格='自評人格',社團='課外活動',
  手機='手機品牌',方案='上網方案',Age='年齡',CT='手機遊戲成癮',A1='Facebook 好友數',
  A2='LINE 好友數',A3='LINE 群組數',A4='Instagram 追蹤者數',A5='Instagram 追蹤數',
- B1='遊戲時間',B2='影片時間',B3='外送次數',B4='搭車次數',B5='電量焦慮',
+ B1='玩手遊時間',B2='影片時間',B3='外送次數',B4='搭車次數',B5='電量焦慮',
  出生年='出生年',Iphone='是否為 iPhone',吃到飽='是否吃到飽')
 case_data <- function(id) read_data(file.path("data",paste0(id,".csv")))
 case_choices <- function(exercise) {
@@ -79,15 +79,20 @@ plot_analysis <- function(a){
   }else abline(lm(y~x1,d),col='#b94723',lwd=2)
  }
 }
-data_controls <- function(prefix,d,kind){
+data_controls <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
  numeric_names <- names(d)[vapply(d,is.numeric,logical(1))]
  category_names <- setdiff(names(d),numeric_names)
  groups <- if(length(category_names))unique(c(category_names,numeric_names[vapply(d[numeric_names],function(x)length(unique(na.omit(x)))<=15,logical(1))])) else numeric_names
  x_choices <- if(kind %in% c('pb','dummy'))groups else numeric_names
+ default_y <- if(prefix=='survey' && '手機遊戲成癮' %in% numeric_names)'手機遊戲成癮' else tail(numeric_names,1)
+ y <- if(length(current_y)==1L && current_y %in% numeric_names) current_y else default_y
+ x <- setdiff(intersect(current_x,x_choices),y)
+ if(!length(x))x <- if(prefix=='survey' && '玩手遊時間' %in% x_choices && !kind %in% c('pb','dummy'))'玩手遊時間' else head(setdiff(x_choices,y),1)
+ if(kind!='lm')x<-head(x,1)
  row_controls(
-  select(paste0(prefix,'_y'),'Y 結果變數',numeric_names,selected=tail(numeric_names,1)),
+  select(paste0(prefix,'_y'),'Y 結果變數',numeric_names,selected=y),
   selectInput(paste0(prefix,'_x'),'X 預測／分組變數',x_choices,multiple=kind=='lm',
-   selected=if(length(x_choices))x_choices[1] else NULL,
+   selected=x,
    selectize=kind=='lm'),
   if(kind=='poly')select(paste0(prefix,'_degree'),'多項式次數',2:3))
 }
@@ -102,7 +107,7 @@ ui <- fluidPage(
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
    card(uiOutput('exercise_result'),plotOutput('exercise_plot',height=360),uiOutput('worked_answers'))),
   tabPanel('調查習作',
-   card(h3('手機使用行為調查'),p('選擇全體或單一星座，再選取變數。有效樣本依目前分析欄位排除缺失值。'),
+   card(h3('手機使用行為調查'),p('預設案例為玩手遊時間與手機遊戲成癮的 Pearson 相關。可切換全體或單一星座，也可改選變數。'),
     p('若未載入資料，請在 Excel 開啟 data3.xlsx，切到 Cleaned_Data 工作表，另存為 CSV UTF-8，再選取該檔案。'),
     fileInput('survey_file','載入調查逐筆資料 CSV',accept='.csv'),
     row_controls(uiOutput('survey_group'),select('survey_method','分析方法',methods)),uiOutput('survey_options'),uiOutput('survey_levels'),
@@ -134,6 +139,7 @@ server <- function(input,output,session){
    d<-d[fields]
    names(d)<-unname(survey_labels[fields])
   }
+  if('遊戲時間' %in% names(d) && !'玩手遊時間' %in% names(d))names(d)[names(d)=='遊戲時間']<-'玩手遊時間'
   d<-d[!tolower(names(d)) %in% c('id','姓名','學號','email','電子郵件')]
   d[]<-lapply(d,function(column)if(is.character(column))trimws(column) else column)
   validate(need(ncol(d)>=2&&!anyDuplicated(names(d)),'CSV 須含至少兩個不同名稱的變數欄。'))
@@ -155,7 +161,8 @@ server <- function(input,output,session){
   d
  }))
  configure <- function(prefix,get_data){
-  output[[paste0(prefix,'_options')]] <- renderUI(data_controls(prefix,get_data(),input[[paste0(prefix,'_method')]]))
+  output[[paste0(prefix,'_options')]] <- renderUI(data_controls(prefix,get_data(),input[[paste0(prefix,'_method')]],
+   isolate(input[[paste0(prefix,'_x')]]),isolate(input[[paste0(prefix,'_y')]])))
   output[[paste0(prefix,'_levels')]] <- renderUI({
    method<-input[[paste0(prefix,'_method')]]
    if(!method %in% c('pb','dummy'))return(NULL)
