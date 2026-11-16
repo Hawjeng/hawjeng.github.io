@@ -37,7 +37,7 @@ def main():
         # Shinylive owns the generated HTML/runtime under teaching/.
         # Validate the site links to these exports below, without imposing
         # the academic site's page template on third-party runtime files.
-        if path.relative_to(folder).parts[0] == 'teaching': continue
+        if path.relative_to(folder).parts[0] in ('teaching', 'correlation-regression-lab'): continue
         p=Page(); p.feed(path.read_text(encoding='utf-8')); pages[path.resolve()]=p
         if p.lang!='zh-Hant': errors.append(f'{path.name}: language missing')
         if p.h1!=1: errors.append(f'{path.name}: expected one h1, got {p.h1}')
@@ -75,6 +75,9 @@ def main():
     expected_pages = 10 + len(books)
     if len(pages) != expected_pages: errors.append(f'Expected {expected_pages} pages, found {len(pages)}')
     if (folder / 'teaching').exists():
+        for filename in ('index.html', 'app.json'):
+            if not (folder / 'correlation-regression-lab' / filename).is_file():
+                errors.append(f'correlation-regression-lab: missing Shinylive {filename}')
         for app in ('probability-distributions', 'central-limit-theorem'):
             for filename in ('index.html', 'app.json'):
                 if not (folder / 'teaching' / app / filename).is_file():
