@@ -65,12 +65,19 @@ const quadrantOption = document.getElementById('quadrants');
 const quadrantLines = document.getElementById('quadrant-lines');
 const quadrantShading = document.getElementById('quadrant-shading');
 const quadrantCounts = document.getElementById('quadrant-counts');
+const meanIntersection = document.getElementById('mean-intersection');
+const meanPair = document.getElementById('mean-pair');
 function drawQuadrants(model){
   quadrantLines.replaceChildren();
   quadrantShading.replaceChildren();
-  quadrantCounts.hidden=!quadrantOption.checked;
+  quadrantCounts.hidden=meanPair.hidden=!quadrantOption.checked;
+  meanIntersection.setAttribute('visibility',quadrantOption.checked?'visible':'hidden');
   if(!quadrantOption.checked)return;
   const x=xScale(model.mx), y=yScale(model.my);
+  meanIntersection.setAttribute('cx',x);
+  meanIntersection.setAttribute('cy',y);
+  meanPair.textContent='平均線交點 ('+(zx.checked?'0':fmt(model.mx))+', '+(zy.checked?'0':fmt(model.my))+')'+
+    (zx.checked||zy.checked?'｜原始平均數 ('+fmt(model.mx)+', '+fmt(model.my)+')':'');
   const mint='#e8f4f1', sand='#f6f0e7';
   quadrantShading.append(
     svg('rect',{x,y:22,width:828-x,height:y-22,fill:mint}),

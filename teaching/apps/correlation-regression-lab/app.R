@@ -127,6 +127,18 @@ plot_equation <- function(a,zx,zy){
   if(mult)p('圖的 X 軸是模型預測值；方程式列的是完整模型的原始預測變數。'),
   if(named_design&&zx)p('X 軸的 z 分數只套用到圖上的橫軸。'))
 }
+plot_x <- function(a,fit=NULL){
+ d<-a$data
+ if(a$kind=='lm'&&ncol(d)>2)return(fitted(if(is.null(fit))fit_design(d) else fit))
+ if(a$kind=='dummy'&&ncol(d)>2)return(max.col(cbind(1-rowSums(d[-1]),d[-1]))-1L)
+ d[[2]]
+}
+mean_pair <- function(a,zx,zy){
+ original<-c(mean(plot_x(a)),mean(a$data$y))
+ in_view<-ifelse(c(zx,zy),'0',num(original))
+ p(class='mean-pair',strong('平均線交點 '),paste0('(',paste(in_view,collapse=', '),')'),
+   if(zx||zy)paste0('｜原始平均數 (',paste(num(original),collapse=', '),')'))
+}
 plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE){
  d<-a$data;kind<-a$kind
  model_plot<-kind=='lm'&&ncol(d)>2
@@ -135,9 +147,7 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE){
  palette<-c('#176f7a','#ac512e','#7465a1','#567537','#a15378')
  par(mar=c(if(quadrants)5.3 else 3.8,4.2,.7,1.1),family='sans',las=1,
   cex.axis=1.0,cex.lab=1.03,col.axis='#456168',col.lab='#244c55',fg='#9bb1b5')
- x_plot<-d[[2]]
- if(model_plot)x_plot<-fitted(fit)
- if(kind=='dummy')x_plot<-if(ncol(d)==2)d[[2]] else max.col(cbind(1-rowSums(d[-1]),d[-1]))-1L
+ x_plot<-plot_x(a,fit)
  groups<-sort(unique(x_plot))
  xlim<-if(group_plot)range(groups)+c(-.62,.62) else range(x_plot)
  ylim<-extendrange(d$y,f=.11)
@@ -177,6 +187,7 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE){
   points(x_plot,d$y,pch=21,cex=if(nrow(d)>100).82 else 1.16,lwd=.8,
    col=adjustcolor('#176f7a',.62),bg=adjustcolor('#176f7a',if(nrow(d)>100).26 else .52))
  }
+ if(quadrants)points(mean(x_plot),mean(d$y),pch=21,col='#244c55',bg='white',cex=1.23,lwd=1.6)
 }
 plot_key <- function(a){
  labels<-a$labels
@@ -367,7 +378,9 @@ server <- function(input,output,session){
    if(selected_option('equation'))checks(plot_equation(get_analysis(),selected_option('zx'),selected_option('zy')))
   })
   output[[paste0(id,'_quadrant_note')]]<-renderUI({
-   if(isTRUE(input[[paste0(id,'_quadrants')]]))p(class='quadrant-note','Q1、Q3 淺綠，Q2、Q4 淺米色。落在 X̄ 或 Ȳ 平均線上的觀察值另計。')
+   if(selected_option('quadrants'))checks(tagList(
+    mean_pair(get_analysis(),selected_option('zx'),selected_option('zy')),
+    p(class='quadrant-note','Q1、Q3 淺綠，Q2、Q4 淺米色。落在 X̄ 或 Ȳ 平均線上的觀察值另計。')))
   })
  })
  output$raw_survey<-downloadHandler(function()'survey-observations.csv',function(file){
