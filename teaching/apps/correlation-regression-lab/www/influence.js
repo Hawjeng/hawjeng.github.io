@@ -32,7 +32,7 @@ function fit(data) {
   const slope = xy/xx, intercept = my-slope*mx;
   const predict = x => intercept+slope*x;
   const mse = data.reduce((sum,[x,y]) => sum+(y-predict(x))**2,0)/(n-2);
-  return {mx,xx,slope,predict,mse,r:xy/Math.sqrt(xx*yy)};
+  return {mx,my,xx,slope,predict,mse,r:xy/Math.sqrt(xx*yy)};
 }
 const axis = document.getElementById('axis');
 for(let x=0;x<=40;x+=5){
@@ -52,9 +52,38 @@ const circles = original.map((_,i)=>{
   document.getElementById('points').append(node);
   return node;
 });
+const quadrantOption = document.getElementById('quadrants');
+const quadrantLines = document.getElementById('quadrant-lines');
+const quadrantCounts = document.getElementById('quadrant-counts');
+function drawQuadrants(model){
+  quadrantLines.replaceChildren();
+  quadrantCounts.hidden=!quadrantOption.checked;
+  if(!quadrantOption.checked)return;
+  const x=xScale(model.mx), y=yScale(model.my);
+  const style={stroke:'#687e83','stroke-dasharray':'5 5','stroke-width':2};
+  quadrantLines.append(
+    svg('line',{x1:x,x2:x,y1:22,y2:412,...style}),
+    svg('line',{x1:62,x2:828,y1:y,y2:y,...style}));
+  label(quadrantLines,x,452,'X̄');
+  label(quadrantLines,55,y+5,'Ȳ','end');
+  [[828,22],[62,22],[62,412],[828,412]].forEach(([edgeX,edgeY],i)=>{
+    label(quadrantLines,(edgeX+x)/2,(edgeY+y)/2,i+1);
+  });
+  const n=[0,0,0,0];
+  let onLines=0;
+  for(const [px,py] of points){
+    const dx=px-model.mx, dy=py-model.my;
+    if(Math.abs(dx)<=1e-10*Math.max(1,Math.abs(px),Math.abs(model.mx)) ||
+       Math.abs(dy)<=1e-10*Math.max(1,Math.abs(py),Math.abs(model.my)))onLines++;
+    else n[dx>0?(dy>0?0:3):(dy>0?1:2)]++;
+  }
+  quadrantCounts.textContent=n.map((count,i)=>'第 '+(i+1)+' 象限 '+count+' 筆').join('｜')+'｜落在平均線上 '+onLines+' 筆';
+
+}
 const fmt = number => Number.isFinite(number) ? number.toFixed(4) : '—';
 function render(){
   const full = fit(points);
+  drawQuadrants(full);
   const removed = fit(points.filter((_,i)=>i!==selected));
   const [x,y] = points[selected], yhat = full.predict(x), e=y-yhat;
   const h=1/points.length+(x-full.mx)**2/full.xx;
@@ -109,6 +138,7 @@ chart.addEventListener('keydown',event=>{
   selected=Number(event.target.dataset.index);
   move(points[selected][0]+delta[0],points[selected][1]+delta[1]);
 });
+quadrantOption.onchange=render;
 selectPoint.onchange=()=>{selected=Number(selectPoint.value);render();};
 document.getElementById('reset').onclick=()=>{points=original.map(p=>[...p]);selected=1;render();};
 render();

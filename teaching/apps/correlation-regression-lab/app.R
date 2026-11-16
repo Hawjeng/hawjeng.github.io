@@ -54,12 +54,32 @@ display_result <- function(analysis, extra=NULL) {
    show_table(transform(diag,變數=unname(labels[colnames(d)[-1]]),允差=num(允差),VIF=num(VIF)))),
   if(!is.null(extra))extra)
 }
-plot_analysis <- function(a){
+add_quadrants <- function(x,y) {
+ center_x<-mean(x);center_y<-mean(y)
+ limits<-par('usr')
+ abline(v=center_x,h=center_y,col='#687e83',lty=2,lwd=1.5)
+ mtext(expression(bar(X)),side=1,at=center_x,line=1.5,col='#465e63')
+ mtext(expression(bar(Y)),side=2,at=center_y,line=2.35,col='#465e63',las=1)
+ text(c(mean(c(center_x,limits[2])),mean(c(limits[1],center_x)),
+        mean(c(limits[1],center_x)),mean(c(center_x,limits[2]))),
+      c(mean(c(center_y,limits[4])),mean(c(center_y,limits[4])),
+        mean(c(limits[3],center_y)),mean(c(limits[3],center_y))),
+      1:4,col='#465e63',font=2,cex=1.2)
+ dx<-x-center_x;dy<-y-center_y
+ on_axis<-abs(dx)<=1e-10*pmax(1,abs(x),abs(center_x)) | abs(dy)<=1e-10*pmax(1,abs(y),abs(center_y))
+ q<-ifelse(dx>0,ifelse(dy>0,1L,4L),ifelse(dy>0,2L,3L))
+ counts<-tabulate(q[!on_axis],nbins=4)
+ caption<-paste0(paste0('Q',1:4,': ',counts,collapse='   |   '),'   |   On mean lines: ',sum(on_axis))
+ mtext(caption,side=1,line=4.35,cex=.82,col='#465e63')
+}
+plot_analysis <- function(a,quadrants=FALSE){
  d<-a$data;kind<-a$kind
  fit<-if(kind %in% c('cor','pb'))NULL else fit_design(d)
- par(mar=c(4.5,4.5,1,1),family='sans',las=1)
+ par(mar=c(if(quadrants)5.5 else 4.5,4.5,1,1),family='sans',las=1)
+ x_plot<-d[[2]]
  if(kind=='dummy'){
   group <- if(ncol(d)==2)d[[2]] else max.col(cbind(1-rowSums(d[-1]),d[-1]))-1L
+  x_plot<-group+1
   boxplot(d$y~group,xlab='Group code (0 = reference)',ylab='Observed Y',col='#dbefee',outline=FALSE)
   points(jitter(group+1,.18),d$y,pch=19,col=adjustcolor('#245d69',.45))
  }else if(kind=='pb'){
@@ -67,7 +87,8 @@ plot_analysis <- function(a){
   axis(1,0:1)
   points(0:1,as.numeric(tapply(d$y,d[[2]],mean)),pch=18,col='#b94723',cex=1.7)
  }else if(kind=='lm'&&ncol(d)>2){
-  plot(fitted(fit),d$y,pch=19,col=adjustcolor('#245d69',.55),xlab='Fitted Y',ylab='Observed Y')
+  x_plot<-fitted(fit)
+  plot(x_plot,d$y,pch=19,col=adjustcolor('#245d69',.55),xlab='Fitted Y',ylab='Observed Y')
   abline(0,1,col='#b94723',lwd=2)
  }else{
   plot(d[[2]],d$y,pch=19,col=adjustcolor('#245d69',.55),xlab='X',ylab='Y')
@@ -78,6 +99,7 @@ plot_analysis <- function(a){
    lines(x,predict(fit,nd),col='#b94723',lwd=2)
   }else abline(lm(y~x1,d),col='#b94723',lwd=2)
  }
+ if(quadrants)add_quadrants(x_plot,d$y)
 }
 data_controls <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
  numeric_names <- names(d)[vapply(d,is.numeric,logical(1))]
@@ -103,16 +125,17 @@ ui <- fluidPage(
  tabsetPanel(id='unit',
   tabPanel('原理說明',includeHTML('www/theory.html')),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
-   card(uiOutput('book_result'),plotOutput('book_plot',height=360),uiOutput('critical_demo'))),
+   card(uiOutput('book_result'),checkboxInput('book_quadrants','顯示 X̄、Ȳ 與四象限'),plotOutput('book_plot',height=360),uiOutput('book_quadrant_note'),uiOutput('critical_demo'))),
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
-   card(uiOutput('exercise_result'),plotOutput('exercise_plot',height=360),uiOutput('worked_answers'))),
+   card(uiOutput('exercise_result'),checkboxInput('exercise_quadrants','顯示 X̄、Ȳ 與四象限'),plotOutput('exercise_plot',height=360),uiOutput('exercise_quadrant_note'),uiOutput('worked_answers'))),
   tabPanel('調查習作',
    card(h3('手機使用行為調查'),p('預設案例為玩手遊時間與手機遊戲成癮的 Pearson 相關。可切換全體或單一星座，也可改選變數。'),
-    p('若未載入資料，請在 Excel 開啟 data3.xlsx，切到 Cleaned_Data 工作表，另存為 CSV UTF-8，再選取該檔案。'),
-    fileInput('survey_file','載入調查逐筆資料 CSV',accept='.csv'),
+    tags$details(tags$summary('載入其他調查資料'),
+     p('將 data3.xlsx 的 Cleaned_Data 工作表另存為 CSV UTF-8，再選取 CSV。'),
+     fileInput('survey_file','選擇調查逐筆資料 CSV',accept='.csv')),
     row_controls(uiOutput('survey_group'),select('survey_method','分析方法',methods)),uiOutput('survey_options'),uiOutput('survey_levels'),
-    downloadButton('raw_survey','下載調查逐筆 CSV')),
-   card(uiOutput('survey_result'),plotOutput('survey_plot',height=360)),
+    downloadButton('raw_survey','下載逐筆分析資料 CSV')),
+   card(uiOutput('survey_result'),checkboxInput('survey_quadrants','顯示 X̄、Ȳ 與四象限'),plotOutput('survey_plot',height=360),uiOutput('survey_quadrant_note')),
    includeHTML('www/survey-practice.html')),
   tabPanel('殘差與影響點',includeHTML('www/diagnostics.html')),
   tabPanel('R 與 Python 語法',
@@ -128,10 +151,11 @@ ui <- fluidPage(
    card(h3('輸入逐筆資料'),p('第一列填變數名稱，欄位以逗號分隔。類別可填文字，缺失值留空。'),
     textAreaInput('manual_csv','CSV 資料','學習時間,練習次數,成績\n2,3,61\n4,4,68\n5,8,75\n7,5,77\n8,7,83\n9,10,88\n10,8,91',rows=8,width='100%'),
     select('manual_method','分析方法',methods),uiOutput('manual_options'),uiOutput('manual_levels')),
-   card(uiOutput('manual_result'),plotOutput('manual_plot',height=360)))))
+   card(uiOutput('manual_result'),checkboxInput('manual_quadrants','顯示 X̄、Ȳ 與四象限'),plotOutput('manual_plot',height=360),uiOutput('manual_quadrant_note')))))
 server <- function(input,output,session){
  survey_raw <- reactive({
-  f <- if(is.null(input$survey_file))'../private/survey.csv' else input$survey_file$datapath
+  default_file<-if(file.exists('../private/survey.csv'))'../private/survey.csv' else 'data/survey-teaching.csv'
+  f <- if(is.null(input$survey_file))default_file else input$survey_file$datapath
   validate(need(file.exists(f),'請選擇調查逐筆 CSV。'))
   d<-read_data(f)
   if('Zname' %in% names(d)){
@@ -247,7 +271,10 @@ server <- function(input,output,session){
    tagList(if(!is.null(a$reduced))tags$details(tags$summary('查看縮減模型與共線性診斷'),display_result(a$reduced)),
     display_result(a,a$comparison))
   }))
-  output[[paste0(id,'_plot')]]<-renderPlot(checks(plot_analysis(get_analysis())))
+  output[[paste0(id,'_plot')]]<-renderPlot(checks(plot_analysis(get_analysis(),isTRUE(input[[paste0(id,'_quadrants')]]))))
+  output[[paste0(id,'_quadrant_note')]]<-renderUI({
+   if(isTRUE(input[[paste0(id,'_quadrants')]]))p(class='quadrant-note','Q1–Q4 依序為右上、左上、左下、右下。落在 X̄ 或 Ȳ 平均線上的觀察值另計。')
+  })
  })
  output$raw_survey<-downloadHandler(function()'survey-observations.csv',function(file){
   d<-survey_raw();d<-d[!tolower(names(d)) %in% c('id','姓名','學號','email','電子郵件')]
