@@ -17,7 +17,11 @@ methods <- c('Pearson 積差相關'='cor','點二系列相關'='pb','線性／�
 card <- function(...) div(class="card",...)
 row_controls <- function(...) div(class="controls",...)
 select <- function(...) selectInput(...,selectize=FALSE)
-num <- function(x) formatC(x,format='f',digits=4)
+num <- function(x,digits=4){
+ x[!is.na(x)&abs(x)<.5*10^-digits]<-0
+ sub('[.]$','',sub('0+$','',formatC(x,format='f',digits=digits)))
+}
+chart_num <- function(x)num(x,3)
 checks <- function(expr) tryCatch(expr,error=function(e){
  if(inherits(e,"shiny.silent.error"))stop(e)
  validate(need(FALSE,conditionMessage(e)))
@@ -133,8 +137,8 @@ equation_label <- function(a,zx,zy,plot_label=FALSE,model=NULL){
   terms<-c(term,if(length(beta)>2)paste0(term,powers[seq_len(length(beta)-2L)]))
  }
  coefs[abs(coefs)<.00005]<-0
- paste0(target,' = ',num(coefs[1]),paste(sprintf(' %s %s %s %s',
-  ifelse(coefs[-1]<0,if(plot_label)'-' else '−','+'),num(abs(coefs[-1])),if(plot_label)'*' else '×',terms),collapse=''))
+ paste0(target,' = ',chart_num(coefs[1]),paste(sprintf(' %s %s %s %s',
+  ifelse(coefs[-1]<0,if(plot_label)'-' else '−','+'),chart_num(abs(coefs[-1])),if(plot_label)'*' else '×',terms),collapse=''))
 }
 plot_equation <- function(a,zx,zy){
  d<-a$data;kind<-a$kind
@@ -166,7 +170,7 @@ draw_equation <- function(label,r_squared,x,y,quadrants){
  }
  lines<-wrap(cex)
  if(length(lines)>2){cex<-.78;lines<-wrap(cex)}
- lines<-c(lines,paste0('R² = ',num(r_squared)))
+ lines<-c(lines,paste0('R² = ',chart_num(r_squared)))
  overlap<-vapply(corners,function(corner){
   box<-legend(corner,legend=lines,plot=FALSE,inset=inset,cex=cex)$rect
   sum(x>=box$left & x<=box$left+box$w & y<=box$top & y>=box$top-box$h)
@@ -180,11 +184,11 @@ plot_x <- function(a,fit=NULL){
  if(a$kind=='dummy'&&ncol(d)>2)return(max.col(cbind(1-rowSums(d[-1]),d[-1]))-1L)
  d[[2]]
 }
-pair_label <- function(x,y,zx,zy)paste0('(',paste(ifelse(c(zx,zy),'0',num(c(x,y))),collapse=', '),')')
+pair_label <- function(x,y,zx,zy)paste0('(',paste(ifelse(c(zx,zy),'0',chart_num(c(x,y))),collapse=', '),')')
 mean_pair <- function(a,zx,zy){
  original<-c(mean(plot_x(a)),mean(a$data$y))
  p(class='mean-pair',strong('平均線交點 '),pair_label(original[1],original[2],zx,zy),
-   if(zx||zy)paste0('｜原始平均數 (',paste(num(original),collapse=', '),')'))
+   if(zx||zy)paste0('｜原始平均數 (',paste(chart_num(original),collapse=', '),')'))
 }
 plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALSE,show_mean=FALSE,show_numbers=FALSE){
  d<-a$data;kind<-a$kind
@@ -253,7 +257,17 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALS
  if(show_mean){
   mx<-mean(x_plot);my<-mean(d$y)
   points(mx,my,pch=21,col='#244c55',bg='white',cex=1.27,lwd=1.6)
-  text(mx,my,pair_label(mx,my,zx,zy),pos=4,offset=.55,cex=.95,font=2,col='#244c55')
+  label<-pair_label(mx,my,zx,zy)
+  px<-diff(limits[1:2])*.016;py<-diff(limits[3:4])*.025
+  w<-strwidth(label,cex=.86);h<-strheight(label,cex=.86)
+  candidates<-rbind(c(mx+px,my+py),c(mx-px-w,my+py),c(mx+px,my-py-h),c(mx-px-w,my-py-h))
+  overlap<-apply(candidates,1,function(pos){
+   if(pos[1]<limits[1]||pos[1]+w>limits[2]||pos[2]<limits[3]||pos[2]+h>limits[4])return(Inf)
+   sum(plot_locations>=pos[1]-px & plot_locations<=pos[1]+w+px &
+       d$y>=pos[2]-py & d$y<=pos[2]+h+py)
+  })
+  location<-candidates[which.min(overlap),]
+  text(location[1],location[2],label,adj=c(0,0),cex=.86,font=2,col='#244c55')
  }
  if(show_equation){
   equation_fit<-if(is.null(fit))fit_design(d) else fit
@@ -494,7 +508,7 @@ server <- function(input,output,session){
     model<-fit_design(a$data)
     div(class='plot-equation-label',tabindex=0,title='拖曳或使用方向鍵移動方程式',
      span(equation_label(a,selected_option('zx'),selected_option('zy'),plot_label=TRUE,model=model)),
-     span(paste0('R² = ',num(summary(model)$r.squared))))
+     span(paste0('R² = ',chart_num(summary(model)$r.squared))))
    })
   })
   output[[paste0(id,'_equation_text')]]<-renderUI({

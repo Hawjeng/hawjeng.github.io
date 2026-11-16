@@ -127,9 +127,14 @@ function drawMean(model) {
   const pair='('+(zx.checked?'0':fmt(model.mx))+', '+(zy.checked?'0':fmt(model.my))+')';
   meanIntersection.setAttribute('cx',x);
   meanIntersection.setAttribute('cy',y);
-  meanLabel.setAttribute('x',x+11);
-  meanLabel.setAttribute('y',y-9);
   meanLabel.textContent=pair;
+  const width=meanLabel.getComputedTextLength();
+  const candidates=[[x+11,y-9],[x-width-11,y-9],[x+11,y+22],[x-width-11,y+22]];
+  const overlap=([left,baseline])=>points.filter(([px,py])=>
+    xScale(px)>=left-7&&xScale(px)<=left+width+7&&yScale(py)>=baseline-21&&yScale(py)<=baseline+7).length;
+  const [left,baseline]=candidates.reduce((best,next)=>overlap(next)<overlap(best)?next:best);
+  meanLabel.setAttribute('x',left);
+  meanLabel.setAttribute('y',baseline);
   meanPair.textContent='平均線交點 '+pair+
     (zx.checked||zy.checked?'｜原始平均數 ('+fmt(model.mx)+', '+fmt(model.my)+')':'');
 }
@@ -171,7 +176,7 @@ function drawQuadrants(model){
     return item;
   }));
 }
-const fmt = number => Number.isFinite(number) ? (Math.abs(number)<.00005?0:number).toFixed(4) : '—';
+const fmt = number => Number.isFinite(number) ? String(Number((Math.abs(number)<.0005?0:number).toFixed(3))) : '—';
 function render(){
   const full = fit(points);
   const sx=Math.sqrt(full.xx/(points.length-1));
