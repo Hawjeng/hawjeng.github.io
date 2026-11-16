@@ -56,7 +56,9 @@ prepare_design <- function(d, kind, xs, y, levels=NULL, degree=2L) {
     labels<-setNames(c(y,xs),names(design))
   }
   if(nrow(design)<3)stop("配對有效資料至少須有 3 筆。")
-  list(data=design,labels=labels,kind=kind)
+  groups<-if(kind=='pb')levels else if(kind=='dummy')c(base,others) else NULL
+  if(length(groups)&&xs[1]=='補習'&&identical(as.character(groups),c('0','1')))groups<-c('未補習','有補習')
+  list(data=design,labels=labels,kind=kind,groups=groups,x_name=xs[1])
 }
 cor_fit <- function(d) {
  if(nrow(d)<4||sd(d[[2]])==0||sd(d[[1]])==0) stop("相關分析需至少四筆有變異的配對資料。")
