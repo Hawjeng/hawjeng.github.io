@@ -23,13 +23,18 @@ vif_table <- function(fit) {
 prepare_design <- function(d, kind, xs, y, levels=NULL, degree=2L) {
   if(!length(xs)||y %in% xs) stop("請選擇彼此不同的結果與預測變數。")
   if(!is.numeric(d[[y]])) stop("結果變數須為數值。")
+  observation <- attr(d,'observation_numbers')
+  if(is.null(observation))observation<-seq_len(nrow(d))
   cols <- d[c(xs,y)]
   keep <- complete.cases(cols)
   for(nm in names(cols)) if(is.numeric(cols[[nm]]))keep <- keep & is.finite(cols[[nm]]) else keep <- keep & nzchar(trimws(cols[[nm]]))
   d <- d[keep,,drop=FALSE]
+  observation<-observation[keep]
   if(kind=='pb'){
     if(length(levels)!=2L||length(unique(levels))!=2L)stop("請選擇兩個不同類別。")
-    d <- d[as.character(d[[xs[1]]]) %in% levels,,drop=FALSE]
+    in_groups<-as.character(d[[xs[1]]]) %in% levels
+    d <- d[in_groups,,drop=FALSE]
+    observation<-observation[in_groups]
     x <- as.integer(as.character(d[[xs[1]]])==levels[2])
     design <- data.frame(y=d[[y]], x=x)
     labels <- c('y'=y,'x'=paste0(xs[1],'（0 = ',levels[1],'，1 = ',levels[2],'）'))
@@ -58,7 +63,7 @@ prepare_design <- function(d, kind, xs, y, levels=NULL, degree=2L) {
   if(nrow(design)<3)stop("配對有效資料至少須有 3 筆。")
   groups<-if(kind=='pb')levels else if(kind=='dummy')c(base,others) else NULL
   if(length(groups)&&xs[1]=='補習'&&identical(as.character(groups),c('0','1')))groups<-c('未補習','有補習')
-  list(data=design,labels=labels,kind=kind,groups=groups,x_name=xs[1])
+  list(data=design,labels=labels,kind=kind,groups=groups,x_name=xs[1],observation=observation)
 }
 cor_fit <- function(d) {
  if(nrow(d)<4||sd(d[[2]])==0||sd(d[[1]])==0) stop("相關分析需至少四筆有變異的配對資料。")

@@ -99,6 +99,7 @@ plot_controls <- function(prefix) {
  div(class='plot-controls',
   checkboxInput(paste0(prefix,'_quadrants'),'顯示 X̄、Ȳ 與四象限'),
   checkboxInput(paste0(prefix,'_mean'),'標示平均數交點'),
+  checkboxInput(paste0(prefix,'_point_ids'),'標示觀察值編號'),
   checkboxInput(paste0(prefix,'_equation'),'顯示迴歸方程式'),
   checkboxInput(paste0(prefix,'_zx'),'X 軸用 z 分數'),
   checkboxInput(paste0(prefix,'_zy'),'Y 軸用 z 分數'))
@@ -185,7 +186,7 @@ mean_pair <- function(a,zx,zy){
  p(class='mean-pair',strong('平均線交點 '),pair_label(original[1],original[2],zx,zy),
    if(zx||zy)paste0('｜原始平均數 (',paste(num(original),collapse=', '),')'))
 }
-plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALSE,show_mean=FALSE){
+plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALSE,show_mean=FALSE,show_numbers=FALSE){
  d<-a$data;kind<-a$kind
  model_plot<-kind=='lm'&&ncol(d)>2
  group_plot<-kind %in% c('dummy','pb')
@@ -221,6 +222,7 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALS
  axis(1,at=ticks_x$at,labels=ticks_x$labels,col='#a1b6b9',col.ticks='#a1b6b9')
  axis(2,at=ticks_y$at,labels=ticks_y$labels,col='#a1b6b9',col.ticks='#a1b6b9')
  if(quadrants)add_quadrants(x_plot,d$y)
+ plot_locations<-x_plot
  if(group_plot){
   for(i in seq_along(groups)){
    x<-groups[i]
@@ -228,6 +230,7 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALS
    # Deterministic offsets prevent point movement when toggling overlays.
    offset<-if(length(y)>1) .16*sin(seq_along(y)*2.399963) else 0
    color<-palette[(i-1L)%%length(palette)+1L]
+   plot_locations[x_plot==x]<-x+offset
    dot_color<-if(quadrants)point_colors[x_plot==x] else color
    points(x+offset,y,pch=21,cex=if(length(y)>60).85 else 1.18,
     col=adjustcolor(dot_color,.83),bg=adjustcolor(dot_color,.52),lwd=.8)
@@ -245,6 +248,8 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_equation=FALS
   points(x_plot,d$y,pch=21,cex=if(nrow(d)>100).82 else 1.16,lwd=.8,
    col=adjustcolor(point_colors,.8),bg=adjustcolor(point_colors,if(nrow(d)>100).38 else .66))
  }
+ if(show_numbers)text(plot_locations,d$y,a$observation,pos=3,offset=.35,
+  col='#294650',cex=if(nrow(d)>100).59 else .83)
  if(show_mean){
   mx<-mean(x_plot);my<-mean(d$y)
   points(mx,my,pch=21,col='#244c55',bg='white',cex=1.27,lwd=1.6)
@@ -284,16 +289,29 @@ data_controls <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
    selectize=kind=='lm'),
   if(kind=='poly')select(paste0(prefix,'_degree'),'多項式次數',2:3))
 }
+cor_critical <- function(n,alpha,tails){
+ df<-n-2L
+ t<-qt(1-alpha/tails,df)
+ data.frame(N=n,df=df,t=t,r=t/sqrt(t^2+df))
+}
+critical_controls <- function(){
+ card(h3('樣本數與相關係數臨界值'),
+  p('對應第 13 章圖 13.6。檢定 H₀：ρ = 0 時，df = N − 2。先查 t 臨界值，再換算 r 臨界值。'),
+  row_controls(select('critical_tails','檢定方向',c('雙尾'='2','右尾'='right','左尾'='left')),
+   select('critical_alpha','顯著水準 α',c('0.10'='.10','0.05'='.05','0.02'='.02','0.01'='.01'),selected='.05')),
+  sliderInput('critical_n','配對樣本數 N',min=3,max=500,value=10,step=1,width='100%',sep=''),
+  uiOutput('critical_lookup'),uiOutput('critical_table'))
+}
 ui <- fluidPage(
  tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css'),tags$script(src='console.js')),
  div(class='mast',p(class='eyebrow','STATISTICS LAB'),
   h1('相關與迴歸'),p('從兩個變數的散布圖，到多元模型與個案診斷。')),
  tabsetPanel(id='unit',
-  tabPanel('原理說明',includeHTML('www/theory.html')),
+  tabPanel('原理說明',includeHTML('www/theory.html'),critical_controls()),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
-   card(uiOutput('book_result'),plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),plotOutput('book_plot',height=465),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('book_quadrant_note'),uiOutput('critical_demo'))),
+   card(uiOutput('book_result'),plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=465),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('book_quadrant_note'),uiOutput('critical_demo'))),
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
-   card(uiOutput('exercise_result'),plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),plotOutput('exercise_plot',height=465),uiOutput('exercise_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('exercise_quadrant_note'),uiOutput('worked_answers'))),
+   card(uiOutput('exercise_result'),plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),div(class='plot-surface',plotOutput('exercise_plot',height=465),uiOutput('exercise_plot_label',class='plot-label-layer')),uiOutput('exercise_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('exercise_quadrant_note'),uiOutput('worked_answers'))),
   tabPanel('調查習作',
    card(h3('手機使用行為調查'),p('預設案例為玩手遊時間與手機遊戲成癮的 Pearson 相關。可切換全體或單一星座，也可改選變數。'),
     tags$details(tags$summary('載入其他調查資料'),
@@ -301,7 +319,7 @@ ui <- fluidPage(
      fileInput('survey_file','選擇調查逐筆資料 CSV',accept='.csv')),
     row_controls(uiOutput('survey_group'),select('survey_method','分析方法',methods)),uiOutput('survey_options'),uiOutput('survey_levels'),
     downloadButton('raw_survey','下載逐筆分析資料 CSV')),
-   card(uiOutput('survey_result'),plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),plotOutput('survey_plot',height=465),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('survey_quadrant_note')),
+   card(uiOutput('survey_result'),plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=465),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('survey_quadrant_note')),
    includeHTML('www/survey-practice.html')),
   tabPanel('殘差與影響點',includeHTML('www/diagnostics.html')),
   tabPanel('R 與 Python 語法',
@@ -317,8 +335,30 @@ ui <- fluidPage(
    card(h3('輸入逐筆資料'),p('第一列填變數名稱，欄位以逗號分隔。類別可填文字，缺失值留空。'),
     textAreaInput('manual_csv','CSV 資料','學習時間,練習次數,成績\n2,3,61\n4,4,68\n5,8,75\n7,5,77\n8,7,83\n9,10,88\n10,8,91',rows=8,width='100%'),
     select('manual_method','分析方法',methods),uiOutput('manual_options'),uiOutput('manual_levels')),
-   card(uiOutput('manual_result'),plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),plotOutput('manual_plot',height=465),uiOutput('manual_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('manual_quadrant_note')))))
+   card(uiOutput('manual_result'),plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),div(class='plot-surface',plotOutput('manual_plot',height=465),uiOutput('manual_plot_label',class='plot-label-layer')),uiOutput('manual_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),uiOutput('manual_quadrant_note')))))
 server <- function(input,output,session){
+ critical_settings<-reactive({
+  req(input$critical_n,input$critical_alpha,input$critical_tails)
+  direction<-input$critical_tails
+  list(n=input$critical_n,alpha=as.numeric(input$critical_alpha),tails=if(direction=='2')2L else 1L,
+       sign=if(direction=='2')'±' else if(direction=='left')'−' else '')
+ })
+ output$critical_lookup<-renderUI({
+  q<-critical_settings();v<-cor_critical(q$n,q$alpha,q$tails)
+  div(class='equation-box',p(strong('目前 N = ',v$N),'｜df = ',v$df,
+   '｜t 臨界值 = ',paste0(q$sign,num(v$t)),'｜r 臨界值 = ',paste0(q$sign,num(v$r))),
+   p('|r 臨界值| = |t 臨界值| / √(t 臨界值² + df)。'))
+ })
+ output$critical_table<-renderUI({
+  q<-critical_settings()
+  n<-sort(unique(c(3:12,15,20,25,30,40,50,75,100,200,500,q$n)))
+  d<-cor_critical(n,q$alpha,q$tails)
+  row<-function(i)tags$tr(class=if(d$N[i]==q$n)'active-critical',
+   tags$td(d$N[i]),tags$td(d$df[i]),tags$td(paste0(q$sign,num(d$t[i]))),tags$td(paste0(q$sign,num(d$r[i]))))
+  div(class='table-scroll critical-table',tags$table(
+   tags$thead(tags$tr(tags$th('配對樣本數 N'),tags$th('自由度 df'),tags$th('t 臨界值'),tags$th('r 臨界值'))),
+   tags$tbody(lapply(seq_len(nrow(d)),row))))
+ })
  survey_raw <- reactive({
   default_file<-if(file.exists('../private/survey.csv'))'../private/survey.csv' else 'data/survey-teaching.csv'
   f <- if(is.null(input$survey_file))default_file else input$survey_file$datapath
@@ -342,7 +382,13 @@ server <- function(input,output,session){
  outputOptions(output,'survey_group',suspendWhenHidden=FALSE)
  survey <- reactive({
   d<-survey_raw()
-  if(length(input$survey_zodiac)&&nzchar(input$survey_zodiac))d<-d[which(d[['星座']]==input$survey_zodiac),,drop=FALSE]
+  observation<-seq_len(nrow(d))
+  if(length(input$survey_zodiac)&&nzchar(input$survey_zodiac)){
+   take<-which(d[['星座']]==input$survey_zodiac)
+   d<-d[take,,drop=FALSE]
+   observation<-observation[take]
+  }
+  attr(d,'observation_numbers')<-observation
   d
  })
  manual <- reactive(checks({
@@ -440,8 +486,17 @@ server <- function(input,output,session){
   output[[paste0(id,'_plot_key')]]<-renderUI(checks(plot_key(get_analysis())))
   selected_option<-function(name)isTRUE(input[[paste0(id,'_',name)]])
   draw_current_plot<-function()plot_analysis(get_analysis(),selected_option('quadrants'),
-   selected_option('zx'),selected_option('zy'),selected_option('equation'),selected_option('mean'))
+   selected_option('zx'),selected_option('zy'),FALSE,selected_option('mean'),selected_option('point_ids'))
   output[[paste0(id,'_plot')]]<-renderPlot(checks(draw_current_plot()))
+  output[[paste0(id,'_plot_label')]]<-renderUI({
+   if(selected_option('equation'))checks({
+    a<-get_analysis()
+    model<-fit_design(a$data)
+    div(class='plot-equation-label',tabindex=0,title='拖曳或使用方向鍵移動方程式',
+     span(equation_label(a,selected_option('zx'),selected_option('zy'),plot_label=TRUE,model=model)),
+     span(paste0('R² = ',num(summary(model)$r.squared))))
+   })
+  })
   output[[paste0(id,'_equation_text')]]<-renderUI({
    if(selected_option('equation'))checks({
     a<-get_analysis()

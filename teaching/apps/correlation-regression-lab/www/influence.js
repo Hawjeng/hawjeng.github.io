@@ -43,6 +43,8 @@ const zy = document.getElementById('zy');
 const equationOption = document.getElementById('equation');
 const equationText = document.getElementById('equation-text');
 const equationOverlay = document.getElementById('equation-overlay');
+let equationPosition=null;
+let equationOffset=null;
 function configureBounds(model,sx,sy) {
   bounds={...originalBounds};
   if(zx.checked&&zy.checked&&sx>0&&sy>0){
@@ -60,15 +62,17 @@ function configureBounds(model,sx,sy) {
 }
 function placeEquation(label,r2){
   const texts=[...equationOverlay.querySelectorAll('text')];
-  const rect=equationOverlay.querySelector('rect');
   texts[0].textContent=label;
   texts[1].textContent=r2;
   const w=Math.max(...texts.map(text=>text.getComputedTextLength()))+22, h=49;
   const [left,right,top,bottom]=[bounds.x0+36,rightEdge()-24-w,bounds.y0+32,bottomEdge()-27-h];
   const candidates=[[right,top],[left,top],[right,bottom],[left,bottom]];
   const count=([x,y])=>points.filter(([px,py])=>xScale(px)>=x-9&&xScale(px)<=x+w+9&&yScale(py)>=y-9&&yScale(py)<=y+h+9).length;
-  const [x,y]=candidates.reduce((best,next)=>count(next)<count(best)?next:best);
-  for(const [key,value] of Object.entries({x,y,width:w,height:h}))rect.setAttribute(key,value);
+  const automatic=candidates.reduce((best,next)=>count(next)<count(best)?next:best);
+  const x=equationPosition?Math.max(bounds.x0,Math.min(rightEdge()-w,equationPosition.x)):automatic[0];
+  const y=equationPosition?Math.max(bounds.y0,Math.min(bottomEdge()-h,equationPosition.y)):automatic[1];
+  equationOverlay.dataset.x=x;
+  equationOverlay.dataset.y=y;
   texts.forEach((text,i)=>{text.setAttribute('x',x+11);text.setAttribute('y',y+19+20*i);});
 }
 
@@ -111,6 +115,8 @@ const meanIntersection = document.getElementById('mean-intersection');
 const meanPair = document.getElementById('mean-pair');
 const meanLabel = document.getElementById('mean-label');
 const meanOption = document.getElementById('show-mean');
+const numbersOption = document.getElementById('show-numbers');
+const pointNumbers = document.getElementById('point-numbers');
 function drawMean(model) {
   const visibility=meanOption.checked?'visible':'hidden';
   meanPair.hidden=!meanOption.checked;
@@ -202,6 +208,8 @@ function render(){
     node.setAttribute('stroke-width',i===selected?3:1);
     node.setAttribute('aria-label','第 '+(i+1)+' 筆，X '+points[i][0].toFixed(1)+'，Y '+points[i][1].toFixed(1));
   });
+  pointNumbers.replaceChildren();
+  if(numbersOption.checked)points.forEach(([px,py],i)=>label(pointNumbers,xScale(px),yScale(py)-12,i+1));
   selectPoint.value=selected;
   metrics.replaceChildren(...[
     ['Pearson r',full.r],['全部點斜率',full.slope],['刪除該點後斜率',removed.slope],
@@ -220,28 +228,45 @@ function move(x,y){
   ];
   render();
 }
+const chartPoint = event => new DOMPoint(event.clientX,event.clientY).matrixTransform(chart.getScreenCTM().inverse());
 chart.addEventListener('pointerdown',event=>{
-  if(!event.target.matches('.point')||pointer!==null)return;
-  selected=Number(event.target.dataset.index);
+  if(pointer!==null)return;
+  if(event.target.closest('#equation-overlay')){
+    const at=chartPoint(event);
+    equationOffset={x:at.x-Number(equationOverlay.dataset.x),y:at.y-Number(equationOverlay.dataset.y)};
+  }else if(event.target.matches('.point'))selected=Number(event.target.dataset.index);
+  else return;
   pointer=event.pointerId;
   chart.setPointerCapture(pointer);
   render();
 });
 chart.addEventListener('pointermove',event=>{
   if(event.pointerId!==pointer)return;
-  const p=new DOMPoint(event.clientX,event.clientY).matrixTransform(chart.getScreenCTM().inverse());
+  const p=chartPoint(event);
+  if(equationOffset){
+    equationPosition={x:p.x-equationOffset.x,y:p.y-equationOffset.y};
+    render();
+    return;
+  }
   move(bounds.xmin+(p.x-bounds.x0)/bounds.width*(bounds.xmax-bounds.xmin),
     bounds.ymax-(p.y-bounds.y0)/bounds.height*(bounds.ymax-bounds.ymin));
 });
-chart.addEventListener('lostpointercapture',()=>{pointer=null;});
+chart.addEventListener('lostpointercapture',()=>{pointer=null;equationOffset=null;});
 chart.addEventListener('keydown',event=>{
   const delta={ArrowLeft:[-0.5,0],ArrowRight:[0.5,0],ArrowDown:[0,-0.5],ArrowUp:[0,0.5]}[event.key];
-  if(!delta||!event.target.matches('.point'))return;
+  if(!delta)return;
+  if(event.target===equationOverlay){
+    event.preventDefault();
+    equationPosition={x:Number(equationOverlay.dataset.x)+16*delta[0],y:Number(equationOverlay.dataset.y)-16*delta[1]};
+    render();
+    return;
+  }
+  if(!event.target.matches('.point'))return;
   event.preventDefault();
   selected=Number(event.target.dataset.index);
   move(points[selected][0]+delta[0],points[selected][1]+delta[1]);
 });
-meanOption.onchange=quadrantOption.onchange=equationOption.onchange=zx.onchange=zy.onchange=render;
+numbersOption.onchange=meanOption.onchange=quadrantOption.onchange=equationOption.onchange=zx.onchange=zy.onchange=render;
 selectPoint.onchange=()=>{selected=Number(selectPoint.value);render();};
 document.getElementById('download-chart').onclick=()=>{
   const copy=chart.cloneNode(true);
@@ -259,5 +284,5 @@ document.getElementById('download-chart').onclick=()=>{
   link.click();
   setTimeout(()=>URL.revokeObjectURL(url),30000);
 };
-document.getElementById('reset').onclick=()=>{points=original.map(p=>[...p]);selected=1;render();};
+document.getElementById('reset').onclick=()=>{points=original.map(p=>[...p]);selected=1;equationPosition=null;render();};
 render();
