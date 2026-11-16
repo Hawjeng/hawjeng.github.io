@@ -1,0 +1,13 @@
+# 讀取有效觀測。多項式與虛擬變數已依畫面設定轉成設計欄。
+d <- read.csv("analysis.csv")
+if (method %in% c("cor", "pb")) {
+  print(cor.test(d[[2]], d$y))
+} else {
+  # 係數、整體 F、區間及共線性可直接對照教材。
+  fit <- fit_design(d)
+  print(summary(fit))
+  print(confint(fit))
+  if (ncol(d) > 2) print(vif_table(fit))
+  print(data.frame(observed=d$y, fitted=fitted(fit), residual=residuals(fit),
+    leverage=hatvalues(fit), Cook_D=cooks.distance(fit)))
+}

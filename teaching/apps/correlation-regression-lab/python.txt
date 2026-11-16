@@ -1,0 +1,50 @@
+import numpy as np
+from scipy import stats
+
+d = np.genfromtxt("analysis.csv", delimiter=",", names=True, encoding="utf-8-sig")
+y = d["y"]
+x = np.column_stack([d[name] for name in d.dtype.names if name != "y"])
+n = len(y)
+if method in ("cor", "pb"):
+    result = stats.pearsonr(x[:, 0], y)
+    print(result)
+    print("95% CI =", result.confidence_interval())
+    print("df =", n - 2)
+else:
+    design = np.column_stack([np.ones(n), x])
+    beta, _, rank, _ = np.linalg.lstsq(design, y, rcond=None)
+    p = x.shape[1]
+    df = n - p - 1
+    if rank != design.shape[1] or df <= 0:
+        raise ValueError("The fitted design must have full rank and positive residual df.")
+    fitted = design @ beta
+    residual = y - fitted
+    sse = residual @ residual
+    sst = np.sum((y - y.mean()) ** 2)
+    mse = sse / df
+    r2 = 1 - sse / sst
+    f = ((sst - sse) / p) / mse
+    print("R2 =", r2, "adjusted R2 =", 1 - (1 - r2) * (n - 1) / df)
+    print("F =", f, "df =", (p, df), "p =", stats.f.sf(f, p, df))
+    q, r = np.linalg.qr(design)
+    r_inverse = np.linalg.solve(r, np.eye(p + 1))
+    se = np.sqrt(mse * np.sum(r_inverse ** 2, axis=1))
+    t = beta / se
+    print("name coefficient SE t p CI_lower CI_upper")
+    margin = stats.t.isf(.025, df) * se
+    for name, *row in zip(("intercept", *d.dtype.names[1:]), beta, se, t,
+                          2 * stats.t.sf(abs(t), df), beta - margin, beta + margin):
+        print(name, *[f"{value:.8g}" for value in row])
+    if p > 1:
+        print("name tolerance VIF")
+        for j, name in enumerate(d.dtype.names[1:]):
+            target = x[:, j]
+            auxiliary = np.delete(design, j + 1, axis=1)
+            coef = np.linalg.lstsq(auxiliary, target, rcond=None)[0]
+            tolerance = np.sum((target - auxiliary @ coef) ** 2) / np.sum((target - target.mean()) ** 2)
+            print(name, tolerance, 1 / tolerance)
+    h = np.sum(q ** 2, axis=1)
+    cook = residual ** 2 * h / ((p + 1) * mse * (1 - h) ** 2)
+    print("row observed fitted residual leverage Cook_D")
+    for i in range(n):
+        print(i + 1, y[i], fitted[i], residual[i], h[i], cook[i])

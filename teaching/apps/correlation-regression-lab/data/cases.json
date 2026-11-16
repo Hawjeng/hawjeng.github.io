@@ -1,0 +1,121 @@
+{
+  "pearson": {
+    "title": "表 13.2｜認真程度與考試成績",
+    "source": "Ch13p354t13.2.xlsx",
+    "sheet": "t13.2",
+    "method": "cor",
+    "exercise": false
+  },
+  "point": {
+    "title": "表 13.5｜補習與考試成績",
+    "source": "Ch13p361t13.5.xlsx",
+    "sheet": "t13.5",
+    "method": "pb",
+    "exercise": false
+  },
+  "excel": {
+    "title": "第 13 章 Excel｜認真程度與成績",
+    "source": "Ch13p367EXCEL1.xlsx",
+    "sheet": "data",
+    "method": "cor",
+    "exercise": false
+  },
+  "simple": {
+    "title": "表 14.1｜認真程度預測考試成績",
+    "source": "Ch14p377t14.1.xlsx",
+    "sheet": "t14.1",
+    "method": "lm",
+    "exercise": false
+  },
+  "residual": {
+    "title": "表 14.2｜觀測值、預測值和殘差",
+    "source": "Ch14p380t14.2.xlsx",
+    "sheet": "f14.2",
+    "method": "lm",
+    "exercise": false
+  },
+  "lmexcel": {
+    "title": "表 14.4｜Excel 迴歸摘要",
+    "source": "Ch14p382t14.4.xlsx",
+    "sheet": "t14.4",
+    "method": "lm",
+    "exercise": false
+  },
+  "height": {
+    "title": "例 14.1｜身高預測體重",
+    "source": "Ch14p384ex14.1.xlsx",
+    "sheet": "ex14.1",
+    "method": "lm",
+    "exercise": false
+  },
+  "tutor": {
+    "title": "表 14.7｜補習的虛擬迴歸",
+    "source": "Ch14p389t14.7.xlsx",
+    "sheet": "t14.7",
+    "method": "dummy",
+    "exercise": false
+  },
+  "dummy": {
+    "title": "例 14.2｜三組虛擬迴歸",
+    "source": "Ch14p391ex14.2.xlsx",
+    "sheet": "ex14.2",
+    "method": "dummy",
+    "exercise": false
+  },
+  "house": {
+    "title": "表 15.1｜人口數與社經地位預測開銷",
+    "source": "Ch15p404t15.1.xlsx",
+    "sheet": "t15.1",
+    "method": "lm",
+    "exercise": false
+  },
+  "weight": {
+    "title": "例 15.1｜年齡與身高預測體重",
+    "source": "Ch15p417ex15.1.xlsx",
+    "sheet": "ex15.1",
+    "method": "lm",
+    "exercise": false
+  },
+  "curve": {
+    "title": "表 15.10｜焦慮水準與績效表現",
+    "source": "Ch15p421t15.10.xlsx",
+    "sheet": "t15.10",
+    "method": "poly",
+    "exercise": false
+  },
+  "contest": {
+    "title": "表 15.12–15.15｜競賽總分與區組迴歸",
+    "source": "Ch15p424t15.12.xlsx",
+    "sheet": "Data",
+    "method": "lm",
+    "exercise": false
+  },
+  "ex13": {
+    "title": "習題 13.1｜辯手經驗、性別與成績",
+    "source": "Ch13p370exercise13.1.xlsx",
+    "sheet": "exercise13.1",
+    "method": "cor",
+    "exercise": true
+  },
+  "ex14": {
+    "title": "習題 14.1｜經驗預測辯手成績",
+    "source": "Ch14p399exercise14.1.xlsx",
+    "sheet": "exercise12.1",
+    "method": "lm",
+    "exercise": true
+  },
+  "ex15a": {
+    "title": "習題 15.1｜辯手成績的四個預測變數",
+    "source": "Ch15p435exercise15.1.xlsx",
+    "sheet": "exercise15.1",
+    "method": "lm",
+    "exercise": true
+  },
+  "ex15b": {
+    "title": "習題 15.2｜兩個模型的解釋增量",
+    "source": "Ch15p435exercise15.1.xlsx",
+    "sheet": "exercise15.1",
+    "method": "lm",
+    "exercise": true
+  }
+}

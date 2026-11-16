@@ -17,3 +17,24 @@ for (app in c("probability-distributions", "central-limit-theorem")) {
   writeLines(enc2utf8(html), index, useBytes = TRUE)
 }
 cat("Exported probability distributions and sampling/estimation apps.\n")
+
+# The regression app is published at its own top-level URL.
+regression <- "correlation-regression-lab"
+output <- file.path("_site", regression)
+shinylive::export(file.path("teaching/apps", regression), output,
+                  template_params = list(title = "相關與迴歸｜邱皓政統計互動教材"))
+index <- file.path(output, "index.html")
+html <- paste(readLines(index, encoding = "UTF-8", warn = FALSE), collapse = "\n")
+version <- substr(Sys.getenv("GITHUB_SHA"), 1, 12)
+if (nzchar(version)) {
+  loader_path <- file.path(output, "shinylive", "shinylive.js")
+  loader <- rawToChar(readBin(loader_path, "raw", n = file.info(loader_path)$size))
+  Encoding(loader) <- "UTF-8"
+  loader <- sub('fetch("./app.json")', paste0('fetch("./app.json?v=', version,
+    '", {cache: "no-store"})'), loader, fixed = TRUE)
+  writeLines(enc2utf8(loader), loader_path, useBytes = TRUE)
+  html <- sub('"./shinylive/shinylive.js"', paste0('"./shinylive/shinylive.js?v=', version, '"'), html, fixed = TRUE)
+  html <- sub("</head>", paste0('<meta name="app-build" content="', version, '"/></head>'), html, fixed = TRUE)
+}
+html <- sub('lang="en"', 'lang="zh-Hant"', html, fixed = TRUE)
+writeLines(enc2utf8(html), index, useBytes = TRUE)
