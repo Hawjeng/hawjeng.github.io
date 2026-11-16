@@ -63,20 +63,28 @@ const circles = original.map((_,i)=>{
 });
 const quadrantOption = document.getElementById('quadrants');
 const quadrantLines = document.getElementById('quadrant-lines');
+const quadrantShading = document.getElementById('quadrant-shading');
 const quadrantCounts = document.getElementById('quadrant-counts');
 function drawQuadrants(model){
   quadrantLines.replaceChildren();
+  quadrantShading.replaceChildren();
   quadrantCounts.hidden=!quadrantOption.checked;
   if(!quadrantOption.checked)return;
   const x=xScale(model.mx), y=yScale(model.my);
+  const mint='#e8f4f1', sand='#f6f0e7';
+  quadrantShading.append(
+    svg('rect',{x,y:22,width:828-x,height:y-22,fill:mint}),
+    svg('rect',{x:62,y:22,width:x-62,height:y-22,fill:sand}),
+    svg('rect',{x:62,y,width:x-62,height:412-y,fill:mint}),
+    svg('rect',{x,y,width:828-x,height:412-y,fill:sand}));
   const style={stroke:'#687e83','stroke-dasharray':'5 5','stroke-width':2};
   quadrantLines.append(
     svg('line',{x1:x,x2:x,y1:22,y2:412,...style}),
     svg('line',{x1:62,x2:828,y1:y,y2:y,...style}));
   label(quadrantLines,x,452,'X̄');
   label(quadrantLines,55,y+5,'Ȳ','end');
-  [[828,22],[62,22],[62,412],[828,412]].forEach(([edgeX,edgeY],i)=>{
-    label(quadrantLines,(edgeX+x)/2,(edgeY+y)/2,i+1);
+  [[809,45],[81,45],[81,398],[809,398]].forEach(([cornerX,cornerY],i)=>{
+    label(quadrantLines,cornerX,cornerY,'Q'+(i+1));
   });
   const n=[0,0,0,0];
   let onLines=0;

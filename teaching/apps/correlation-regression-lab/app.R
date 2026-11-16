@@ -54,17 +54,22 @@ display_result <- function(analysis, extra=NULL) {
    show_table(transform(diag,變數=unname(labels[colnames(d)[-1]]),允差=num(允差),VIF=num(VIF)))),
   if(!is.null(extra))extra)
 }
+shade_quadrants <- function(x,y,limits){
+ mx<-mean(x);my<-mean(y)
+ rect(c(mx,limits[1],limits[1],mx),c(my,my,limits[3],limits[3]),
+      c(limits[2],mx,mx,limits[2]),c(limits[4],limits[4],my,my),
+      col=c('#e8f4f1','#f6f0e7','#e8f4f1','#f6f0e7'),border=NA)
+}
 add_quadrants <- function(x,y) {
  center_x<-mean(x);center_y<-mean(y)
  limits<-par('usr')
  abline(v=center_x,h=center_y,col='#687e83',lty=2,lwd=1.5)
  mtext(expression(bar(X)),side=1,at=center_x,line=1.5,col='#465e63')
  mtext(expression(bar(Y)),side=2,at=center_y,line=2.35,col='#465e63',las=1)
- text(c(mean(c(center_x,limits[2])),mean(c(limits[1],center_x)),
-        mean(c(limits[1],center_x)),mean(c(center_x,limits[2]))),
-      c(mean(c(center_y,limits[4])),mean(c(center_y,limits[4])),
-        mean(c(limits[3],center_y)),mean(c(limits[3],center_y))),
-      1:4,col='#465e63',font=2,cex=1.2)
+ margin_x<-diff(limits[1:2])*.03; margin_y<-diff(limits[3:4])*.04
+ text(limits[c(2,1,1,2)]+c(-1,1,1,-1)*margin_x,
+      c(rep(limits[4]-margin_y,2),rep(limits[3]+margin_y,2)),
+      paste0('Q',1:4),col='#465e63',font=2,cex=.87)
  dx<-x-center_x;dy<-y-center_y
  on_axis<-abs(dx)<=1e-10*pmax(1,abs(x),abs(center_x)) | abs(dy)<=1e-10*pmax(1,abs(y),abs(center_y))
  q<-ifelse(dx>0,ifelse(dy>0,1L,4L),ifelse(dy>0,2L,3L))
@@ -140,7 +145,8 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE){
   xlab=paste0(if(group_plot)'Group' else if(model_plot)'Fitted Y' else 'X',if(zx)' (z)'),
   ylab=paste0(if(model_plot)'Observed Y' else 'Y',if(zy)' (z)'))
  limits<-par('usr')
- rect(limits[1],limits[3],limits[2],limits[4],col='#f7fafb',border=NA)
+ if(quadrants)shade_quadrants(x_plot,d$y,limits)
+ else rect(limits[1],limits[3],limits[2],limits[4],col='#f7fafb',border=NA)
  ticks_x<-axis_scale(x_plot,limits[1:2],zx,if(group_plot)groups else NULL)
  ticks_y<-axis_scale(d$y,limits[3:4],zy)
  abline(h=if(is.null(ticks_y$at))axTicks(2) else ticks_y$at,col='#dce8ea')
@@ -207,9 +213,9 @@ ui <- fluidPage(
  tabsetPanel(id='unit',
   tabPanel('原理說明',includeHTML('www/theory.html')),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
-   card(uiOutput('book_result'),plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),plotOutput('book_plot',height=360),uiOutput('book_equation_text')),uiOutput('book_quadrant_note'),uiOutput('critical_demo'))),
+   card(uiOutput('book_result'),plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),plotOutput('book_plot',height=465),uiOutput('book_equation_text')),uiOutput('book_quadrant_note'),uiOutput('critical_demo'))),
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
-   card(uiOutput('exercise_result'),plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),plotOutput('exercise_plot',height=360),uiOutput('exercise_equation_text')),uiOutput('exercise_quadrant_note'),uiOutput('worked_answers'))),
+   card(uiOutput('exercise_result'),plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),plotOutput('exercise_plot',height=465),uiOutput('exercise_equation_text')),uiOutput('exercise_quadrant_note'),uiOutput('worked_answers'))),
   tabPanel('調查習作',
    card(h3('手機使用行為調查'),p('預設案例為玩手遊時間與手機遊戲成癮的 Pearson 相關。可切換全體或單一星座，也可改選變數。'),
     tags$details(tags$summary('載入其他調查資料'),
@@ -217,7 +223,7 @@ ui <- fluidPage(
      fileInput('survey_file','選擇調查逐筆資料 CSV',accept='.csv')),
     row_controls(uiOutput('survey_group'),select('survey_method','分析方法',methods)),uiOutput('survey_options'),uiOutput('survey_levels'),
     downloadButton('raw_survey','下載逐筆分析資料 CSV')),
-   card(uiOutput('survey_result'),plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),plotOutput('survey_plot',height=360),uiOutput('survey_equation_text')),uiOutput('survey_quadrant_note')),
+   card(uiOutput('survey_result'),plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),plotOutput('survey_plot',height=465),uiOutput('survey_equation_text')),uiOutput('survey_quadrant_note')),
    includeHTML('www/survey-practice.html')),
   tabPanel('殘差與影響點',includeHTML('www/diagnostics.html')),
   tabPanel('R 與 Python 語法',
@@ -233,7 +239,7 @@ ui <- fluidPage(
    card(h3('輸入逐筆資料'),p('第一列填變數名稱，欄位以逗號分隔。類別可填文字，缺失值留空。'),
     textAreaInput('manual_csv','CSV 資料','學習時間,練習次數,成績\n2,3,61\n4,4,68\n5,8,75\n7,5,77\n8,7,83\n9,10,88\n10,8,91',rows=8,width='100%'),
     select('manual_method','分析方法',methods),uiOutput('manual_options'),uiOutput('manual_levels')),
-   card(uiOutput('manual_result'),plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),plotOutput('manual_plot',height=360),uiOutput('manual_equation_text')),uiOutput('manual_quadrant_note')))))
+   card(uiOutput('manual_result'),plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),plotOutput('manual_plot',height=465),uiOutput('manual_equation_text')),uiOutput('manual_quadrant_note')))))
 server <- function(input,output,session){
  survey_raw <- reactive({
   default_file<-if(file.exists('../private/survey.csv'))'../private/survey.csv' else 'data/survey-teaching.csv'
@@ -361,7 +367,7 @@ server <- function(input,output,session){
    if(selected_option('equation'))checks(plot_equation(get_analysis(),selected_option('zx'),selected_option('zy')))
   })
   output[[paste0(id,'_quadrant_note')]]<-renderUI({
-   if(isTRUE(input[[paste0(id,'_quadrants')]]))p(class='quadrant-note','Q1–Q4 依序為右上、左上、左下、右下。落在 X̄ 或 Ȳ 平均線上的觀察值另計。')
+   if(isTRUE(input[[paste0(id,'_quadrants')]]))p(class='quadrant-note','Q1、Q3 淺綠，Q2、Q4 淺米色。落在 X̄ 或 Ȳ 平均線上的觀察值另計。')
   })
  })
  output$raw_survey<-downloadHandler(function()'survey-observations.csv',function(file){
