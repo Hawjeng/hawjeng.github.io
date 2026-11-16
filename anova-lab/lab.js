@@ -455,6 +455,40 @@ function readManual(){
 }
 function runManual(){safe($('results'),()=>{let {m,h,rows}=readManual(),a=+$('alpha').value;return show(compute(m,h,rows,a,$('pool').checked),a);});}
 function sample(){let m=$('model').value,z=data.items.find(x=>x.model===m);$('paste').value=csv(z.headers,z.rows);runManual();}
+function codeExecutionPanel(id, language, extension){
+ return '<section class="card"><h3>'+language+'</h3><div class="execution-grid"><div>'+
+  '<div class="inline"><button class="primary" id="'+id+'-copy" type="button">複製 '+language+' 語法</button>'+
+  '<button id="'+id+'-download" type="button">下載 '+extension+'</button></div>'+
+  '<p id="'+id+'-status" role="status"></p><label for="'+id+'-output"><strong>可執行的 '+language+' 程式</strong></label>'+
+  '<textarea id="'+id+'-output" rows="20" readonly spellcheck="false"></textarea></div><div>'+
+  '<button id="'+id+'-run" type="button">執行 '+language+'</button>'+
+  '<h4>'+language+' 主控台原始輸出</h4><pre id="'+id+'-console" class="execution-console" role="status">點選執行，查看此案例的原始結果。</pre></div></div></section>';
+}
+
+async function runRConsole(code){
+ const {WebR,ChannelType}=await import('https://webr.r-wasm.org/v0.6.0/webr.mjs');
+ const runtime=new WebR({channelType:ChannelType.PostMessage});
+ try{
+  await runtime.init();
+  const shelter=await new runtime.Shelter();
+  try{
+   const result=await shelter.captureR('local({ conn <- textConnection('+JSON.stringify(code)+'); on.exit(close(conn)); source(conn, local=environment(), echo=TRUE, print.eval=TRUE, max.deparse.length=Inf) })');
+   return result.output.filter(entry=>entry.type==='stdout'||entry.type==='stderr').map(entry=>entry.data).join('\n');
+  }finally{await shelter.purge();}
+ }finally{runtime.close();}
+}
+
+function runPythonConsole(code){
+ return new Promise((resolve,reject)=>{
+  const worker=new Worker('python-console.js',{type:'module'});
+  const timer=setTimeout(()=>finish(reject,new Error('Python 執行逾時。')),120000);
+  function finish(callback,value){clearTimeout(timer);worker.terminate();callback(value);}
+  worker.onmessage=({data})=>data.ok?finish(resolve,data.output):finish(reject,new Error(data.output));
+  worker.onerror=()=>finish(reject,new Error('無法載入 Python 執行環境。'));
+  worker.postMessage({code});
+ });
+}
+
 function rCode(){
  let vars=Object.keys(data.survey), groups=Object.keys(data.survey[vars[0]]);
  return heading('R 與 Python 語法')+'<p>選擇案例或調查組別，即可用同一份資料執行兩種語法。先列 R（不需安裝套件），再列 Python（需安裝 NumPy 和 SciPy）。</p>'+
@@ -463,11 +497,28 @@ function rCode(){
  '<div id="r-survey" hidden>'+field('r-variable','結果變項',options(vars.map(x=>[x,x])))+
  field('r-group','分組因子 A',options(groups.map(x=>[x,x])))+field('r-group-b','分組因子 B（選填）','')+'<h3>納入組別</h3><div id="r-groups" class="check"></div></div>'+
  alpha()+'<div class="check" id="r-pool-control" hidden><label><input id="r-pool" type="checkbox"> 採用課本的合併殘差</label></div></details>'+
- '<div><section class="card"><h3>R</h3><div class="inline"><button class="primary" id="r-copy" type="button">複製 R 語法</button><button id="r-download" type="button">下載 .R</button></div><p id="r-status" role="status"></p><label for="r-output"><strong>可執行的 R 程式</strong></label><textarea id="r-output" rows="20" readonly spellcheck="false"></textarea></section><section class="card"><h3>Python</h3><div class="inline"><button class="primary" id="py-copy" type="button">複製 Python 語法</button><button id="py-download" type="button">下載 .py</button></div><p id="py-status" role="status"></p><label for="py-output"><strong>可執行的 Python 程式</strong></label><textarea id="py-output" rows="20" readonly spellcheck="false"></textarea></section></div></div>';
+ '<div>'+codeExecutionPanel('r','R','.R')+codeExecutionPanel('py','Python','.py')+'</div></div>';
 }
 function mountR(caseIndex){
  const kind=$('r-type'), index=$('r-case'), out=$('r-output'), status=$('r-status'), pick=$('r-groups');
  const py=$('py-output'), pyStatus=$('py-status');
+ let selection=0;
+ function bindRun(id,editor,run){
+  const button=$(id+'-run'), output=$(id+'-console');
+  button.onclick=async()=>{
+   const revision=selection;
+   button.disabled=true;
+   output.textContent='正在載入執行環境。首次下載可能需要一點時間。';
+   try{
+    const text=await run(editor.value);
+    if(revision===selection)output.textContent=text;
+   }catch(error){
+    if(revision===selection)output.textContent=error.message+'\n請重新整理或換用新版瀏覽器及網路，也可下載語法後在本機執行。';
+   }finally{if(revision===selection)button.disabled=false;}
+  };
+ }
+ bindRun('r',out,runRConsole);
+ bindRun('py',py,runPythonConsole);
  function update(){
   let a=+$('alpha').value, z=data.items[+index.value];
   pyStatus.textContent='';
@@ -491,6 +542,11 @@ function mountR(caseIndex){
   }
   $('r-copy').disabled=$('r-download').disabled=!out.value;
   $('py-copy').disabled=$('py-download').disabled=!py.value;
+  selection++;
+  for(const [id,editor] of [['r',out],['py',py]]){
+   $(id+'-run').disabled=!editor.value;
+   $(id+'-console').textContent=editor.value?'點選執行，查看此案例的原始結果。':'請先選擇有效的分析設定。';
+  }
  }
  function surveyGroups(rebuildOptions=true){
   refreshSurveyGroups($('r-variable').value,$('r-group').value,$('r-group-b'),pick,rebuildOptions);

@@ -24,3 +24,4 @@
 }
 
 .anova-summary th:first-child { width: 1%; }
+.execution-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:16px}.execution-console{max-height:430px;min-height:3em;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8f9;border:1px solid #c6d9d9;border-radius:8px;padding:10px}@media(max-width:900px){.execution-grid{grid-template-columns:minmax(0,1fr)}}
