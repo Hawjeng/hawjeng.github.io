@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#163b44"/><text x="32" y="43" text-anchor="middle" fill="#f8df81" font-family="Georgia,serif" font-size="32">Hc</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <circle cx="20" cy="20" r="20" fill="#163b44"/>
+  <path d="M3 31C9 31 12 28 15 19S19 11 20 11 23 11 26 19 31 31 37 31" fill="none" stroke="#a6d3d2" stroke-width="1.25" opacity=".65"/>
+  <text x="20" y="28" text-anchor="middle" fill="#f8df81" stroke="#163b44" stroke-width="2" paint-order="stroke" font-family="Georgia, serif" font-size="26" font-weight="600">C</text>
+</svg>
