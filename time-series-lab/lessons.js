@@ -53,17 +53,82 @@ function renderExample() {
     + '<details open><summary>逐期計算與分析結果</summary><pre class="example-output" tabindex="0"></pre></details>');
   $("example-result").querySelector("pre").textContent = LESSON_DATA.results[key].R;
   $("example-to-code").addEventListener("click", () => {
-    $("run-case").value = key;
-    renderSyntax();
+    $("run-data-type").value = "examples";
+    selectSyntaxCases(key);
   });
+}
+
+const syntaxLanguages = ["R", "py"];
+const syntaxResults = new Set();
+
+function selectSyntaxCases(preferred) {
+  const exercise = val("run-data-type") === "exercises";
+  const cases = Object.entries(exampleLabels).filter(([key]) => key.startsWith("exercise") === exercise);
+  set("run-case", cases.map(([key, label]) => '<option value="' + key + '">' + label + '</option>').join(""));
+  if (cases.some(([key]) => key === preferred)) $("run-case").value = preferred;
+  syntaxResults.clear();
+  renderSyntax();
 }
 
 function renderSyntax() {
   const key = val("run-case");
-  const language = val("run-language");
-  $("run-command").textContent = (language === "R" ? "Rscript chapter16.R " : "python chapter16.py ") + key;
-  $("run-output").textContent = LESSON_DATA.results[key][language];
-  $("run-source").textContent = LESSON_DATA.source[language];
+  const diagnostic = key === "residual";
+  $("run-alpha-control").hidden = !diagnostic;
+  let decision = "";
+  if (diagnostic) {
+    const alpha = val("run-alpha");
+    const model = fitDiagnostic(DATA.diagnostic, "1");
+    const [lower, upper] = DATA.dw[alpha][model.n][model.k];
+    const bg = bgTest(model, 1);
+    const dwDecision = model.dw < lower ? "拒絕 H₀" : model.dw > upper ? "不拒絕 H₀" : "無法判定";
+    const bgDecision = chiTail(bg.lm, 1) <= Number(alpha) ? "拒絕 H₀" : "不拒絕 H₀";
+    decision = "依目前 α = " + alpha + " 判讀。DW 正向單尾 " + dwDecision
+      + "（dL = " + fixed(lower, 3) + "，dU = " + fixed(upper, 3) + "）。BG(1) LM " + bgDecision + "。";
+  }
+  for (const language of syntaxLanguages) {
+    const output = $("run-output-" + language);
+    const button = document.querySelector('[data-result="' + language + '"]');
+    const shown = syntaxResults.has(language);
+    const label = language === "R" ? "R" : "Python";
+    $("run-command-" + language).textContent = (language === "R" ? "Rscript chapter16.R " : "python chapter16.py ") + key;
+    $("run-source-" + language).textContent = LESSON_DATA.source[language];
+    output.textContent = LESSON_DATA.results[key][language];
+    output.hidden = !shown;
+    $("run-placeholder-" + language).hidden = shown;
+    button.setAttribute("aria-expanded", String(shown));
+    button.textContent = (shown ? "收合 " : "查看 ") + label + " 結果";
+    const note = $("run-decision-" + language);
+    note.hidden = !shown || !decision;
+    note.textContent = decision;
+  }
+}
+
+for (const button of document.querySelectorAll("[data-result]")) {
+  button.addEventListener("click", () => {
+    const language = button.dataset.result;
+    if (syntaxResults.has(language)) syntaxResults.delete(language);
+    else syntaxResults.add(language);
+    renderSyntax();
+  });
+}
+for (const button of document.querySelectorAll("[data-copy]")) {
+  button.addEventListener("click", async () => {
+    const language = button.dataset.copy;
+    const source = $("run-source-" + language);
+    const label = language === "R" ? "R" : "Python";
+    try {
+      await navigator.clipboard.writeText(source.textContent);
+      $("syntax-status").textContent = "已複製 " + label + " 語法。";
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(source);
+      const selection = window.getSelection();
+      source.focus();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      $("syntax-status").textContent = "已選取 " + label + " 語法，可使用 Ctrl+C 或 ⌘C 複製。";
+    }
+  });
 }
 
 function lessonTable(headers, rows, digits = 3) {
@@ -117,9 +182,9 @@ for (const [id, draw] of Object.entries(exerciseCharts)) {
 }
 document.addEventListener("lessonchange", e => exerciseCharts[e.detail.topic]?.());
 
-set("run-case", Object.entries(exampleLabels).map(([key,label]) => '<option value="' + key + '">' + label + '</option>').join(""));
-$("run-case").value = "residual";
-observe(["example-case"],renderExample);
-observe(["run-case","run-language"],renderSyntax);
+observe(["example-case"], renderExample);
+observe(["run-data-type"], () => selectSyntaxCases());
+observe(["run-case"], () => { syntaxResults.clear(); renderSyntax(); });
+observe(["run-alpha"], renderSyntax);
+selectSyntaxCases("residual");
 renderExample();
-renderSyntax();

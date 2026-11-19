@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="從臺灣少子化理解時間序列，操作非線性趨勢、影響點與 DW、BG 殘差檢定。">
 <title>時間序列分析｜邱皓政統計互動教材</title>
-<link rel="stylesheet" href="style.css?v=equation-r2">
+<link rel="stylesheet" href="style.css?v=syntax-layout">
 <script defer src="data.js"></script><script defer src="stats.js?v=chapter-examples"></script><script defer src="lesson-data.js?v=chapter-examples"></script><script defer src="lab.js?v=equation-r2"></script>
-<script defer src="lessons.js?v=chapter-examples"></script>
+<script defer src="lessons.js?v=syntax-layout"></script>
 </head>
 <body>
 <header><div class="shell mast"><a class="brand" href="../resources.html#statistics-apps" aria-label="返回教學與資源"><span aria-hidden="true">Hc</span> 邱皓政｜教學與資源</a><a href="../correlation-regression-lab/">相關與迴歸</a></div></header>
@@ -122,14 +122,37 @@
 </div>
 </section>
 <section id="syntax" class="unit" aria-labelledby="syntax-title">
-<div class="section-head"><h2 id="syntax-title">R 與 Python 語法與結果</h2><p>兩種程式使用同一份 CSV。切換案例可對照實際執行輸出，也可下載程式與資料在本機重現。</p></div>
-<div class="card">
-<div class="toolbar"><label>分析案例 <select id="run-case"></select></label><label>語言 <select id="run-language"><option value="R">R</option><option value="py">Python</option></select></label></div>
-<div class="toolbar"><a href="downloads/chapter16.R" download>下載 R 程式</a><a href="downloads/chapter16.py" download>下載 Python 程式</a><a href="downloads/chapter16.csv" download>下載案例 CSV</a></div>
-<p class="note">R 使用內建函式。Python 需要 NumPy 與 SciPy。把下載的程式與資料放在同一資料夾。</p>
-<h3>執行指令</h3><pre id="run-command"></pre>
-<h3>執行結果</h3><pre id="run-output" tabindex="0"></pre>
-<details><summary>展開完整程式碼</summary><pre id="run-source" tabindex="0"></pre></details>
+<div class="section-head"><h2 id="syntax-title">R 與 Python 語法與結果</h2><p>選擇案例，用同一份資料對照 R 與 Python 的程式及實際執行結果。</p></div>
+<div class="syntax-layout">
+<details class="card syntax-settings" open>
+<summary>分析設定</summary>
+<label for="run-data-type">資料類型</label><select id="run-data-type"><option value="examples">課本範例</option><option value="exercises">課後習作</option></select>
+<label for="run-case">案例</label><select id="run-case"></select>
+<label for="run-alpha" id="run-alpha-control">顯著水準 α <select id="run-alpha"><option value=".05">0.05</option><option value=".01">0.01</option></select></label>
+<a href="downloads/chapter16.csv" download>下載案例 CSV</a>
+</details>
+<div class="syntax-languages">
+<p class="note">把程式與 CSV 放在同一資料夾即可重現。R 使用內建函式。Python 需要 NumPy 與 SciPy。</p>
+<article class="card syntax-language" data-language="R">
+<h3>R</h3>
+<div class="syntax-pair">
+<div><div class="toolbar"><button type="button" class="syntax-copy" data-copy="R">複製 R 語法</button><a class="syntax-download" href="downloads/chapter16.R" download>下載 .R</a></div>
+<h4>可執行的 R 程式</h4><pre id="run-command-R" class="syntax-command"></pre><pre id="run-source-R" class="syntax-console" tabindex="0" aria-label="R 程式碼"></pre></div>
+<div><div class="toolbar"><button type="button" data-result="R" aria-controls="run-output-R" aria-expanded="false">查看 R 結果</button></div>
+<h4>R 主控台原始輸出</h4><p class="syntax-placeholder" id="run-placeholder-R">選擇「查看 R 結果」以開啟此案例的執行紀錄。</p><pre id="run-output-R" class="syntax-console" tabindex="0" hidden></pre><p id="run-decision-R" class="note" hidden></p></div>
+</div>
+</article>
+<article class="card syntax-language" data-language="py">
+<h3>Python</h3>
+<div class="syntax-pair">
+<div><div class="toolbar"><button type="button" class="syntax-copy" data-copy="py">複製 Python 語法</button><a class="syntax-download" href="downloads/chapter16.py" download>下載 .py</a></div>
+<h4>可執行的 Python 程式</h4><pre id="run-command-py" class="syntax-command"></pre><pre id="run-source-py" class="syntax-console" tabindex="0" aria-label="Python 程式碼"></pre></div>
+<div><div class="toolbar"><button type="button" data-result="py" aria-controls="run-output-py" aria-expanded="false">查看 Python 結果</button></div>
+<h4>Python 主控台原始輸出</h4><p class="syntax-placeholder" id="run-placeholder-py">選擇「查看 Python 結果」以開啟此案例的執行紀錄。</p><pre id="run-output-py" class="syntax-console" tabindex="0" hidden></pre><p id="run-decision-py" class="note" hidden></p></div>
+</div>
+</article>
+<p id="syntax-status" class="note" role="status"></p>
+</div>
 </div>
 </section>
 </div>
