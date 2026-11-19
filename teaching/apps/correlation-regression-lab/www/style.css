@@ -1,8 +1,8 @@
 :root{color-scheme:light;--ink:#173b44;--accent:#286d79;--line:#d4e4e6;--canvas:#eff5f5}
 body{background:var(--canvas);color:var(--ink);font:16px/1.65 "Microsoft JhengHei","Noto Sans TC",sans-serif}
 .container-fluid{max-width:1410px;padding:28px clamp(14px,4vw,55px)}
-.mast{padding:38px 0 25px}.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.22em;font-size:12px}
-h1{font-size:clamp(36px,6vw,67px);font-weight:800;letter-spacing:.045em;margin:12px 0}h2,h3,h4{font-weight:650}
+.mast{padding:26px 0 16px}.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.22em;font-size:12px}
+h1{font-size:clamp(28px,20.8px + 1.5vw,36px);font-weight:700;letter-spacing:.015em;line-height:1.22;margin:4px 0 7px}h2,h3,h4{font-weight:650}
 .nav-tabs{margin-bottom:20px}.nav-tabs a{color:var(--accent)}.nav-tabs>li.active>a{border-top:3px solid var(--accent)}
 .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:clamp(15px,3vw,28px);margin:0 0 16px}
 .card h3:first-child{margin-top:0}.card h4{margin-top:22px}.controls{display:flex;gap:8px 16px;align-items:flex-start;flex-wrap:wrap}

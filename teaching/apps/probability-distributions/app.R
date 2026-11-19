@@ -481,7 +481,7 @@ ui <- fluidPage(
          style = "margin-top: 10px;", "← 返回教學與專案"),
   tags$head(tags$meta(charset="utf-8"), tags$style(HTML('
     body{font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif;background:#f5f7fa;color:#334155;font-size:14px;-webkit-font-smoothing:antialiased}
-    .container-fluid>h2{font-size:27px;font-weight:500;letter-spacing:.08em;margin:24px 0 20px}
+
     .nav-tabs>li>a{font-size:14px;padding:11px 18px;color:#687c8c}
     .nav-tabs>li.active>a,.nav-tabs>li.active>a:focus{color:#215f7a;font-weight:600;background:white;border-top:2px solid #39788f}
     .well{background:white;border-radius:10px}.metric{background:white;border:1px solid #dce4ed;border-radius:10px;padding:16px;margin:8px 0}
@@ -522,7 +522,7 @@ ui <- fluidPage(
     /* 緊湊版：以視窗高度控制圖形，字體和控制項同步縮小。 */
     body{font-size:13px}
     .container-fluid{padding-left:16px;padding-right:16px}
-    .container-fluid>h2{font-size:22px;letter-spacing:.025em;margin:12px 0 10px}
+
     .nav-tabs>li>a{font-size:13px;padding:8px 12px}
     .tab-content{padding-top:9px}
     .well{padding:12px;margin-bottom:12px}
@@ -543,8 +543,9 @@ ui <- fluidPage(
     #exercise_plot{height:clamp(190px,45vh,340px)!important}
     .intro-home{margin:10px auto 20px;padding:18px 26px;font-size:13px}
     @media(min-width:768px){.well{max-height:calc(100vh - 135px);overflow-y:auto}}
-    @media(max-width:767px){.container-fluid>h2{font-size:19px}.metric{padding:6px}.metric strong{font-size:19px}#distribution_plot{height:280px!important}}
+    @media(max-width:767px){.metric{padding:6px}.metric strong{font-size:19px}#distribution_plot{height:280px!important}}
 '))),
+  tags$head(tags$style(HTML(".container-fluid>h2{font-size:clamp(28px,20.8px + 1.5vw,36px);font-weight:700;letter-spacing:.015em;line-height:1.22;margin:16px 0 14px}"))),
   titlePanel("機率分配 Probability Distribution"),
   tabsetPanel(id="main_page",selected="home",
     tabPanel("首頁｜基本概念",value="home",home_ui),

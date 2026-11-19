@@ -19,7 +19,7 @@ demo_ui <- fluidPage(
     .value-number { font-size:19px; font-weight:700; }
     .note-box { background:#fff8dc; border-left:5px solid #d8a600; padding:12px; margin-top:12px; }
   "))),
-  
+
   sidebarLayout(
     sidebarPanel(
       width = 3,
@@ -476,10 +476,11 @@ ui <- fluidPage(
   tags$a(href = "https://hawjeng.github.io/resources.html", class = "btn btn-default btn-sm",
          style = "margin-top: 10px;", "← 返回教學與專案"),
   tags$head(tags$meta(charset="utf-8"),tags$style(HTML('body{font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif;background:#f5f7fa;color:#334155}.nav-tabs>li>a{padding:11px 18px;color:#687c8c}.nav-tabs>li.active>a{color:#215f7a;border-top:2px solid #39788f}.tab-content{padding-top:14px}.intro-home{max-width:1120px;margin:20px auto 36px;padding:26px 38px;line-height:1.85;background:white;border:1px solid #e4e9ef;border-radius:7px}.intro-home h2{font-size:22px;color:#245f77}.intro-home h3{font-size:19px;color:#245f77;margin-top:24px}.intro-home p{margin-bottom:15px}.home-equation{overflow-x:auto;padding:8px 0;font-size:16px}.formula{font-size:17px;color:#245f77;padding:12px 0}.formula p{margin:4px 0}.intro-source{font-size:12px;color:#7b8794}.well{background:white!important}.value-number{color:#146d92}.note-box{background:#eaf3fa!important;border-left:3px solid #6792a5!important}@media(max-width:767px){.intro-home{padding:18px;margin:8px 0}.nav-tabs>li>a{padding:9px}}'))),
+  tags$head(tags$style(HTML(".container-fluid>h2{font-size:clamp(28px,20.8px + 1.5vw,36px);font-weight:700;letter-spacing:.015em;line-height:1.22;margin:16px 0 14px}"))),
   titlePanel("抽樣分配與估計 Sampling Distribution and Estimation"),
   # 隨可用視窗高度調整圖形容器，tab 切換後重新量測。
   tags$head(tags$style(HTML('
-    .container-fluid>h2{margin-top:15px;margin-bottom:13px}
+
     .value-box{margin-bottom:8px!important;padding:9px 12px!important}
     .tab-content{padding-top:9px}
     .tab-pane>br:first-child{display:none}
@@ -530,7 +531,7 @@ ui <- fluidPage(
   # 精簡字級與公式比例，避免 MathJax 自動放大破壞正文層次。
   tags$head(tags$style(HTML('
     body{font-size:13px;line-height:1.65}
-    .container-fluid>h2{font-size:24px;font-weight:500;letter-spacing:.035em;margin:20px 0 17px}
+
     h3{font-size:17px}h4{font-size:15px}
     .nav-tabs>li>a{font-size:13px;padding:9px 15px}
     .tab-content{padding-top:11px}
