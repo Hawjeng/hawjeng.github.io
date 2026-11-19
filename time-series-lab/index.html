@@ -6,8 +6,8 @@
 <meta name="description" content="從臺灣少子化理解時間序列，操作非線性趨勢、影響點與 DW、BG 殘差檢定。">
 <title>時間序列分析｜邱皓政統計互動教材</title>
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=title-scale">
-<script defer src="data.js"></script><script defer src="stats.js?v=chapter-examples"></script><script defer src="lesson-data.js?v=chapter-examples"></script><script defer src="lab.js?v=principles-group"></script>
+<link rel="stylesheet" href="style.css?v=population-labels">
+<script defer src="data.js"></script><script defer src="stats.js?v=chapter-examples"></script><script defer src="lesson-data.js?v=chapter-examples"></script><script defer src="lab.js?v=population-labels"></script>
 <script defer src="lessons.js?v=syntax-layout"></script>
 </head>
 <body>
@@ -24,7 +24,7 @@
 <div class="sub-head"><h3 id="population-title">臺灣少子化與人口變動</h3><p>圖 16.1｜1974–2025 年粗出生率、粗死亡率及人口數</p></div>
 <div class="grid"><div class="card">
 <div class="toolbar"><label><input name="pop-view" type="radio" value="rates" checked> 出生率與死亡率</label><label><input name="pop-view" type="radio" value="net"> 自然增加率</label><label><input name="pop-view" type="radio" value="total"> 人口數</label></div>
-<div id="population-chart"></div>
+<div id="population-chart"></div><p class="note">移動圖上游標、點選年份或調整滑桿，可查看同一年的數值。</p>
 <div class="toolbar"><label for="pop-year">查看年度</label><input id="pop-year" type="range" min="1974" max="2025" value="2020"><output id="pop-year-value" for="pop-year"></output></div>
 <div id="population-values" class="metrics" aria-live="polite"></div>
 </div><aside class="card reading"><h4>為什麼要保留時間順序？</h4>

@@ -72,6 +72,28 @@ function numericTicks(values, count = 6, heading = v => v) {
     (i % step === 0 && values.length - i > step / 2) || i === values.length - 1 ? [[v, heading(v)]] : []);
 }
 
+let populationGeometry;
+
+function populationLabels(g, year, current, series, value) {
+  const px = g.x(year);
+  const labelOnLeft = px > (g.left + g.right) / 2;
+  const labelX = px + (labelOnLeft ? -10 : 10);
+  const labels = series.map(([index, name, color]) => {
+    const number = value(current, index);
+    const unit = index === 3 ? " 百萬人" : "‰";
+    return {position: g.y(number), color, label: year + " 年　" + name + " " + fixed(number, index === 3 ? 3 : 2) + unit};
+  }).sort((a, b) => a.position - b.position);
+  const minY = g.top + 16, maxY = g.bottom - 9, gap = 22;
+  const positions = labels.map(entry => clamp(entry.position + 5, minY, maxY));
+  if (positions.length === 2 && positions[1] - positions[0] < gap) {
+    const midpoint = clamp((positions[0] + positions[1]) / 2, minY + gap / 2, maxY - gap / 2);
+    positions[0] = midpoint - gap / 2;
+    positions[1] = midpoint + gap / 2;
+  }
+  return labels.map(({color, label}, i) => g.text(labelX, positions[i], label, 'class="population-label" text-anchor="'
+    + (labelOnLeft ? "end" : "start") + '" style="fill:' + color + '"')).join("");
+}
+
 function renderPopulation() {
   const mode = document.querySelector('[name="pop-view"]:checked').value;
   const year = Number(val("pop-year"));
@@ -83,8 +105,9 @@ function renderPopulation() {
     total: {series: [[3, "人口數", C.blue]], y: [14, 26], unit: "百萬人"}
   }[mode];
   const value = (row, i) => i === 4 ? row[1] - row[2] : row[i];
-  chart("population-chart", {
-    title: "臺灣人口年度趨勢圖", x: [1974, 2025], y: data.y, xLabel: "西元年", yLabel: data.unit,
+  populationGeometry = chart("population-chart", {
+    title: "臺灣人口年度趨勢圖，" + year + " 年，"
+      + data.series.map(([index, name]) => name + " " + fixed(value(current, index), index === 3 ? 3 : 2)).join("，"), x: [1974, 2025], y: data.y, xLabel: "西元年", yLabel: data.unit,
     ticks: [1974, 1985, 1995, 2005, 2015, 2025].map(n => [n, n]),
     legend: data.series.map(([, name, color]) => [name, color]),
     draw: g => (mode === "net" ? g.horizontal(0, C.grey, 'stroke-dasharray="5 4"') : "")
@@ -92,9 +115,9 @@ function renderPopulation() {
       + (year === 2020 ? "" : g.vertical(year, C.ink, 'stroke-dasharray="4 4"'))
       + data.series.map(([i, name, color]) => g.line(rows.map(row => [row[0], value(row, i)]), color)).join("")
       + data.series.map(([i, name, color]) => rows.map(row => g.point(row[0], value(row, i), color,
-        row[0] === year ? 5.5 : 2.9, "", row[0] + " 年｜" + name + " " + fixed(value(row, i), i === 3 ? 3 : 2)
-          + (i === 3 ? " 百萬人" : "‰"))).join("")).join("")
+        row[0] === year ? 5.5 : 2.9)).join("")).join("")
       + g.text(g.x(2020) - 5, g.top + 14, "2020", 'text-anchor="end"')
+      + populationLabels(g, year, current, data.series, value)
   });
   $("pop-year-value").textContent = year;
   set("population-values", metric("粗出生率", fixed(current[1]) + "‰") + metric("粗死亡率", fixed(current[2]) + "‰")
@@ -377,6 +400,27 @@ function observe(ids, handler, event = "input") {
 }
 document.querySelectorAll('[name="pop-view"]').forEach(input => input.addEventListener("change", renderPopulation));
 $("pop-year").addEventListener("input", renderPopulation);
+function selectPopulationYear(event) {
+  if (event.type === "pointermove" && event.pointerType === "touch") return;
+  const svg = event.target.closest("svg");
+  if (!svg || !populationGeometry) return;
+  const point = svg.createSVGPoint();
+  point.x = event.clientX;
+  point.y = event.clientY;
+  const transform = svg.getScreenCTM();
+  if (!transform) return;
+  const position = point.matrixTransform(transform.inverse());
+  const {left, right, top, bottom} = populationGeometry;
+  if (position.x < left - 5 || position.x > right + 5 || position.y < top || position.y > bottom) return;
+  const ratio = clamp((position.x - left) / (right - left), 0, 1);
+  const slider = $("pop-year");
+  const year = Math.round(Number(slider.min) + ratio * (Number(slider.max) - Number(slider.min)));
+  if (year === Number(slider.value)) return;
+  slider.value = year;
+  renderPopulation();
+}
+$("population-chart").addEventListener("pointermove", selectPopulationYear);
+$("population-chart").addEventListener("click", selectPopulationYear);
 document.querySelectorAll("[data-year]").forEach(button => button.addEventListener("click", () => {
   $("pop-year").value = button.dataset.year;
   renderPopulation();

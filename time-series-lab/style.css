@@ -85,3 +85,4 @@ section{margin:1.75rem 0 3.4rem;scroll-margin-top:5rem}.section-head{margin-bott
 .unit-nav a[aria-current]{border:1px solid var(--line);border-top:3px solid var(--accent);border-bottom-color:#fff;background:#fff;color:var(--ink)}
 .unit-content{margin-top:1.25rem}
 @media(max-width:620px){.hero{padding:1.25rem 0 .85rem}.unit-nav{display:flex}.unit-nav a{padding:.5rem .55rem}.unit-content{margin-top:.85rem}}
+.chart .population-label{font-size:16px;font-weight:750;stroke:#fcfefe;stroke-width:3px;stroke-linejoin:round;paint-order:stroke;pointer-events:none}
