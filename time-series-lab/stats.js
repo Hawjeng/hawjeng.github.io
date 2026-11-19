@@ -33,7 +33,7 @@ function leastSquares(rows, values) {
   const fitted = rows.map(predict);
   const residuals = values.map((y, i) => y - fitted[i]);
   const sse = dot(residuals, residuals);
-  return {predict, fitted, residuals, sse};
+  return {predict, fitted, residuals, sse, coefficients};
 }
 
 function polynomialRow(x, degree, center, scale) {
@@ -52,7 +52,10 @@ function fitTrend(points, type) {
   const sse = dot(residuals, residuals);
   const center = mean(values);
   const sst = values.reduce((sum, y) => sum + (y - center) ** 2, 0);
-  return {predict, r2: sst ? 1 - sse / sst : NaN, rmse: Math.sqrt(sse / points.length)};
+  // Convert the centered basis to t = year - 2005 for the displayed equation.
+  const [a, b, c = 0] = model.coefficients;
+  const coefficients = [a - 8 * b / 7 + 64 * c / 49, b / 7 - 16 * c / 49, c / 49];
+  return {predict, coefficients, r2: sst ? 1 - sse / sst : NaN, rmse: Math.sqrt(sse / points.length)};
 }
 
 function fitDiagnostic(points, type) {

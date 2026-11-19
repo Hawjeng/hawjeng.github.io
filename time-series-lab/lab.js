@@ -43,8 +43,8 @@ function chart(id, config) {
     + (x(x1) - x(x0)) + '" height="' + (y(y0) - y(y1)) + '" fill="' + fill + '" opacity=".10"/>';
   const point = (a, b, color, r, extra = "", label = "") =>
     '<circle cx="' + x(a) + '" cy="' + y(b) + '" r="' + r + '" fill="' + color
-    + '" stroke="white" stroke-width="1.3" ' + extra + '>'
-    + (label ? '<title>' + escapeText(label) + '</title>' : '') + '</circle>';
+    + '" stroke="white" stroke-width="1.3" ' + extra
+    + (label ? ' data-point-label="' + escapeText(label) + '"' : '') + '/>';
   const ticks = Array.from({length: 5}, (_, i) => yDomain[0] + (yDomain[1] - yDomain[0]) * i / 4);
   const grid = ticks.map(n => horizontal(n) + text(left - 8, y(n) + 5,
     Math.abs(n) >= 10 || Number.isInteger(n) ? fixed(n, 0) : fixed(n, 1),
@@ -54,7 +54,11 @@ function chart(id, config) {
       + text(x(n), bottom + 21, label, 'class="minor" text-anchor="middle"')).join("")
     + text(right, height - 3, xLabel, 'class="minor" text-anchor="end"')
     + text(left, top - 9, yLabel, 'class="minor"');
-  const api = {x, y, text, ln, line, horizontal, vertical, rect, point, left, right, top, bottom};
+  const series = (entries, positions, period) =>
+    entries.map(([values, , color]) => line(positions.map((n, i) => [n, values[i]]), color)).join("")
+    + entries.map(([values, name, color]) => positions.map((n, i) => Number.isFinite(values[i])
+      ? point(n, values[i], color, 4, "", period(i) + "｜" + name + " " + fixed(values[i], 3)) : "").join("")).join("");
+  const api = {x, y, text, ln, line, horizontal, vertical, rect, point, series, left, right, top, bottom};
   set(id, '<svg class="chart" viewBox="0 0 ' + width + ' ' + height + '" role="'
     + (config.touch ? "group" : "img") + '" aria-label="' + escapeText(title) + '">'
     + (config.background?.(api) ?? "") + grid + axes + config.draw(api)
@@ -86,8 +90,10 @@ function renderPopulation() {
     draw: g => (mode === "net" ? g.horizontal(0, C.grey, 'stroke-dasharray="5 4"') : "")
       + g.vertical(2020, "#809ba5", 'stroke-dasharray="4 5"')
       + (year === 2020 ? "" : g.vertical(year, C.ink, 'stroke-dasharray="4 4"'))
-      + data.series.map(([i, name, color]) => g.line(rows.map(row => [row[0], value(row, i)]), color)
-        + g.point(year, value(current, i), color, 5, "", name + " " + fixed(value(current, i)))).join("")
+      + data.series.map(([i, name, color]) => g.line(rows.map(row => [row[0], value(row, i)]), color)).join("")
+      + data.series.map(([i, name, color]) => rows.map(row => g.point(row[0], value(row, i), color,
+        row[0] === year ? 5.5 : 2.9, "", row[0] + " 年｜" + name + " " + fixed(value(row, i), i === 3 ? 3 : 2)
+          + (i === 3 ? " 百萬人" : "‰"))).join("")).join("")
       + g.text(g.x(2020) - 5, g.top + 14, "2020", 'text-anchor="end"')
   });
   $("pop-year-value").textContent = year;
@@ -143,7 +149,8 @@ function renderSmooth() {
   chart("smooth-chart", {
     title: "原始資料與平滑或去季節後的資料", x: [x[0], x.at(-1)], y, xLabel: yearLabel, yLabel: "銷售量",
     ticks, legend: series.map(([, name, color]) => [name, color]),
-    draw: g => series.map(([values, , color]) => g.line(x.map((n, i) => [n, values[i]]), color)).join("")
+    draw: g => g.series(series, x, i => mode === "season"
+      ? DATA.season[Math.floor(i / 4)][0] + "Q" + (i % 4 + 1) : x[i] + " 年")
   });
 }
 
@@ -219,6 +226,7 @@ function renderTrend() {
   });
   set("quadrant-counts", show && labels ? names.map((name, i) => '<span><i style="--key:' + quadColors[i] + '"></i>'
     + escapeText(name) + ' ' + tally[i] + ' 點</span>').join("") + '<span>分界線上 ' + tally[4] + ' 點</span>' : "");
+  renderEquations(visible, fits);
   set("trend-stats", trendTypes.map(([key, name]) => {
     const fit = fits[key];
     if (!fit) return '<tr><th scope="row">' + name + '</th><td colspan="4">需所有銷售值大於 0</td></tr>';
@@ -378,7 +386,7 @@ set("trend-year", options(DATA.sales.map(p => p[0])));
 $("trend-year").value = "2020";
 set("quad-names", quadDefaults.map((label, i) => '<label>' + label[0] + '<input id="quad-name-' + i
   + '" type="text" maxlength="28" value="' + label + '" aria-label="第 ' + (i + 1) + ' 象限名稱"></label>').join(""));
-observe(["trend-year", "line-linear", "line-quadratic", "line-exp", "show-baseline", "quadrants",
+observe(["trend-year", "line-linear", "line-quadratic", "line-exp", "show-baseline", "show-equations", "quadrants",
   "cut-x", "cut-y", "quad-labels", "quad-shade", ...quadDefaults.map((_, i) => "quad-name-" + i)], renderTrend);
 $("impact").addEventListener("input", () => moveImpact(Number(val("trend-year")), Number(val("impact"))));
 $("reset-impact").addEventListener("click", () => { changes.clear(); renderTrend(); });
@@ -447,6 +455,7 @@ function showUnit() {
   if (unit.id === "smooth") renderSmooth();
   if (unit.id === "trend") renderTrend();
   if (topic?.id === "residual-plot") renderDiagnosticsChartOnResize();
+  document.dispatchEvent(new CustomEvent("lessonchange", {detail: {unit: unit.id, topic: topic?.id}}));
 }
 
 function setCurrent(link, id) {
@@ -479,5 +488,84 @@ window.addEventListener("resize", () => {
   cancelAnimationFrame(pendingResize);
   pendingResize = requestAnimationFrame(showUnit);
 });
+let equationPosition = {x: .11, y: .12};
+let equationDrag;
+function positionEquations(box, left, top) {
+  const plot = $("trend-chart").querySelector("svg");
+  const maxX = Math.max(0, plot.clientWidth - box.offsetWidth - 4);
+  const maxY = Math.max(0, plot.clientHeight - box.offsetHeight - 6);
+  const x = clamp(left, 4, Math.max(4, maxX));
+  const y = clamp(top, 5, Math.max(5, maxY));
+  box.style.left = x + "px";
+  box.style.top = y + "px";
+  return {x: x / plot.clientWidth, y: y / plot.clientHeight};
+}
+
+function renderEquations(visible, fits) {
+  const show = checked("show-equations") && visible.length > 0;
+  $("equation-help").hidden = !show;
+  if (!show) return;
+  const graph = $("trend-chart");
+  const box = document.createElement("div");
+  box.className = "equation-box";
+  box.tabIndex = 0;
+  box.setAttribute("aria-describedby", "equation-help");
+  const terms = (coefs, powers) => coefs.slice(0, powers.length + 1).reduce((out, n, i) => i === 0 ? fixed(n, 3)
+    : out + (n < 0 ? " − " : " + ") + fixed(Math.abs(n), 3) + powers[i - 1], "");
+  box.innerHTML = visible.map(([key, label, color]) => {
+    const polynomial = terms(fits[key].coefficients, key === "quadratic" ? ["t", "t²"] : ["t"]);
+    return '<div style="--key:' + color + '"><strong>' + label + '</strong> Ŷ = '
+      + (key === "exp" ? "exp(" + polynomial + ")" : polynomial) + "</div>";
+  }).join("");
+  graph.append(box);
+  const plot = graph.querySelector("svg");
+  positionEquations(box, equationPosition.x * plot.clientWidth, equationPosition.y * plot.clientHeight);
+  box.addEventListener("pointerdown", event => {
+    if (event.button !== 0) return;
+    equationDrag = {id: event.pointerId, x: event.clientX - box.offsetLeft, y: event.clientY - box.offsetTop};
+    box.focus({preventScroll:true});
+    box.setPointerCapture(event.pointerId);
+  });
+  box.addEventListener("pointermove", event => {
+    if (equationDrag?.id === event.pointerId) {
+      equationPosition = positionEquations(box, event.clientX - equationDrag.x, event.clientY - equationDrag.y);
+    }
+  });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(type =>
+    box.addEventListener(type, () => { equationDrag = null; }));
+  box.addEventListener("keydown", event => {
+    const offsets = {ArrowLeft: [-12,0], ArrowRight: [12,0], ArrowUp: [0,-12], ArrowDown: [0,12]};
+    const step = offsets[event.key];
+    if (!step) return;
+    event.preventDefault();
+    equationPosition = positionEquations(box, box.offsetLeft + step[0], box.offsetTop + step[1]);
+  });
+}
+
+const tooltip = Object.assign(document.createElement("div"), {className: "point-tooltip", hidden: true});
+tooltip.setAttribute("role", "tooltip");
+document.body.append(tooltip);
+function showPointTooltip(element, x, y) {
+  tooltip.textContent = element.dataset.pointLabel;
+  tooltip.hidden = false;
+  tooltip.style.left = Math.max(6, Math.min(innerWidth - tooltip.offsetWidth - 6, x + 12)) + "px";
+  tooltip.style.top = (y >= tooltip.offsetHeight + 15 ? y - tooltip.offsetHeight - 10 : y + 12) + "px";
+}
+document.addEventListener("pointermove", event => {
+  const element = event.target.closest("[data-point-label]");
+  if (element && event.buttons === 0) showPointTooltip(element, event.clientX, event.clientY);
+  else tooltip.hidden = true;
+});
+document.addEventListener("focusin", event => {
+  const element = event.target.closest("[data-point-label]");
+  if (!element) return;
+  const bounds = element.getBoundingClientRect();
+  showPointTooltip(element, bounds.right, bounds.top);
+});
+["pointerout", "focusout"].forEach(type => document.addEventListener(type, event => {
+  if (event.target.closest("[data-point-label]")) tooltip.hidden = true;
+}));
+window.addEventListener("scroll", () => { tooltip.hidden = true; }, {passive: true, capture: true});
+
 renderDiagnostics();
 showUnit();

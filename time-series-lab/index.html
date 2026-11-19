@@ -5,14 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="從臺灣少子化理解時間序列，操作非線性趨勢、影響點與 DW、BG 殘差檢定。">
 <title>時間序列分析｜邱皓政統計互動教材</title>
-<link rel="stylesheet" href="style.css?v=unit-panels">
-<script defer src="data.js"></script><script defer src="stats.js"></script><script defer src="lab.js?v=unit-panels"></script>
+<link rel="stylesheet" href="style.css?v=chapter-examples">
+<script defer src="data.js"></script><script defer src="stats.js?v=chapter-examples"></script><script defer src="lesson-data.js?v=chapter-examples"></script><script defer src="lab.js?v=chapter-examples"></script>
+<script defer src="lessons.js?v=chapter-examples"></script>
 </head>
 <body>
 <header><div class="shell mast"><a class="brand" href="../resources.html#statistics-apps" aria-label="返回教學與資源"><span aria-hidden="true">Hc</span> 邱皓政｜教學與資源</a><a href="../correlation-regression-lab/">相關與迴歸</a></div></header>
 <main class="shell">
 <div class="hero"><h1>時間序列分析</h1><p>從臺灣出生率與死亡率的交會，學習辨認長期趨勢、季節變動和殘差中的時間相依性。</p></div>
-<nav class="unit-nav" aria-label="教材單元"><a href="#intro">原理介紹</a><a href="#smooth">平滑與去季節化</a><a href="#trend">非線性趨勢</a><a href="#diagnostics">殘差自我相關</a></nav>
+<nav class="unit-nav" aria-label="教材單元"><a href="#intro">原理介紹</a><a href="#smooth">平滑與去季節化</a><a href="#trend">非線性趨勢</a><a href="#diagnostics">殘差自我相關</a><a href="#examples">課本範例</a><a href="#exercises">習作詳解</a><a href="#syntax">R 與 Python 語法</a></nav>
 <div class="unit-content">
 <section id="intro" class="unit" aria-labelledby="intro-title">
 <div class="section-head"><h2 id="intro-title">時間序列分析的原理</h2><p>將同一對象的觀察值按時間排列，觀察變化是否持續、重複或遺留在殘差中。</p></div>
@@ -50,8 +51,8 @@
 <section id="trend" class="unit" aria-labelledby="trend-title">
 <div class="section-head"><h2 id="trend-title">非線性趨勢與影響點</h2><p>用表 16.9 電子產品銷售資料比較線性、二次與指數模型。改動單期銷售後，觀察哪一條線改變最多。</p></div>
 <div class="grid trend-grid"><div class="card">
-<div class="toolbar" aria-label="趨勢線顯示"><label><input id="line-linear" type="checkbox" checked> 線性</label><label><input id="line-quadratic" type="checkbox" checked> 二次</label><label><input id="line-exp" type="checkbox" checked> 指數</label><label><input id="show-baseline" type="checkbox"> 比較原始擬合</label></div>
-<div id="trend-chart"></div><div id="quadrant-counts" class="legend"></div>
+<div class="toolbar" aria-label="趨勢線顯示"><label><input id="line-linear" type="checkbox" checked> 線性</label><label><input id="line-quadratic" type="checkbox" checked> 二次</label><label><input id="line-exp" type="checkbox" checked> 指數</label><label><input id="show-baseline" type="checkbox"> 比較原始擬合</label><label><input id="show-equations" type="checkbox"> 顯示方程式</label></div>
+<div id="trend-chart"></div><p id="equation-help" class="note" hidden>方程式的 t = 年份 − 2005。可拖曳方程式框，或聚焦後以方向鍵移動。</p><div id="quadrant-counts" class="legend"></div>
 <div class="scroll"><table><thead><tr><th scope="col">模型</th><th scope="col">R²（原尺度）</th><th scope="col">RMSE</th><th scope="col">下期預測</th><th scope="col">相對原始預測</th></tr></thead><tbody id="trend-stats"></tbody></table></div>
 <p class="note">指數模型對 ln(Y) 做最小平方法，再以 exp 轉回原尺度，未做偏差校正。表中 R² 以原尺度的殘差平方和計算。樣本外預測會放大模型差異。</p>
 </div><aside class="card reading">
@@ -95,6 +96,41 @@
 <details><summary>展開 BG 臨界值查表與 R 寫法</summary><div id="bg-table" class="scroll"></div><p>本站比照 <code>lmtest::bgtest</code> 預設 <code>fill = 0</code>，缺少的起始落後殘差補零，保留原迴歸樣本。若採省略前 q 期的方式，有效樣本與結果會改變。</p><pre id="bg-code"></pre></details>
 </article>
 <p class="source">DW 臨界值取自教材附錄 H。BG 版本與起始殘差處理參考 <a href="https://cran.r-project.org/web/packages/lmtest/refman/lmtest.html#bgtest">R lmtest 套件文件</a>。</p>
+</section>
+<section id="examples" class="unit" aria-labelledby="examples-title">
+<div class="section-head"><h2 id="examples-title">課本範例</h2><p>依各節挑選範例，查看逐期資料、計算結果及判讀。</p></div>
+<div class="toolbar"><label>選擇範例 <select id="example-case">
+<option value="population">16.1–16.2｜圖 16.1 臺灣少子化</option>
+<option value="ma">16.3｜豪宅銷售與平滑法</option>
+<option value="season">16.4｜化妝品銷售與去季節化</option>
+<option value="trend">16.5｜電子產品銷售與趨勢模型</option>
+<option value="residual">16.6｜表 16.10 殘差檢測</option>
+<option value="revenue">16.7｜範例 16.1 公司營收與自我迴歸</option>
+</select></label></div>
+<div id="example-result" class="card"></div>
+</section>
+<section id="exercises" class="unit" aria-labelledby="exercises-title">
+<div class="section-head"><h2 id="exercises-title">習作詳解</h2><p>依課後習作與隨附資料重算。先讀題，再展開解答核對步驟與數值。</p></div>
+<nav class="sub-nav" aria-label="課後習作"><a href="#exercise-one">習作 16.1</a><a href="#exercise-two">習作 16.2</a></nav>
+<div id="exercise-one" class="sub-panel">
+<div class="card"><h3>習作 16.1｜人員增加率</h3><p>以 2004–2013 年資料比較移動平均、指數平滑與趨勢模型，預測 2014 年並檢驗殘差。</p><div id="exercise-one-data" class="scroll"></div>
+<details><summary>展開解答與逐年計算</summary><div id="exercise-one-answer"></div><div id="exercise-one-chart"></div></details></div>
+</div>
+<div id="exercise-two" class="sub-panel">
+<div class="card"><h3>習作 16.2｜進口車商季度銷售</h3><p>用 2007–2013 年共 28 季資料計算中心化移動平均、兩種季節指數與去季節後的銷售量。</p><div id="exercise-two-data" class="scroll"></div>
+<details><summary>展開解答、折線圖與逐季計算</summary><div id="exercise-two-answer"></div><div id="exercise-two-chart"></div></details></div>
+</div>
+</section>
+<section id="syntax" class="unit" aria-labelledby="syntax-title">
+<div class="section-head"><h2 id="syntax-title">R 與 Python 語法與結果</h2><p>兩種程式使用同一份 CSV。切換案例可對照實際執行輸出，也可下載程式與資料在本機重現。</p></div>
+<div class="card">
+<div class="toolbar"><label>分析案例 <select id="run-case"></select></label><label>語言 <select id="run-language"><option value="R">R</option><option value="py">Python</option></select></label></div>
+<div class="toolbar"><a href="downloads/chapter16.R" download>下載 R 程式</a><a href="downloads/chapter16.py" download>下載 Python 程式</a><a href="downloads/chapter16.csv" download>下載案例 CSV</a></div>
+<p class="note">R 使用內建函式。Python 需要 NumPy 與 SciPy。把下載的程式與資料放在同一資料夾。</p>
+<h3>執行指令</h3><pre id="run-command"></pre>
+<h3>執行結果</h3><pre id="run-output" tabindex="0"></pre>
+<details><summary>展開完整程式碼</summary><pre id="run-source" tabindex="0"></pre></details>
+</div>
 </section>
 </div>
 </main>
