@@ -429,32 +429,55 @@ observe(["dw-alpha", "dw-side", "dw-n", "dw-k"], renderDW);
 observe(["bg-order", "bg-type", "bg-alpha"], renderBG);
 $("dw-use-model").addEventListener("click", selectDWModel);
 
-function markSection() {
-  const active = location.hash || "#intro";
-  document.querySelectorAll("nav a").forEach(a => {
-    if (a.hash === active) a.setAttribute("aria-current", "location");
-    else a.removeAttribute("aria-current");
-  });
+const units = [...document.querySelectorAll(".unit")];
+const unitLinks = [...document.querySelectorAll(".unit-nav a")];
+const subLinks = [...document.querySelectorAll(".sub-nav a")];
+
+function showUnit() {
+  const requested = units.flatMap(unit => [unit, ...unit.querySelectorAll(".sub-panel")])
+    .find(panel => "#" + panel.id === location.hash);
+  const unit = requested?.closest(".unit") ?? units[0];
+  const topics = [...unit.querySelectorAll(".sub-panel")];
+  const topic = topics.includes(requested) ? requested : topics[0];
+  units.forEach(panel => { panel.hidden = panel !== unit; });
+  topics.forEach(panel => { panel.hidden = panel !== topic; });
+  unitLinks.forEach(link => setCurrent(link, unit.id));
+  subLinks.forEach(link => setCurrent(link, topic?.id));
+  if (unit.id === "intro" && topic?.id === "population") renderPopulation();
+  if (unit.id === "smooth") renderSmooth();
+  if (unit.id === "trend") renderTrend();
+  if (topic?.id === "residual-plot") renderDiagnosticsChartOnResize();
 }
-function drawAll() {
-  renderPopulation();
-  renderSmooth();
-  renderTrend();
-  renderDiagnostics();
+
+function setCurrent(link, id) {
+  if (link.hash === "#" + id) link.setAttribute("aria-current", "location");
+  else link.removeAttribute("aria-current");
 }
-window.addEventListener("hashchange", markSection);
-let pendingResize;
-window.addEventListener("resize", () => {
-  cancelAnimationFrame(pendingResize);
-  pendingResize = requestAnimationFrame(() => {
-    renderPopulation(); renderSmooth(); renderTrend(); renderDiagnosticsChartOnResize();
-  });
-});
+
 function renderDiagnosticsChartOnResize() {
   const lookup = [val("dw-n"), val("dw-k")];
   renderDiagnostics();
   [$("dw-n").value, $("dw-k").value] = lookup;
   renderDW();
 }
-markSection();
-drawAll();
+
+[...unitLinks, ...subLinks].forEach(link => link.addEventListener("click", event => {
+  if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  if (link.hash !== location.hash) history.pushState(null, "", link.hash);
+  showUnit();
+  const navigation = link.closest("nav");
+  const offset = parseFloat(getComputedStyle(navigation).top) || 0;
+  if (navigation.classList.contains("unit-nav") && window.scrollY && navigation.getBoundingClientRect().top <= offset) {
+    const header = document.querySelector(".unit-content");
+    window.scrollBy(0, header.getBoundingClientRect().top - navigation.getBoundingClientRect().bottom - 12);
+  }
+}));
+window.addEventListener("hashchange", showUnit);
+let pendingResize;
+window.addEventListener("resize", () => {
+  cancelAnimationFrame(pendingResize);
+  pendingResize = requestAnimationFrame(showUnit);
+});
+renderDiagnostics();
+showUnit();
