@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>卡方分析與無母數檢定｜邱皓政統計互動教材</title>
+<meta name="description" content="操作 Pearson 卡方、等級與符號檢定，探索調查範例與六組習作，重現 R 與 Python 結果。">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../time-series-lab/style.css?v=teaching-tabs">
+<link rel="stylesheet" href="style.css">
+<script defer src="data.js"></script><script defer src="programs.js"></script><script defer src="stats.js"></script><script defer src="lab.js"></script>
+</head>
+<body>
+<header><div class="shell mast"><a href="../resources.html#statistics-apps" class="brand" aria-label="返回教學與資源"><img class="lab-brand-mark" src="../assets/favicon.svg" alt="C 字與常態曲線" aria-hidden="true" width="34" height="34"> 邱皓政｜教學與資源</a><a href="../time-series-lab/">時間序列分析</a></div></header>
+<main class="shell">
+<div class="hero"><h1>卡方分析與無母數檢定</h1><p>從次數、符號到等級，依研究設計選擇檢定，並練習從統計結果回到研究問題。</p></div>
+<nav class="unit-nav" aria-label="教材單元"><a href="#intro">原理介紹</a><a href="#chi">卡方分析</a><a href="#ranks">無母數檢定</a><a href="#survey">調查範例</a><a href="#exercises">習作詳解</a><a href="#syntax">R 與 Python 語法</a></nav>
+<div class="unit-content">
+<section class="unit" id="intro" aria-labelledby="intro-title">
+<div class="section-head"><h2 id="intro-title">從研究設計選擇檢定</h2><p>先辨認資料尺度與觀察單位，再判斷樣本是否獨立、是否配對，以及要回答的問題。</p></div>
+<div class="scroll"><table class="guide"><thead><tr><th scope="col">資料與設計</th><th scope="col">研究問題</th><th scope="col">方法</th></tr></thead>
+<tbody><tr><td>一個類別變數</td><td>觀察到的比例是否符合指定分布？</td><td><a href="#chi">卡方適合度</a></td></tr>
+<tr><td>同一樣本，兩個類別變數</td><td>兩變數的聯合分布是否符合獨立假設？</td><td><a href="#chi">卡方獨立性</a></td></tr>
+<tr><td>多組獨立樣本，同一類別結果</td><td>各組的結果比例分布是否相同？</td><td><a href="#chi">卡方同質性</a></td></tr>
+<tr><td>同一對象前後測或成對觀察</td><td>差異方向是否偏向一側？差異量也要納入嗎？</td><td><a href="#ranks">符號、Wilcoxon 符號等級</a></td></tr>
+<tr><td>多位評審評同一批對象</td><td>排序是否有一致性？</td><td><a href="#ranks">Kendall W</a></td></tr>
+<tr><td>兩組或多組獨立觀察</td><td>分數的排序是否因組別而異？</td><td><a href="#ranks">Wilcoxon 等級和／Mann–Whitney U、Kruskal–Wallis H</a></td></tr></tbody></table></div>
+<div class="concept-grid">
+<article class="card"><h3>次數、符號與等級</h3><p>名義類別可整理為互斥的次數。配對資料可用差值的正負號。資料可排序時，等級法還會用到觀察值或差值大小的次序。</p></article>
+<article class="card"><h3>無母數方法的條件</h3><p>抽樣設計、觀察獨立性與配對方式仍然重要。符號等級檢定以配對差值在虛無假設下對稱為基礎。等級和與 H 檢定反映分布差異，若要解釋為位置或中位數差異，需有相近的分布形狀。</p></article>
+<article class="card"><h3>從整體到細部</h3><p>整體檢定評估偏離程度。卡方可用殘差找出差異集中的細格，並以 Cramér V 描述關聯強度。多組檢定若要定位差異，應另外進行有多重比較控制的事後分析。</p></article>
+</div>
+</section>
+<section class="unit" id="chi" aria-labelledby="chi-title">
+<div class="section-head"><h2 id="chi-title">卡方分析</h2><p>比較觀察次數 O 與虛無假設下的期望次數 E。改動次數和顯著水準，觀察臨界值、右尾機率和殘差。</p></div>
+<nav class="sub-nav" aria-label="卡方檢定類型"><button type="button" data-method="gof" aria-pressed="true">適合度</button><button type="button" data-method="ind" aria-pressed="false">獨立性</button><button type="button" data-method="hom" aria-pressed="false">同質性</button></nav>
+<div id="chi-principle" class="card theory"></div>
+<div class="toolbar analysis-toolbar"><label>案例 <select id="chi-case"></select></label><label>顯著水準 α <select id="chi-alpha"><option value=".05">0.05</option><option value=".01">0.01</option><option value=".10">0.10</option></select></label><button type="button" id="chi-reset">還原資料</button></div>
+<div class="card"><h3>觀察次數與假設機率</h3><div id="chi-input" class="scroll"></div><p class="note">可直接修改次數。適合度的機率欄以相對權重輸入，計算時會換算為總和 1 的機率。</p></div>
+<div id="chi-result" aria-live="polite"></div>
+</section>
+<section class="unit" id="ranks" aria-labelledby="ranks-title">
+<div class="section-head"><h2 id="ranks-title">無母數檢定</h2><p>依配對、評分一致性或獨立組別選擇案例，查看原始資料、統計量及解讀方式。</p></div>
+<div class="toolbar analysis-toolbar"><label>案例 <select id="rank-case"></select></label><label>顯著水準 α <select id="rank-alpha"><option value=".05">0.05</option><option value=".01">0.01</option><option value=".10">0.10</option></select></label></div>
+<div id="rank-panel"></div>
+</section>
+<section class="unit" id="survey" aria-labelledby="survey-title">
+<div class="section-head"><h2 id="survey-title">調查範例</h2><p>使用學生調查的彙總次數和 CT 量表得分分布。各案例只納入所需欄位皆有有效值的答卷，因此有效樣本數會不同。</p></div>
+<div class="toolbar analysis-toolbar"><label>研究問題 <select id="survey-case"></select></label><label>顯著水準 α <select id="survey-alpha"><option value=".05">0.05</option><option value=".01">0.01</option><option value=".10">0.10</option></select></label></div>
+<div id="survey-panel"></div>
+<p class="source">資料取自 data3.xlsx 的 Cleaned_Data。網頁及下載檔提供彙總資料。調查比較描述樣本中的關聯或差異。</p>
+</section>
+<section class="unit" id="exercises" aria-labelledby="exercise-title">
+<div class="section-head"><h2 id="exercise-title">習作詳解</h2><p>逐題查看資料與解題步驟。習作 17.6 分開呈現兩組與三組結果。</p></div>
+<div class="toolbar analysis-toolbar"><label>題目 <select id="exercise-case"></select></label></div><div id="exercise-panel"></div>
+</section>
+<section class="unit" id="syntax" aria-labelledby="syntax-title">
+<div class="section-head"><h2 id="syntax-title">R 與 Python 語法與結果</h2><p>同一份案例 CSV 可重現兩種語言的輸出。R 使用內建函式，Python 需要 NumPy 與 SciPy。</p></div>
+<div class="syntax-layout">
+<details class="card syntax-settings" open><summary>分析設定</summary>
+<label for="code-type">資料類型</label><select id="code-type"><option value="books">課本範例</option><option value="survey">調查範例</option><option value="exercises">課後習作</option></select>
+<label for="code-case">案例</label><select id="code-case"></select><a href="downloads/chapter17.csv" download>下載案例 CSV</a></details>
+<div id="code-panels" class="syntax-languages"></div></div>
+</section>
+</div></main>
+<footer><div class="shell">教材資料取自邱皓政、林碧芳（2026）《統計學：原理與應用》第五版與課後習作。</div></footer>
+<noscript><p>請啟用 JavaScript 以使用檢定、查表與結果切換。</p></noscript>
+</body></html>

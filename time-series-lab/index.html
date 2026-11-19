@@ -5,16 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="從臺灣少子化理解時間序列，操作非線性趨勢、影響點與 DW、BG 殘差檢定。">
 <title>時間序列分析｜邱皓政統計互動教材</title>
-<link rel="stylesheet" href="style.css?v=syntax-layout">
-<script defer src="data.js"></script><script defer src="stats.js?v=chapter-examples"></script><script defer src="lesson-data.js?v=chapter-examples"></script><script defer src="lab.js?v=equation-r2"></script>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css?v=teaching-tabs">
+<script defer src="data.js"></script><script defer src="stats.js?v=chapter-examples"></script><script defer src="lesson-data.js?v=chapter-examples"></script><script defer src="lab.js?v=principles-group"></script>
 <script defer src="lessons.js?v=syntax-layout"></script>
 </head>
 <body>
-<header><div class="shell mast"><a class="brand" href="../resources.html#statistics-apps" aria-label="返回教學與資源"><span aria-hidden="true">Hc</span> 邱皓政｜教學與資源</a><a href="../correlation-regression-lab/">相關與迴歸</a></div></header>
+<header><div class="shell mast"><a class="brand" href="../resources.html#statistics-apps" aria-label="返回教學與資源"><img class="lab-brand-mark" src="../assets/favicon.svg" alt="C 字與常態曲線" aria-hidden="true" width="34" height="34"> 邱皓政｜教學與資源</a><a href="../correlation-regression-lab/">相關與迴歸</a></div></header>
 <main class="shell">
 <div class="hero"><h1>時間序列分析</h1><p>從臺灣出生率與死亡率的交會，學習辨認長期趨勢、季節變動和殘差中的時間相依性。</p></div>
-<nav class="unit-nav" aria-label="教材單元"><a href="#intro">原理介紹</a><a href="#smooth">平滑與去季節化</a><a href="#trend">非線性趨勢</a><a href="#diagnostics">殘差自我相關</a><a href="#examples">課本範例</a><a href="#exercises">習作詳解</a><a href="#syntax">R 與 Python 語法</a></nav>
+<nav class="unit-nav" aria-label="教材單元"><a href="#intro">原理介紹</a><a href="#examples">課本範例</a><a href="#exercises">習作詳解</a><a href="#syntax">R 與 Python 語法</a></nav>
 <div class="unit-content">
+<nav class="sub-nav principle-nav" aria-label="時間序列原理主題"><a href="#intro">基本概念</a><a href="#smooth">平滑與去季節化</a><a href="#trend">非線性趨勢</a><a href="#diagnostics">殘差自我相關</a></nav>
 <section id="intro" class="unit" aria-labelledby="intro-title">
 <div class="section-head"><h2 id="intro-title">時間序列分析的原理</h2><p>將同一對象的觀察值按時間排列，觀察變化是否持續、重複或遺留在殘差中。</p></div>
 <nav class="sub-nav" aria-label="原理介紹主題"><a href="#population">臺灣少子化</a><a href="#components">時間序列成分</a></nav>

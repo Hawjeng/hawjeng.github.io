@@ -439,7 +439,10 @@ $("dw-use-model").addEventListener("click", selectDWModel);
 
 const units = [...document.querySelectorAll(".unit")];
 const unitLinks = [...document.querySelectorAll(".unit-nav a")];
-const subLinks = [...document.querySelectorAll(".sub-nav a")];
+const subLinks = [...document.querySelectorAll(".sub-nav:not(.principle-nav) a")];
+
+const principleLinks = [...document.querySelectorAll(".principle-nav a")];
+const principleIds = new Set(principleLinks.map(link => link.hash.slice(1)));
 
 function showUnit() {
   const requested = units.flatMap(unit => [unit, ...unit.querySelectorAll(".sub-panel")])
@@ -449,7 +452,10 @@ function showUnit() {
   const topic = topics.includes(requested) ? requested : topics[0];
   units.forEach(panel => { panel.hidden = panel !== unit; });
   topics.forEach(panel => { panel.hidden = panel !== topic; });
-  unitLinks.forEach(link => setCurrent(link, unit.id));
+  const inPrinciples = principleIds.has(unit.id);
+  document.querySelector(".principle-nav").hidden = !inPrinciples;
+  unitLinks.forEach(link => setCurrent(link, inPrinciples ? "intro" : unit.id));
+  principleLinks.forEach(link => setCurrent(link, unit.id));
   subLinks.forEach(link => setCurrent(link, topic?.id));
   if (unit.id === "intro" && topic?.id === "population") renderPopulation();
   if (unit.id === "smooth") renderSmooth();
@@ -470,7 +476,7 @@ function renderDiagnosticsChartOnResize() {
   renderDW();
 }
 
-[...unitLinks, ...subLinks].forEach(link => link.addEventListener("click", event => {
+[...unitLinks, ...principleLinks, ...subLinks].forEach(link => link.addEventListener("click", event => {
   if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   event.preventDefault();
   if (link.hash !== location.hash) history.pushState(null, "", link.hash);

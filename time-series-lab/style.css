@@ -72,3 +72,16 @@ section{margin:1.75rem 0 3.4rem;scroll-margin-top:5rem}.section-head{margin-bott
 #syntax-status:empty{display:none}
 @media(max-width:980px){.syntax-pair{grid-template-columns:1fr}}
 @media(max-width:680px){.syntax-layout{grid-template-columns:1fr}}
+
+.lab-brand-mark{display:inline-block;vertical-align:middle;margin-right:8px;width:34px;height:34px}
+.principle-nav{margin-bottom:1.45rem}
+/* Match the teaching suite's primary tabs and content surface. */
+:root{--ink:#173b44;--paper:#eff5f5;--line:#d4e4e6;--accent:#286d79}
+.shell{width:min(1410px,calc(100% - 2 * clamp(14px,4vw,55px)))}
+.hero{padding:38px 0 25px}
+.hero h1{font-size:clamp(2.25rem,6vw,4.1875rem);font-weight:800;letter-spacing:.045em;margin:.18em 0}
+.unit-nav{gap:.25rem;padding:0;background:var(--paper)}
+.unit-nav a{margin-bottom:-1px;padding:.6rem .9rem;border:1px solid transparent;border-top:3px solid transparent;border-radius:.45rem .45rem 0 0;background:transparent;color:var(--accent);font-weight:650}
+.unit-nav a[aria-current]{border:1px solid var(--line);border-top:3px solid var(--accent);border-bottom-color:#fff;background:#fff;color:var(--ink)}
+.unit-content{margin-top:1.25rem}
+@media(max-width:620px){.hero{padding:24px 0 18px}.unit-nav{display:flex}.unit-nav a{padding:.5rem .55rem}.unit-content{margin-top:.85rem}}
