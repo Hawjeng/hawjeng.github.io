@@ -7,15 +7,16 @@
 <meta name="description" content="操作 Pearson 卡方、等級與符號檢定，探索調查範例與六組習作，重現 R 與 Python 結果。">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../time-series-lab/style.css?v=title-scale">
-<link rel="stylesheet" href="style.css">
-<script defer src="data.js"></script><script defer src="programs.js"></script><script defer src="stats.js"></script><script defer src="lab.js"></script>
+<link rel="stylesheet" href="style.css?v=chi-distribution">
+<script defer src="data.js"></script><script defer src="programs.js"></script><script defer src="stats.js"></script><script defer src="lab.js?v=chi-distribution"></script>
 </head>
 <body>
 <header><div class="shell mast"><a href="../resources.html#statistics-apps" class="brand" aria-label="返回教學與資源"><img class="lab-brand-mark" src="../assets/favicon.svg" alt="C 字與常態曲線" aria-hidden="true" width="34" height="34"> 邱皓政｜教學與資源</a><a href="../time-series-lab/">時間序列分析</a></div></header>
 <main class="shell">
 <div class="hero"><h1>卡方分析與無母數檢定</h1><p>從次數、符號到等級，依研究設計選擇檢定，並練習從統計結果回到研究問題。</p></div>
-<nav class="unit-nav" aria-label="教材單元"><a href="#intro">原理介紹</a><a href="#chi">卡方分析</a><a href="#ranks">無母數檢定</a><a href="#survey">調查範例</a><a href="#exercises">習作詳解</a><a href="#syntax">R 與 Python 語法</a></nav>
+<nav class="unit-nav" aria-label="教材單元"><a href="#intro">原理介紹</a><a href="#survey">調查範例</a><a href="#exercises">習作詳解</a><a href="#syntax">R 與 Python 語法</a></nav>
 <div class="unit-content">
+<nav class="sub-nav principle-nav" aria-label="原理介紹主題"><a href="#intro">基本概念</a><a href="#distribution">卡方分配與查表</a><a href="#chi">卡方分析</a><a href="#ranks">無母數檢定</a></nav>
 <section class="unit" id="intro" aria-labelledby="intro-title">
 <div class="section-head"><h2 id="intro-title">從研究設計選擇檢定</h2><p>先辨認資料尺度與觀察單位，再判斷樣本是否獨立、是否配對，以及要回答的問題。</p></div>
 <div class="scroll"><table class="guide"><thead><tr><th scope="col">資料與設計</th><th scope="col">研究問題</th><th scope="col">方法</th></tr></thead>
@@ -30,6 +31,19 @@
 <article class="card"><h3>無母數方法的條件</h3><p>抽樣設計、觀察獨立性與配對方式仍然重要。符號等級檢定以配對差值在虛無假設下對稱為基礎。等級和與 H 檢定反映分布差異，若要解釋為位置或中位數差異，需有相近的分布形狀。</p></article>
 <article class="card"><h3>從整體到細部</h3><p>整體檢定評估偏離程度。卡方可用殘差找出差異集中的細格，並以 Cramér V 描述關聯強度。多組檢定若要定位差異，應另外進行有多重比較控制的事後分析。</p></article>
 </div>
+</section>
+<section class="unit" id="distribution" aria-labelledby="distribution-title">
+<div class="section-head"><h2 id="distribution-title">卡方分配與查表</h2><p>卡方分配的取值從 0 開始。自由度較小時右偏明顯，自由度增加時分配逐漸對稱。若 Z₁ 至 Zᵥ 為相互獨立的標準常態變數，平方和 ΣZᵢ² 服從自由度 ν 的卡方分配。</p></div>
+<div class="analysis-grid distribution-layout">
+<details class="card syntax-settings" open><summary>圖形設定</summary>
+<label for="dist-df">自由度 ν <output id="dist-df-value" for="dist-df"></output></label><input id="dist-df" type="range" min="1" max="30" step="1" value="6">
+<label for="dist-alpha">右尾顯著水準 α</label><select id="dist-alpha"><option value=".10">0.100</option><option value=".05" selected>0.050</option><option value=".025">0.025</option><option value=".02">0.020</option><option value=".01">0.010</option><option value=".005">0.005</option><option value=".001">0.001</option></select>
+<label for="dist-stat">觀察統計量 χ²</label><input id="dist-stat" type="number" min="0" max="300" step=".01" value="12.8">
+<label for="dist-tail">陰影顯示</label><select id="dist-tail"><option value="critical">臨界值右側（α）</option><option value="p">觀察值右側（p 值）</option></select>
+</details>
+<article class="card"><h3>卡方機率密度</h3><div id="dist-chart"></div><div id="dist-metrics" aria-live="polite"></div></article>
+</div>
+<article class="card report-card"><h3>右尾臨界值表</h3><p>找自由度所在列，再找右尾 α 所在欄。點選表格數值即可帶入圖形。以 ν = 6、α = .05 為例，臨界值約 12.592。觀察值 12.80 位於其右方，因此 p 約 .0463。</p><div id="dist-table" class="scroll"></div></article>
 </section>
 <section class="unit" id="chi" aria-labelledby="chi-title">
 <div class="section-head"><h2 id="chi-title">卡方分析</h2><p>比較觀察次數 O 與虛無假設下的期望次數 E。改動次數和顯著水準，觀察臨界值、右尾機率和殘差。</p></div>

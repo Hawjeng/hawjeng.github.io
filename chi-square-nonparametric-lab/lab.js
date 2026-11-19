@@ -54,7 +54,7 @@ function renderChi() {
   put("chi-result",chiReport(d,chiValues,chiWeights,Number(value("chi-alpha")))+source(d)+jumpCode(chiKey)
     +'<p class="note">下載程式使用課本原值。自訂數值會更新目前網頁分析。</p>');
 }
-function chiChart(stat,df,cut) {
+function chiChart(stat,df,cut,tail="critical") {
   const xmax=Math.max(df+5*Math.sqrt(2*df),cut*1.2, Math.min(stat*1.04,cut*2.5));
   const start=xmax/350, mode=Math.max(start,df-2), peak=chiDensity(mode,df)*1.08;
   const x=n=>45+n/xmax*540;
@@ -64,11 +64,13 @@ function chiChart(stat,df,cut) {
     return x(n).toFixed(2)+","+y(chiDensity(Math.max(start,n),df)).toFixed(2);
   }).join("L");
   const seen=Math.min(stat,xmax);
-  return '<svg class="chi-plot" viewBox="0 0 620 182" role="img" aria-label="卡方機率密度，橘色區域為右尾拒絕域">'
-    +'<path d="M'+x(cut)+',147L'+curve(cut,xmax)+'L585,147Z" fill="#f3c8ae"/><path d="M'+curve(0,xmax)+'" fill="none" stroke="#286d79" stroke-width="3"/>'
+  const shade=tail==="p"?seen:cut;
+  const shadedText=tail==="p"?"觀察值右尾 p 值":"臨界值右尾拒絕域";
+  return '<svg class="chi-plot" viewBox="0 0 620 182" role="img" aria-label="卡方機率密度，橘色區域為'+shadedText+'">'
+    +'<path d="M'+x(shade)+',147L'+curve(shade,xmax)+'L585,147Z" fill="#f3c8ae"/><path d="M'+curve(0,xmax)+'" fill="none" stroke="#286d79" stroke-width="3"/>'
     +'<path d="M45 147H585 M'+x(cut)+' 40V147" stroke="#a24a14" stroke-dasharray="4 4"/><path d="M'+x(seen)+' 20V147" stroke="#173b44" stroke-width="2"/>'
     +'<text x="45" y="169">0</text><text x="585" y="169" text-anchor="end">'+fx(xmax,1)+'</text></svg>'
-    +'<p class="distribution-key">深色線為觀察 χ²'+(stat>xmax?"（超出圖示範圍）":"")+'，橘色區域為拒絕域。虛線為臨界值 '+fx(cut)+'</p>';
+    +'<p class="distribution-key">深色線為觀察 χ²'+(stat>xmax?"（超出圖示範圍）":"")+'，橘色區域為'+shadedText+'。虛線為臨界值 '+fx(cut)+'</p>';
 }
 function chiReport(d,counts,weights,alpha) {
   const m=pearson(counts,weights);
@@ -206,10 +208,15 @@ function renderCode() {
     +safe(PROGRAMS.results[key][lang])+'</pre></details></div></div></article>').join("")+'<p id="copy-status" class="note" role="status"></p>');
 }
 const units=[...document.querySelectorAll(".unit")], mainLinks=[...document.querySelectorAll(".unit-nav a")];
+const principleNav=document.querySelector(".principle-nav");
+const principleLinks=[...principleNav.querySelectorAll("a")];
 function route() {
   const id=units.some(u=>"#"+u.id===location.hash)?location.hash:"#intro";
   units.forEach(u=>{u.hidden="#"+u.id!==id;});
-  mainLinks.forEach(link=>link.hash===id?link.setAttribute("aria-current","location"):link.removeAttribute("aria-current"));
+  const inPrinciples=principleLinks.some(link=>link.hash===id);
+  principleNav.hidden=!inPrinciples;
+  mainLinks.forEach(link=>link.hash===(inPrinciples?"#intro":id)?link.setAttribute("aria-current","location"):link.removeAttribute("aria-current"));
+  principleLinks.forEach(link=>link.hash===id?link.setAttribute("aria-current","location"):link.removeAttribute("aria-current"));
 }
 document.addEventListener("click",async e=>{
   const link=e.target.closest('a[href^="#"]');
@@ -222,7 +229,7 @@ document.addEventListener("click",async e=>{
     e.preventDefault();
     if(link.hash!==location.hash) history.pushState(null,"",link.hash);
     route();
-    if(!link.closest(".unit-nav")) document.querySelector(".unit-nav").scrollIntoView({block:"start"});
+    if(!link.closest(".unit-nav, .principle-nav")) document.querySelector(".unit-nav").scrollIntoView({block:"start"});
   }
   const copy=e.target.closest("[data-copy]");
   if(copy) {
@@ -264,4 +271,48 @@ renderRank();
 renderSurvey();
 renderExercise();
 setupCode("brand_gender");
+const distributionAlphas=[...$("dist-alpha").options].map(option=>option.value);
+const distributionRows=Array.from({length:30},(_,i)=>i+1);
+const distributionCritical=distributionRows.map(df=>distributionAlphas.map(alpha=>chiCritical(df,Number(alpha))));
+function buildDistributionTable() {
+  put("dist-table",'<table class="distribution-table"><caption>右尾機率 P(χ² ≥ 臨界值)</caption><thead><tr><th scope="col">自由度</th>'
+    +distributionAlphas.map(alpha=>'<th scope="col">'+fx(alpha,3)+'</th>').join("")+'</tr></thead><tbody>'
+    +distributionRows.map(df=>'<tr><th scope="row">'+df+'</th>'+distributionAlphas.map((alpha,j)=>{
+      const cutoff=fx(distributionCritical[df-1][j]);
+      return '<td><button type="button" data-df="'+df+'" data-alpha="'+alpha+'" aria-pressed="false" aria-label="自由度 '+df
+        +'，右尾 α '+alpha+'，臨界值 '+cutoff+'">'+cutoff+'</button></td>';
+    }).join("")+'</tr>').join("")+'</tbody></table>');
+}
+function renderDistribution() {
+  const df=Number(value("dist-df"));
+  const alpha=value("dist-alpha");
+  const stat=$("dist-stat").valueAsNumber;
+  const cutoff=distributionCritical[df-1][distributionAlphas.indexOf(alpha)];
+  $("dist-df-value").textContent=df;
+  document.querySelectorAll("#dist-table button").forEach(button=>button.setAttribute("aria-pressed",
+    String(Number(button.dataset.df)===df && button.dataset.alpha===alpha)));
+  if (!Number.isFinite(stat) || stat<0 || stat>300) {
+    put("dist-chart","");
+    put("dist-metrics",'<p class="flag">請輸入 0 至 300 的觀察統計量。</p>');
+    return;
+  }
+  const p=chiUpper(stat,df);
+  const tail=value("dist-tail");
+  put("dist-chart",chiChart(stat,df,cutoff,tail));
+  put("dist-metrics",'<div class="metric-grid">'+metric("自由度 ν",df)+metric("右尾 α",fx(alpha,3))
+    +metric("臨界值",fx(cutoff))+metric("右尾 p 值",pfx(p))+'</div><p><strong>'
+    +status(p,Number(alpha))+'</strong>。以目前 α 評估，觀察值 '+fx(stat,2)
+    +(stat>=cutoff?'位於臨界值右側或等於臨界值。':'小於臨界值。')+'</p>');
+}
+buildDistributionTable();
+for(const id of ["dist-df","dist-alpha","dist-stat","dist-tail"]) $(id).addEventListener("input",renderDistribution);
+$("dist-table").addEventListener("click",event=>{
+  const cell=event.target.closest("[data-df]");
+  if(!cell) return;
+  $("dist-df").value=cell.dataset.df;
+  $("dist-alpha").value=cell.dataset.alpha;
+  renderDistribution();
+});
+renderDistribution();
+
 route();
