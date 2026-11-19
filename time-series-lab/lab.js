@@ -515,7 +515,8 @@ function renderEquations(visible, fits) {
   box.innerHTML = visible.map(([key, label, color]) => {
     const polynomial = terms(fits[key].coefficients, key === "quadratic" ? ["t", "t²"] : ["t"]);
     return '<div style="--key:' + color + '"><strong>' + label + '</strong> Ŷ = '
-      + (key === "exp" ? "exp(" + polynomial + ")" : polynomial) + "</div>";
+      + (key === "exp" ? "exp(" + polynomial + ")" : polynomial)
+      + ' <span class="equation-r2">R² = ' + fixed(fits[key].r2, 3) + '</span></div>';
   }).join("");
   graph.append(box);
   const plot = graph.querySelector("svg");
