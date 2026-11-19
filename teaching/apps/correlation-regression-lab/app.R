@@ -309,11 +309,13 @@ critical_controls <- function(){
   uiOutput('p_lookup'))
 }
 ui <- fluidPage(
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=square-plots'),tags$script(src='console.js?v=square-plots')),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=hubble-theory'),tags$script(src='console.js?v=square-plots')),
  div(class='mast',p(class='eyebrow','STATISTICS LAB'),
   h1('相關與迴歸'),p('從兩個變數的散布圖，到多元模型與個案診斷。')),
  tabsetPanel(id='unit',
-  tabPanel('原理說明',includeHTML('www/theory.html'),critical_controls()),
+  tabPanel('原理說明',tabsetPanel(id='theory_topic',
+   tabPanel('基本原理',value='basics',includeHTML('www/theory.html'),critical_controls()),
+   tabPanel('殘差與影響點',value='influence',includeHTML('www/diagnostics.html')))),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
    card(plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520,hover=hoverOpts('book_hover',delay=75,nullOutside=TRUE)),uiOutput('book_point_tip',class='plot-label-layer'),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('book_result'),uiOutput('book_diagnostics')))),
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
@@ -327,7 +329,6 @@ ui <- fluidPage(
     downloadButton('raw_survey','下載逐筆分析資料 CSV')),
    card(plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=520,hover=hoverOpts('survey_hover',delay=75,nullOutside=TRUE)),uiOutput('survey_point_tip',class='plot-label-layer'),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('survey_result'),uiOutput('survey_diagnostics'))),
    includeHTML('www/survey-practice.html')),
-  tabPanel('殘差與影響點',includeHTML('www/diagnostics.html')),
   tabPanel('R 與 Python 語法',
    card(h3('語法與執行結果'),
     row_controls(select('code_scope','分析來源',c('課本範例'='book','習題解答'='exercise','調查習作'='survey','自行輸入'='manual')),

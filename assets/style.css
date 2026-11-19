@@ -55,3 +55,5 @@
 @media(max-width:480px){.about-layout .timeline-row{grid-template-columns:minmax(0,1fr);gap:4px}}
 
 .timeline-detail{margin-inline-start:.5em;color:var(--muted);font-size:.88em;font-weight:400}
+
+@media screen and (min-width:1024px){#book-resources{grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(14px,1.5vw,20px)}#book-resources .book-art{height:214px;padding:16px}#book-resources .book-info{padding:16px}}
