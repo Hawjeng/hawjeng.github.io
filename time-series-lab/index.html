@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="從臺灣少子化理解時間序列，操作非線性趨勢、影響點與 DW、BG 殘差檢定。">
+<title>時間序列分析｜邱皓政統計互動教材</title>
+<link rel="stylesheet" href="style.css?v=anova-layout">
+<script defer src="data.js"></script><script defer src="stats.js"></script><script defer src="lab.js"></script>
+</head>
+<body>
+<header><div class="shell mast"><a class="brand" href="../resources.html#statistics-apps" aria-label="返回教學與資源"><span aria-hidden="true">Hc</span> 邱皓政｜教學與資源</a><a href="../correlation-regression-lab/">相關與迴歸</a></div></header>
+<main class="shell">
+<div class="hero"><h1>時間序列分析</h1><p>從臺灣出生率與死亡率的交會，學習辨認長期趨勢、季節變動和殘差中的時間相依性。</p></div>
+<nav aria-label="教材單元"><a href="#intro">原理與少子化</a><a href="#smooth">平滑與去季節</a><a href="#trend">非線性趨勢</a><a href="#diagnostics">殘差自我相關</a></nav>
+<section id="intro">
+<div class="section-head"><h2>臺灣少子化與人口變動</h2><p>圖 16.1｜1974–2025 年粗出生率、粗死亡率及人口數</p></div>
+<div class="grid"><div class="card">
+<div class="toolbar"><label><input name="pop-view" type="radio" value="rates" checked> 出生率與死亡率</label><label><input name="pop-view" type="radio" value="net"> 自然增加率</label><label><input name="pop-view" type="radio" value="total"> 人口數</label></div>
+<div id="population-chart"></div>
+<div class="toolbar"><label for="pop-year">查看年度</label><input id="pop-year" type="range" min="1974" max="2025" value="2020"><output id="pop-year-value" for="pop-year"></output></div>
+<div id="population-values" class="metrics" aria-live="polite"></div>
+</div><aside class="card reading"><h3>為什麼要保留時間順序？</h3>
+<p>由 2019 年到 2020 年，粗出生率從略高於粗死亡率變成低於粗死亡率。這個交會指出出生人數開始少於死亡人數。到了 2025 年，粗出生率為 4.62‰，粗死亡率為 8.58‰。</p>
+<p>單一年度只能描述當年的差距。把歷年資料按順序排列，才能定位交會、辨認長期下降與短期回升，並比較各階段的變化速度。</p>
+<p>自然增加率等於粗出生率減粗死亡率。人口總數的變動也受淨遷移影響，可切換圖表比較兩者。</p>
+<div class="jump"><button data-year="2019">交會前｜2019</button><button data-year="2020">首次轉負｜2020</button><button data-year="2025">比較｜2025</button></div>
+</aside></div>
+<div class="concepts">
+<article class="card"><h3>長期趨勢</h3><p>粗出生率的長期下降。可以擬合趨勢線，比較不同階段的速率。</p></article>
+<article class="card"><h3>季節變動</h3><p>每個曆年在固定月份或季度反覆出現的變動，需要月或季資料辨認。</p></article>
+<article class="card"><h3>循環變動</h3><p>可能持續數年的波動，各波段的長度可以不同。</p></article>
+<article class="card"><h3>不規則變動</h3><p>扣除可辨認成分後的變動。擬合模型後，可檢查殘差是否仍有時間相依性。</p></article>
+</div>
+<p class="source">依圖 16.1 的 Excel 工作簿（TextCh16_Figure16.1.xlsx）重繪，原始來源為內政部戶政司。比率單位為 ‰。工作簿與 Word 圖表均將 25.92‰ 列於 1976 年，正文寫作 1975 年，此處依工作簿呈現。 <a href="https://www.ris.gov.tw/">內政部戶政司</a></p>
+</section>
+<section id="smooth">
+<div class="section-head"><h2>平滑與去季節化</h2><p>用豪宅銷售與化妝品季銷售資料，觀察不同方法如何保留或減弱短期波動。</p></div>
+<div class="card"><div class="toolbar"><label>方法 <select id="smooth-method"><option value="ma">中心化移動平均</option><option value="exp">指數平滑</option><option value="season">比率移動平均去季節化</option></select></label><label id="window-control">視窗 <select id="ma-window"><option>3</option><option>5</option><option>7</option></select> 年</label><label id="weight-control" hidden>平滑係數 α <input id="smooth-alpha" type="range" min=".05" max="1" step=".05" value=".2"><output id="smooth-alpha-value"></output></label></div>
+<div id="smooth-chart"></div><p id="smooth-note" class="note"></p></div>
+</section>
+<section id="trend">
+<div class="section-head"><h2>非線性趨勢與影響點</h2><p>用表 16.9 電子產品銷售資料比較線性、二次與指數模型。改動單期銷售後，觀察哪一條線改變最多。</p></div>
+<div class="grid trend-grid"><div class="card">
+<div class="toolbar" aria-label="趨勢線顯示"><label><input id="line-linear" type="checkbox" checked> 線性</label><label><input id="line-quadratic" type="checkbox" checked> 二次</label><label><input id="line-exp" type="checkbox" checked> 指數</label><label><input id="show-baseline" type="checkbox"> 比較原始擬合</label></div>
+<div id="trend-chart"></div><div id="quadrant-counts" class="legend"></div>
+<div class="scroll"><table><thead><tr><th scope="col">模型</th><th scope="col">R²（原尺度）</th><th scope="col">RMSE</th><th scope="col">下期預測</th><th scope="col">相對原始預測</th></tr></thead><tbody id="trend-stats"></tbody></table></div>
+<p class="note">指數模型對 ln(Y) 做最小平方法，再以 exp 轉回原尺度，未做偏差校正。表中 R² 以原尺度的殘差平方和計算。樣本外預測會放大模型差異。</p>
+</div><aside class="card reading">
+<h3>調整觀察值</h3><p>可點選圖上的觀察點，拖曳橘色點上下移動，也可用滑桿或鍵盤精確調整。年份保留原來的時間位置。</p>
+<label>觀察年度 <select id="trend-year"></select></label>
+<label class="stack">銷售量改變 <input id="impact" type="range" min="-200" max="200" step="0.25" value="0"><output id="impact-value"></output></label>
+<button id="reset-impact">還原原始資料</button>
+<hr><h3>四象限</h3>
+<label class="stack">分界 <select id="quadrants"><option value="mean">目前資料平均數</option><option value="median">目前資料中位數</option><option value="original">原始資料平均數</option><option value="custom">自訂交點</option><option value="off">關閉四象限</option></select></label>
+<div id="custom-cut" hidden><label>年份 <input id="cut-x" type="number" min="2006.1" max="2019.9" step=".1" value="2013"></label><label>銷售量 <input id="cut-y" type="number" min="-200" max="400" step="1" value="50"></label></div>
+<label class="stack check"><input id="quad-labels" type="checkbox" checked> 顯示象限標示與計數</label>
+<label class="stack check"><input id="quad-shade" type="checkbox" checked> 顯示色塊與點色</label>
+<details><summary>自訂四象限名稱</summary><div id="quad-names" class="quad-names"></div></details>
+</aside></div>
+</section>
+<section id="diagnostics">
+<div class="section-head"><h2>殘差自我相關檢測</h2><p>殘差 eₜ = Yₜ − Ŷₜ。當正殘差或負殘差連續成群，模型可能仍遺留有時間結構。切換擬合模型，對照殘差及兩種檢定。</p></div>
+<div class="card">
+<div class="toolbar"><label>資料 <select id="diag-data"><option value="diagnostic">課本表 16.10</option><option value="positive">模擬正向相依</option><option value="weak">模擬弱相依</option><option value="negative">模擬負向相依</option><option value="lag2">模擬二階相依</option></select></label><label>原模型 <select id="diag-model"><option value="1">線性趨勢</option><option value="2">二次趨勢</option><option value="3">三次趨勢</option><option value="4">四次趨勢</option><option value="ar">時間趨勢＋Yₜ₋₁</option></select></label></div>
+<div id="residuals"></div><div id="diag-summary" class="metrics"></div>
+</div>
+<div class="test-grid">
+<article class="card test">
+<h3>Durbin–Watson（DW）</h3><p>檢查一階殘差相關。相鄰殘差越接近，d 越小。若經常正負交替，d 趨近 4。接近 2 只提供方向上的線索。</p>
+<p class="formula">d = Σ (eₜ − eₜ₋₁)² / Σ eₜ²</p>
+<div class="toolbar"><label>單尾 α <select id="dw-alpha"><option value=".05">.05</option><option value=".01">.01</option></select></label><label>對立假設 <select id="dw-side"><option value="positive">正向自我相關</option><option value="negative">負向自我相關</option></select></label></div>
+<div id="dw-result" class="result" aria-live="polite"></div><div id="dw-scale"></div>
+<p>由附錄 H 找原模型的樣本數 n、解釋變數個數 k（不含截距）和單尾 α。負向檢定把 d 換成 4 − d。比較值低於 d<sub>L</sub> 時拒絕 H₀，高於 d<sub>U</sub> 時不拒絕，介於兩界或等於界值時無法判定。</p>
+<details><summary>展開附錄 H 查表</summary><div class="toolbar"><label>查表 n <select id="dw-n"></select></label><label>查表 k <select id="dw-k"></select></label><button id="dw-use-model">帶入目前模型</button></div><div id="dw-table" class="scroll"></div></details>
+</article>
+<article class="card test">
+<h3>Breusch–Godfrey（BG）</h3><p>用原模型的全部解釋變數及前 q 期殘差，對當期殘差做輔助迴歸。H₀ 為第 1 至 q 階殘差係數同時為零。含落後依變數的模型也能使用 BG。</p>
+<p class="formula">LM = n<sub>aux</sub> × R²<sub>aux</sub>　│　χ²(q) 右尾</p>
+<div class="toolbar"><label>落後階數 q <select id="bg-order"><option>1</option><option>2</option><option>3</option><option>4</option></select></label><label>統計量 <select id="bg-type"><option value="chi">LM（χ²）</option><option value="f">F 版本</option></select></label><label>α <select id="bg-alpha"><option value=".05">.05</option><option value=".01">.01</option><option value=".10">.10</option></select></label></div>
+<div id="bg-result" class="result" aria-live="polite"></div><div id="bg-scale"></div>
+<p>LM 查右尾卡方表，自由度為 q。F 版本查右尾 F 表，分子自由度 q，分母自由度 n<sub>aux</sub> − k − 1 − q，其中 k 不含截距。觀察值達到右尾臨界值時拒絕 H₀，等同 p ≤ α。</p>
+<details><summary>展開 BG 臨界值查表與 R 寫法</summary><div id="bg-table" class="scroll"></div><p>本站比照 <code>lmtest::bgtest</code> 預設 <code>fill = 0</code>，缺少的起始落後殘差補零，保留原迴歸樣本。若採省略前 q 期的方式，有效樣本與結果會改變。</p><pre id="bg-code"></pre></details>
+</article>
+</div>
+<p class="source">DW 臨界值取自教材附錄 H。BG 版本與起始殘差處理參考 <a href="https://cran.r-project.org/web/packages/lmtest/refman/lmtest.html#bgtest">R lmtest 套件文件</a>。</p>
+</section>
+</main>
+<footer><div class="shell">邱皓政、林碧芳（2026）。《統計學：原理與應用》第五版，第 16 章與附錄 H。</div></footer>
+<noscript><p>請啟用 JavaScript 以使用圖形、擬合及檢定。</p></noscript>
+</body></html>
