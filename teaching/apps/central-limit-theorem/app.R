@@ -354,6 +354,8 @@ interval_theory<-tagList(
 
 home_ui<-withMathJax(div(class="intro-home",tabsetPanel(
   tabPanel("基本概念",h2("抽樣分配與估計"),p("Sampling Distribution and Estimation"),
+    h3("拉普拉斯如何看待許多次觀察"),
+    p("把許多次觀察加在一起，結果會呈現什麼分布？拉普拉斯（Pierre-Simon Laplace）在 1810 年研究大數下的機率近似，將常態近似推廣到更一般的獨立變數之和。今天的抽樣模擬延續同一個問題：固定母體，反覆抽樣，看看不同樣本數下，平均數的分布如何變化。 ", tags$a("拉普拉斯原文", href="https://fr.wikisource.org/wiki/%C5%92uvres_compl%C3%A8tes_de_Laplace/M%C3%A9moire_sur_les_approximations_des_formules_qui_sont_fonctions_de_tr%C3%A8s_grands_nombres_et_sur_leur_application_aux_probabilit%C3%A9s")),
     p("抽樣（sampling）從目標母體選取樣本；估計（estimation）用樣本資料推知未知母體參數。隨機抽樣與合適的抽樣框（sampling frame）是推論的基礎；本章依序介紹抽樣分配、中央極限定理、點估計與區間估計。"),
     h3("從母體到樣本"),
     p("母體（population）是研究希望了解的全體對象；樣本（sample）是實際觀察的一部分。母體參數（population parameter）描述母體特性，例如平均數 μ 與比例 π；樣本統計量（sample statistic）由樣本資料計算，例如平均數 x̄ 與比例 p。估計的目的，就是用可觀察的樣本統計量推知未知的母體參數。"),

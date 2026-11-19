@@ -6,7 +6,7 @@
 <meta name="description" content="從臺灣少子化理解時間序列，操作非線性趨勢、影響點與 DW、BG 殘差檢定。">
 <title>時間序列分析｜邱皓政統計互動教材</title>
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=population-labels">
+<link rel="stylesheet" href="style.css?v=history">
 <script defer src="data.js"></script><script defer src="stats.js?v=chapter-examples"></script><script defer src="lesson-data.js?v=chapter-examples"></script><script defer src="lab.js?v=population-labels"></script>
 <script defer src="lessons.js?v=syntax-layout"></script>
 </head>
@@ -21,6 +21,7 @@
 <div class="section-head"><h2 id="intro-title">時間序列分析的原理</h2><p>將同一對象的觀察值按時間排列，觀察變化是否持續、重複或遺留在殘差中。</p></div>
 <nav class="sub-nav" aria-label="原理介紹主題"><a href="#population">臺灣少子化</a><a href="#components">時間序列成分</a></nav>
 <div id="population" class="sub-panel" aria-labelledby="population-title">
+<article class="card history-story"><h3>從太陽黑子的起伏看時間順序</h3><p>太陽黑子有週期，但每個週期的高峰和低谷都不完全一樣。1927 年，尤爾（George Udny Yule）用歷年的太陽黑子數研究這類不規則起伏，讓當期數值和前幾期的關係成為模型的一部分。把這個想法帶到下面的人口資料：按年份排列出生率與死亡率，找出哪一年交會，再看看交會前後各自怎麼變。 <a href="https://doi.org/10.1098/rsta.1927.0007">尤爾 1927 年原文</a></p></article>
 <div class="sub-head"><h3 id="population-title">臺灣少子化與人口變動</h3><p>圖 16.1｜1974–2025 年粗出生率、粗死亡率及人口數</p></div>
 <div class="grid"><div class="card">
 <div class="toolbar"><label><input name="pop-view" type="radio" value="rates" checked> 出生率與死亡率</label><label><input name="pop-view" type="radio" value="net"> 自然增加率</label><label><input name="pop-view" type="radio" value="total"> 人口數</label></div>

@@ -6,7 +6,7 @@
 <title>卡方分析與無母數檢定｜邱皓政統計互動教材</title>
 <meta name="description" content="操作 Pearson 卡方、等級與符號檢定，探索調查範例與六組習作，重現 R 與 Python 結果。">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../time-series-lab/style.css?v=title-scale">
+<link rel="stylesheet" href="../time-series-lab/style.css?v=history">
 <link rel="stylesheet" href="style.css?v=chi-distribution">
 <script defer src="data.js"></script><script defer src="programs.js"></script><script defer src="stats.js"></script><script defer src="lab.js?v=chi-distribution"></script>
 </head>
@@ -19,6 +19,7 @@
 <nav class="sub-nav principle-nav" aria-label="原理介紹主題"><a href="#intro">基本概念</a><a href="#distribution">卡方分配與查表</a><a href="#chi">卡方分析</a><a href="#ranks">無母數檢定</a></nav>
 <section class="unit" id="intro" aria-labelledby="intro-title">
 <div class="section-head"><h2 id="intro-title">從研究設計選擇檢定</h2><p>先辨認資料尺度與觀察單位，再判斷樣本是否獨立、是否配對，以及要回答的問題。</p></div>
+<article class="card history-story"><h3>皮爾森如何衡量次數偏離預期</h3><p>假定五種手機品牌同樣受歡迎，抽到的五組人數也很少剛好一樣。怎麼知道差距大到需要懷疑原先的假設？皮爾森（Karl Pearson）在 1900 年提出一種作法：將各類的觀察次數與期望次數之差平方，除以各類的期望次數後加總，再用卡方分配衡量這種偏離有多罕見。稍後可以改動品牌次數，觀察統計量和右尾面積怎麼變。 <a href="https://jhanley.biostat.mcgill.ca/bios601/Proportion/Pearson1900.pdf">皮爾森 1900 年原文</a></p></article>
 <div class="scroll"><table class="guide"><thead><tr><th scope="col">資料與設計</th><th scope="col">研究問題</th><th scope="col">方法</th></tr></thead>
 <tbody><tr><td>一個類別變數</td><td>觀察到的比例是否符合指定分布？</td><td><a href="#chi">卡方適合度</a></td></tr>
 <tr><td>同一樣本，兩個類別變數</td><td>兩變數的聯合分布是否符合獨立假設？</td><td><a href="#chi">卡方獨立性</a></td></tr>
@@ -55,6 +56,7 @@
 </section>
 <section class="unit" id="ranks" aria-labelledby="ranks-title">
 <div class="section-head"><h2 id="ranks-title">無母數檢定</h2><p>依配對、評分一致性或獨立組別選擇案例，查看原始資料、統計量及解讀方式。</p></div>
+<article class="card history-story"><h3>威爾科克森為什麼使用等級</h3><p>兩種處理的結果只知道大小順序時，還能比較嗎？威爾科克森（Frank Wilcoxon）在 1945 年發表以排序進行比較的方法。對成對觀察，他將差異按絕對值排等級，再加回正負號；比較兩組獨立觀察時，則將資料合併排序。試著比較下面的符號檢定與符號等級檢定，看看加入差距排序後多用了哪些資訊。 <a href="https://doi.org/10.2307/3001968">威爾科克森 1945 年原文</a></p></article>
 <div class="toolbar analysis-toolbar"><label>案例 <select id="rank-case"></select></label><label>顯著水準 α <select id="rank-alpha"><option value=".05">0.05</option><option value=".01">0.01</option><option value=".10">0.10</option></select></label></div>
 <div id="rank-panel"></div>
 </section>

@@ -86,3 +86,5 @@ section{margin:1.75rem 0 3.4rem;scroll-margin-top:5rem}.section-head{margin-bott
 .unit-content{margin-top:1.25rem}
 @media(max-width:620px){.hero{padding:1.25rem 0 .85rem}.unit-nav{display:flex}.unit-nav a{padding:.5rem .55rem}.unit-content{margin-top:.85rem}}
 .chart .population-label{font-size:16px;font-weight:750;stroke:#fcfefe;stroke-width:3px;stroke-linejoin:round;paint-order:stroke;pointer-events:none}
+.history-story{margin:0 0 1.1rem;border-inline-start:3px solid var(--accent)}
+.history-story p{max-width:76ch}
