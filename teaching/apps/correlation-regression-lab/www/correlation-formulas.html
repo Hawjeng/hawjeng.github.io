@@ -3,26 +3,26 @@
 <p>先看每筆資料離平均數多遠。變異數用同一個離均差乘自己，也就是平方。共變數用 X 的離均差乘 Y 的離均差。</p>
 <div class="correlation-formula">
 <math display="block" aria-label="X 的樣本變異數等於 X 離均差乘自己的加總除以 N 減一">
-  <mi>Var</mi><mo>(</mo><mi>X</mi><mo>)</mo><mo>=</mo>
-  <mfrac><mrow><mo>∑</mo><mo>(</mo><mi>X</mi><mo>−</mo><mover><mi>X</mi><mo>¯</mo></mover><mo>)</mo><mo>(</mo><mi>X</mi><mo>−</mo><mover><mi>X</mi><mo>¯</mo></mover><mo>)</mo></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
+  <mi>Var</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo><mo>=</mo>
+  <mfrac><mrow><mo>∑</mo><mo stretchy="false">(</mo><mi>X</mi><mo>−</mo><mover><mi>X</mi><mo>¯</mo></mover><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mi>X</mi><mo>−</mo><mover><mi>X</mi><mo>¯</mo></mover><mo stretchy="false">)</mo></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
   <mo>=</mo>
-  <mfrac><mrow><mo>∑</mo><msup><mrow><mo>(</mo><mi>X</mi><mo>−</mo><mover><mi>X</mi><mo>¯</mo></mover><mo>)</mo></mrow><mn>2</mn></msup></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
+  <mfrac><mrow><mo>∑</mo><msup><mrow><mo stretchy="false">(</mo><mi>X</mi><mo>−</mo><mover><mi>X</mi><mo>¯</mo></mover><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
   <mo>=</mo><mfrac><msub><mi>SS</mi><mi>X</mi></msub><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
 </math>
 </div>
 <div class="correlation-formula">
 <math display="block" aria-label="Y 的樣本變異數等於 Y 離均差乘自己的加總除以 N 減一">
-  <mi>Var</mi><mo>(</mo><mi>Y</mi><mo>)</mo><mo>=</mo>
-  <mfrac><mrow><mo>∑</mo><mo>(</mo><mi>Y</mi><mo>−</mo><mover><mi>Y</mi><mo>¯</mo></mover><mo>)</mo><mo>(</mo><mi>Y</mi><mo>−</mo><mover><mi>Y</mi><mo>¯</mo></mover><mo>)</mo></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
+  <mi>Var</mi><mo stretchy="false">(</mo><mi>Y</mi><mo stretchy="false">)</mo><mo>=</mo>
+  <mfrac><mrow><mo>∑</mo><mo stretchy="false">(</mo><mi>Y</mi><mo>−</mo><mover><mi>Y</mi><mo>¯</mo></mover><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mi>Y</mi><mo>−</mo><mover><mi>Y</mi><mo>¯</mo></mover><mo stretchy="false">)</mo></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
   <mo>=</mo>
-  <mfrac><mrow><mo>∑</mo><msup><mrow><mo>(</mo><mi>Y</mi><mo>−</mo><mover><mi>Y</mi><mo>¯</mo></mover><mo>)</mo></mrow><mn>2</mn></msup></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
+  <mfrac><mrow><mo>∑</mo><msup><mrow><mo stretchy="false">(</mo><mi>Y</mi><mo>−</mo><mover><mi>Y</mi><mo>¯</mo></mover><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
   <mo>=</mo><mfrac><msub><mi>SS</mi><mi>Y</mi></msub><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
 </math>
 </div>
 <div class="correlation-formula">
 <math display="block" aria-label="X 與 Y 的樣本共變數等於兩者離均差乘積的加總除以 N 減一">
-  <mi>Cov</mi><mo>(</mo><mi>X</mi><mo>,</mo><mi>Y</mi><mo>)</mo><mo>=</mo>
-  <mfrac><mrow><mo>∑</mo><mo>(</mo><mi>X</mi><mo>−</mo><mover><mi>X</mi><mo>¯</mo></mover><mo>)</mo><mo>(</mo><mi>Y</mi><mo>−</mo><mover><mi>Y</mi><mo>¯</mo></mover><mo>)</mo></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
+  <mi>Cov</mi><mo stretchy="false">(</mo><mi>X</mi><mo>,</mo><mi>Y</mi><mo stretchy="false">)</mo><mo>=</mo>
+  <mfrac><mrow><mo>∑</mo><mo stretchy="false">(</mo><mi>X</mi><mo>−</mo><mover><mi>X</mi><mo>¯</mo></mover><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mi>Y</mi><mo>−</mo><mover><mi>Y</mi><mo>¯</mo></mover><mo stretchy="false">)</mo></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
   <mo>=</mo><mfrac><msub><mi>SP</mi><mi>XY</mi></msub><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac>
 </math>
 </div>
@@ -31,7 +31,7 @@
 <div class="correlation-formula">
 <math display="block" aria-label="Pearson r 等於共變數除以兩個標準差的乘積">
   <mi>r</mi><mo>=</mo>
-  <mfrac><mrow><mi>Cov</mi><mo>(</mo><mi>X</mi><mo>,</mo><mi>Y</mi><mo>)</mo></mrow><mrow><msub><mi>s</mi><mi>X</mi></msub><msub><mi>s</mi><mi>Y</mi></msub></mrow></mfrac>
+  <mfrac><mrow><mi>Cov</mi><mo stretchy="false">(</mo><mi>X</mi><mo>,</mo><mi>Y</mi><mo stretchy="false">)</mo></mrow><mrow><msub><mi>s</mi><mi>X</mi></msub><msub><mi>s</mi><mi>Y</mi></msub></mrow></mfrac>
   <mo>=</mo><mfrac><msub><mi>SP</mi><mi>XY</mi></msub><msqrt><msub><mi>SS</mi><mi>X</mi></msub><msub><mi>SS</mi><mi>Y</mi></msub></msqrt></mfrac>
 </math>
 </div>

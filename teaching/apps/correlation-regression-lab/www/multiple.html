@@ -1,18 +1,6 @@
-<div class="theory-columns">
-<article class="card"><h3>多元迴歸的模型與整體檢定</h3>
-<p>模型 ŷ = b₀ + Σbⱼxⱼ。在其他預測變數固定下，bⱼ 表示 xⱼ 增加 1 單位的條件關聯。含 p 個預測欄時，殘差 df = n − p − 1。整體 F = (SSR/p)/(SSE/df)，檢定所有斜率同時為 0。係數的信賴區間以 bⱼ ± t₍.975,df₎SE(bⱼ) 計算。</p>
-<p>加入更多欄後，樣本內 R² 只會維持或增加。調整後 R²（adjusted R²）會對欄數作調整。以相同樣本比較包含關係的兩個模型，可用 ΔR² 及 F = [(SSE縮減 − SSE完整)/新增欄數]/MSE完整，量化新區組的增量。</p>
-<p>標準線性推論通常需要獨立誤差、條件平均數模型適當及同質變異（homoscedasticity）。小樣本 t 與 F 檢定還依賴誤差近似常態。</p></article>
 <article class="card"><h3>多元共線性（multicollinearity）</h3>
 <p>用其餘設計欄預測第 j 欄，得 R²ⱼ。允差（tolerance）= 1 − R²ⱼ，變異數膨脹因子（variance inflation factor, VIF）= 1/(1 − R²ⱼ)。VIF 衡量斜率估計變異的膨脹程度，係數標準誤放大的倍數是 √VIF。</p>
 <p>若一個預測欄可被其他欄共同預測，個別斜率的標準誤可能變大，係數也可能對樣本或模型設定敏感，即使整體 R² 很高。完全共線時，模型無法唯一估計所有斜率。VIF 5 或 10 只可作為檢查起點。對多項式，將 X 減去平均數再取冪，可降低部分非必要的共線性。此教材回報每個設計欄的 VIF，包含虛擬與多項式欄。</p></article>
-</div>
-
-<article class="card">
-<h3>橫軸用預測值 ŷ 的散布圖</h3>
-<p>多元迴歸同時使用多個 X。每筆資料的 ŷᵢ = b₀ + Σbⱼxᵢⱼ，把所有預測欄的資訊合成一個值。用 ŷᵢ 當橫軸、實際 Yᵢ 當縱軸，每個點就能呈現整個模型對該筆資料的預測。</p>
-<p>虛線 Y = ŷ 是預測完全吻合的參考線。點在線上方表示低估，在下方表示高估，垂直差距是殘差 Yᵢ − ŷᵢ。這是樣本內的擬合圖。若要判斷模型預測新資料的表現，需用驗證資料或交叉驗證。</p>
-</article>
 <article class="card">
 <h3>第 15 章的三種變數投入方式</h3>
 <div class="table-scroll"><table><thead><tr><th scope="col">方法</th><th scope="col">變數如何進入</th><th scope="col">結果怎麼讀</th></tr></thead><tbody>

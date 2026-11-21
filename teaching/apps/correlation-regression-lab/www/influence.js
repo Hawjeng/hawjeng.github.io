@@ -107,7 +107,10 @@ const circles = original.map((_,i)=>{
   return node;
 });
 const quadrantOption = document.getElementById('quadrants');
-if(new URLSearchParams(location.search).get('quadrants')==='1')quadrantOption.checked=true;
+const params = new URLSearchParams(location.search);
+const correlationMode = params.get('mode')==='correlation';
+if(correlationMode||params.get('quadrants')==='1')quadrantOption.checked=true;
+if(correlationMode)document.body.classList.add('correlation-mode');
 const quadrantLines = document.getElementById('quadrant-lines');
 const quadrantShading = document.getElementById('quadrant-shading');
 const quadrantCounts = document.getElementById('quadrant-counts');
@@ -213,18 +216,20 @@ function render(){
     const residual=py-full.predict(px);
     const leverage=1/points.length+(px-full.mx)**2/full.xx;
     const studentized=residual/Math.sqrt(full.mse*(1-leverage));
-    const tip='第 '+(i+1)+' 筆\n'+(zx.checked?'zX':'X')+' = '+fmt(zx.checked?(px-full.mx)/sx:px)+
-      '，'+(zy.checked?'zY':'Y')+' = '+fmt(zy.checked?(py-full.my)/sy:py)+
+    const coordinates='第 '+(i+1)+' 筆\n'+(zx.checked?'zX':'X')+' = '+fmt(zx.checked?(px-full.mx)/sx:px)+
+      '，'+(zy.checked?'zY':'Y')+' = '+fmt(zy.checked?(py-full.my)/sy:py);
+    const tip=correlationMode?coordinates:coordinates+
       '\n'+(zy.checked?'z 尺度殘差':'殘差')+' = '+fmt(zy.checked?residual/sy:residual)+
       '\n標準化殘差 = '+fmt(studentized);
     node.querySelector('title').textContent=tip;
     node.setAttribute('aria-label',tip.replaceAll('\n','，'));
   });
   selectPoint.value=selected;
-  metrics.replaceChildren(...[
-    ['Pearson r',full.r],['全部點斜率',full.slope],['刪除該點後斜率',removed.slope],
+  const values=[['Pearson r',full.r]];
+  if(!correlationMode)values.push(['全部點斜率',full.slope],['刪除該點後斜率',removed.slope],
     ['預測值 ŷ',yhat],['殘差 e',e],['槓桿值 h',h],['Cook 距離',cook]
-  ].map(([key,value])=>{
+  );
+  metrics.replaceChildren(...values.map(([key,value])=>{
     const node=document.createElement('div'), strong=document.createElement('strong');
     strong.textContent=fmt(value);
     node.append(key,strong);
@@ -280,6 +285,7 @@ meanOption.onchange=quadrantOption.onchange=equationOption.onchange=zx.onchange=
 selectPoint.onchange=()=>{selected=Number(selectPoint.value);render();};
 document.getElementById('download-chart').onclick=()=>{
   const copy=chart.cloneNode(true);
+  if(correlationMode)copy.querySelectorAll('[data-regression]').forEach(node=>node.remove());
   copy.setAttribute('xmlns','http://www.w3.org/2000/svg');
   copy.setAttribute('width','540');
   copy.setAttribute('height','485');
@@ -290,7 +296,7 @@ document.getElementById('download-chart').onclick=()=>{
   const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(copy)],{type:'image/svg+xml'}));
   const link=document.createElement('a');
   link.href=url;
-  link.download='regression-influence.svg';
+  link.download=correlationMode?'correlation-scatterplot.svg':'regression-influence.svg';
   link.click();
   setTimeout(()=>URL.revokeObjectURL(url),30000);
 };

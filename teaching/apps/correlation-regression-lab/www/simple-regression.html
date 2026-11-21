@@ -1,0 +1,10 @@
+<article class="card"><h3>簡單線性迴歸（simple linear regression）</h3>
+<p>模型 ŷ = b₀ + b₁x。普通最小平方法（ordinary least squares, OLS）使殘差平方和（residual sum of squares, SSE） = Σ(y − ŷ)² 最小。b₁ = SP/SSₓ，稱為斜率（slope），表示 X 每多 1 單位時，Y 的預測值平均改變多少；b₀ = ȳ − b₁x̄，是截距（intercept），在 x = 0 有意義且接近觀測範圍時才適合解釋。</p>
+<p>對含截距模型，SST = SSR + SSE，R² = SSR/SST，稱為決定係數（coefficient of determination）。一元迴歸有 R² = r²。殘差標準誤為 √[SSE/(n − 2)]。斜率 t = b₁/SE(b₁)，df = n − 2，整體 F 檢定在一個預測欄時等於 t²。</p><p>把 X 和 Y 都換成 z 分數後，簡單迴歸式是 ẑᵧ = r × zₓ。例如 r = 0.6，X 比平均高 2 個標準差時，預測的 Y 比平均高 1.2 個標準差。</p></article>
+<article class="card">
+<h3>個案診斷補充</h3>
+<p><strong>殘差（residual）eᵢ = yᵢ − ŷᵢ</strong>。散布圖上是觀測值與迴歸線之間的垂直距離。殘差大表示模型對這點的預測誤差大。<strong>標準化殘差</strong>為 eᵢ/[s√(1 − hᵢᵢ)]，用槓桿值調整殘差的尺度。這裡的 s 是以全部觀測值估計的殘差標準誤，包含正在檢查的那一筆。</p>
+<p><strong>槓桿值（leverage）hᵢᵢ</strong> 反映該點在預測變數空間離資料中心多遠。簡單迴歸中 hᵢᵢ = 1/n + (xᵢ − x̄)²/SSₓ。只移動點的 Y 時，X 設計不變，槓桿值也不變。平均槓桿值是模型參數數目除以 n。</p>
+<p><strong>Cook 距離（Cook’s distance）Dᵢ</strong> 綜合殘差與槓桿值，衡量刪掉第 i 筆後，所有觀測點的擬合值整體改變多少。若 k 含截距，Dᵢ = eᵢ²hᵢᵢ/[k·MSE·(1 − hᵢᵢ)²]。同時具高槓桿與較大殘差時，通常更值得檢查。應先核對資料，再比較含與不含該點的模型。</p>
+<p>在殘差與影響點散布圖試著只往上拖、只向右拖，以及往右上拖。對照 r、兩條迴歸線與刪除前後斜率，觀察三個診斷量何時表現不同。</p>
+</article>
