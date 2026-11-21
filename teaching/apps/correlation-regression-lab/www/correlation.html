@@ -1,4 +1,16 @@
 <article class="card">
+<h2>X、Y 的變異數與共變數</h2>
+<p>對 N 筆 X、Y 配對資料，先算每筆的兩個離均差 Xᵢ − X̄ 與 Yᵢ − Ȳ。三個公式的分子都把<strong>兩個離均差相乘</strong>再加總，樣本公式的分母都是 N − 1。</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">量數</th><th scope="col">分子：逐筆相乘後加總</th><th scope="col">樣本公式</th></tr></thead><tbody>
+<tr><th scope="row">X 的變異數</th><td>SSₓ = Σ[(Xᵢ − X̄)(Xᵢ − X̄)]</td><td>sₓ² = SSₓ / (N − 1)</td></tr>
+<tr><th scope="row">Y 的變異數</th><td>SSᵧ = Σ[(Yᵢ − Ȳ)(Yᵢ − Ȳ)]</td><td>sᵧ² = SSᵧ / (N − 1)</td></tr>
+<tr><th scope="row">X、Y 的共變數</th><td>SPₓᵧ = Σ[(Xᵢ − X̄)(Yᵢ − Ȳ)]</td><td>Cov(X, Y) = SPₓᵧ / (N − 1)</td></tr>
+</tbody></table></div>
+<p>同一個離均差乘自己就是平方，所以變異數一定大於或等於 0。共變數每筆用一個 X 離均差乘一個 Y 離均差。同號相乘為正（第一、第三象限），異號相乘為負（第二、第四象限）。有一項為 0 時，乘積就是 0。</p>
+<p class="equation-box"><strong>Pearson r</strong> = Cov(X, Y) / (sₓsᵧ) = SPₓᵧ / √(SSₓ × SSᵧ)。分子與分母的 N − 1 約掉後，就得到右邊的積差和公式。</p>
+<p>上方散布圖的原始 10 筆資料中，SSₓ = 630、SSᵧ = 352、SPₓᵧ = 367。因此 sₓ² = 70、sᵧ² ≈ 39.111、Cov(X, Y) ≈ 40.778，最後得到 r ≈ .779。</p>
+</article>
+<article class="card">
 <h2>從親子身高到相關係數</h2>
 <p>1886 年，法蘭西斯・高爾頓（Francis Galton）發表親子身高研究。他把父母的身高整理成可比較的平均值，發現父母較高的一組，子女平均也偏高，但偏離全體平均的幅度通常較小。父母較矮的一組也有類似現象。這就是後來所說的<strong>向平均數迴歸</strong>（regression toward the mean）。<a href="https://zenodo.org/records/1449548">Galton 1886 年原文</a></p>
 <p>十年後，卡爾・皮爾森（Karl Pearson）把這類問題放進數學模型，發展了今日常用的積差相關係數。皇家學會還保留高爾頓為皮爾森這篇論文撰寫的審查報告。兩人的工作讓研究者能以 <em>r</em> 描述線性關聯，再用迴歸線回答給定 X 時，Y 的預測值是多少。<a href="https://doi.org/10.1098/rsta.1896.0007">Pearson 1896 年論文</a> · <a href="https://makingscience.royalsociety.org/items/rr_13_94">Galton 的審查報告</a></p>
