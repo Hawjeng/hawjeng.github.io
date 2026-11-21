@@ -34,6 +34,26 @@ async function copyCode(button) {
     selection.addRange(range);
   }
 }
+function saveBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+function downloadAnalysis(button) {
+  const filename = button.dataset.analysisFile;
+  const output = button.closest('.shiny-html-output');
+  if (output.classList.contains('recalculating')) return;
+  const csv = filename === 'analysis.csv';
+  const payload = output.querySelector(csv ? '.console-csv' : '.source-code code');
+  if (!payload?.textContent) return;
+  const mimeType = csv ? 'text/csv;charset=utf-8' : 'text/plain;charset=utf-8';
+  saveBlob(new Blob([payload.textContent, '\n'], {type:mimeType}), filename);
+}
 async function downloadPlot(button) {
   const image = button.closest('.chart-panel').querySelector('.shiny-plot-output img');
   if (!image || !image.complete || !image.naturalWidth) return;
@@ -74,14 +94,7 @@ async function downloadPlot(button) {
       }
       blob = await new Promise(resolve=>canvas.toBlob(resolve,'image/png')) || blob;
     }
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = image.closest('.shiny-plot-output').id.replace('_plot','') + '-scatterplot.png';
-    document.body.append(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    saveBlob(blob,image.closest('.shiny-plot-output').id.replace('_plot','')+'-scatterplot.png');
   } catch {
     button.textContent = '下載失敗，請再試一次';
     setTimeout(() => { button.textContent = label; }, 2000);

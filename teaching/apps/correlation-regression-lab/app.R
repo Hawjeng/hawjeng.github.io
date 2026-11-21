@@ -312,9 +312,10 @@ critical_curve_svg <- function(){
  tags$div(id='critical-curve',class='interactive-correlation-curve',`data-kind`='critical',`data-values`=as.character(values_json))
 }
 ui <- fluidPage(
+ tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
  tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=correlation-focus'),
-  tags$script(src='console.js?v=square-plots'),tags$script(src='critical-curve.js?v=paired-curves')),
- div(class='mast',tags$a(class='btn btn-default lab-main-menu',href='https://hawjeng.github.io/resources.html#statistics-apps','回到教材主選單'),
+  tags$script(src='console.js?v=syntax-downloads'),tags$script(src='critical-curve.js?v=paired-curves')),
+ div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow','STATISTICS LAB'),
   h1('相關與迴歸'),p('從兩個變數的散布圖，到多元模型與個案診斷。')),
  tabsetPanel(id='unit',
@@ -356,8 +357,7 @@ ui <- fluidPage(
      select('lang','語言',c('R','Python'))),
     p('沿用各單元目前的設定。下載語法與 analysis.csv，放在同一資料夾後依畫面指令執行。'),
     div(class='console-grid',
-     div(tags$button(type='button',class='btn btn-default',onclick='copyCode(this)','複製語法'),
-      downloadButton('script','下載語法'),downloadButton('analytic','下載 analysis.csv'),uiOutput('script_text')),
+     div(uiOutput('script_text')),
      div(h4('主控台原始輸出'),uiOutput('console'))))),
   tabPanel('自行輸入',
    card(h3('輸入逐筆資料'),p('第一列填變數名稱，欄位以逗號分隔。類別可填文字，缺失值留空。'),
@@ -626,22 +626,28 @@ server <- function(input,output,session){
     paste('fit_design <-',fit_code),paste('vif_table <-',vif_code),r_body,sep='\n')
   }else paste(header,'# python -m pip install numpy scipy',paste0('method = "',a$kind,'"'),py_body,sep='\n')
  })
- output$script_text<-renderUI(tagList(p(code(if(input$lang=='R')'Rscript analysis.R' else 'python analysis.py')),
-  tags$pre(class='source-code',tags$code(script()))))
+ output$script_text<-renderUI(checks({
+  a<-current()
+  filename<-if(req(input$lang)=='R')'analysis.R' else 'analysis.py'
+  tagList(
+   div(class='toolbar',
+    tags$button(type='button',class='btn btn-default',onclick='copyCode(this)','複製語法'),
+    tags$button(type='button',class='btn btn-default',onclick='downloadAnalysis(this)',`data-analysis-file`=filename,'下載語法'),
+    tags$button(type='button',class='btn btn-default',onclick='downloadAnalysis(this)',`data-analysis-file`='analysis.csv','下載 analysis.csv')),
+   p(code(paste(if(input$lang=='R')'Rscript' else 'python',filename))),
+   tags$pre(class='source-code',tags$code(script())),
+   tags$pre(class='console-csv',hidden=NA,paste(capture.output(write.csv(a$data,row.names=FALSE)),collapse='\n')))
+ }))
  output$console<-renderUI(checks({
   a<-current()
   if(input$lang=='Python')return(tagList(
    tags$button(type='button',class='btn btn-default',onclick='runPython(this)','執行 Python'),
-   tags$pre(class='console',role='status','首次執行會下載 Python 與 SciPy。'),
-   tags$pre(class='console-csv',hidden=NA,paste(capture.output(write.csv(a$data,row.names=FALSE)),collapse='\n'))))
+   tags$pre(class='console',role='status','首次執行會下載 Python 與 SciPy。')))
   env<-new.env()
   env$read.csv<-function(file,...)a$data
   connection<-textConnection(script())
   on.exit(close(connection))
   tags$pre(class='console',paste(capture.output(source(connection,local=env,echo=TRUE,print.eval=TRUE,max.deparse.length=Inf)),collapse='\n'))
  }))
- output$analytic<-downloadHandler(function()'analysis.csv',function(file)write.csv(current()$data,file,row.names=FALSE))
- output$script<-downloadHandler(function()if(input$lang=='R')'analysis.R' else 'analysis.py',
-  function(file)writeLines(enc2utf8(script()),file,useBytes=TRUE))
 }
 shinyApp(ui,server)
