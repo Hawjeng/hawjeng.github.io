@@ -323,6 +323,7 @@ ui <- fluidPage(
  tabsetPanel(id='unit',
   tabPanel('原理說明',tabsetPanel(id='theory_topic',
    tabPanel('相關分析',value='critical',
+    includeHTML('www/correlation-story.html'),
     card(h3('操作散布圖的四象限'),
      p('拖動觀測點，觀察兩條平均線、各象限的點數與 Pearson r 如何一起變動。勾選 X 軸 z、Y 軸 z，可在標準化尺度上比較。'),
      tags$iframe(class='diag-frame',title='可拖曳的四象限散布圖',src='influence.html?quadrants=1&v=compact-scatter')),
