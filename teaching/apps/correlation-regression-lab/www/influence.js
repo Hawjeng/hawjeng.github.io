@@ -99,7 +99,7 @@ function renderAxes(model, sx, sy) {
   label(axis,bounds.x0+4,17,zy.checked ? '考試成績 zᵧ' : '考試成績 Y','start');
 }
 const circles = original.map((_,i)=>{
-  const node = svg('circle',{r:8,tabindex:0,class:'point','data-index':i,role:'button'});
+  const node = svg('circle',{r:5.5,tabindex:0,class:'point','data-index':i,role:'button'});
   const option = new Option('第 '+(i+1)+' 筆',i);
   node.append(svg('title',{}));
   selectPoint.add(option);
@@ -284,7 +284,7 @@ document.getElementById('download-chart').onclick=()=>{
   copy.setAttribute('width','540');
   copy.setAttribute('height','485');
   copy.setAttribute('font-family','Microsoft JhengHei, Arial, sans-serif');
-  copy.setAttribute('font-size','15');
+  copy.setAttribute('font-size','13');
   copy.setAttribute('fill','#173b44');
   copy.prepend(svg('rect',{x:175,y:0,width:540,height:485,fill:'#f5f9f9',rx:8}));
   const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(copy)],{type:'image/svg+xml'}));
