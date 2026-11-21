@@ -323,10 +323,11 @@ ui <- fluidPage(
  tabsetPanel(id='unit',
   tabPanel('原理說明',tabsetPanel(id='theory_topic',
    tabPanel('基本原理',value='basics',includeHTML('www/theory.html')),
-   tabPanel('相關係數與散布圖',value='critical',includeHTML('www/correlation.html'),
+   tabPanel('相關係數與散布圖',value='critical',
     card(h3('操作散布圖的四象限'),
      p('拖動觀測點，觀察兩條平均線、各象限的點數與 Pearson r 如何一起變動。勾選 X 軸 z、Y 軸 z，可在標準化尺度上比較。'),
-     tags$iframe(class='diag-frame',title='可拖曳的四象限散布圖',src='influence.html?quadrants=1&v=correlation')),
+     tags$iframe(class='diag-frame',title='可拖曳的四象限散布圖',src='influence.html?quadrants=1&v=standardized-residual')),
+    includeHTML('www/correlation.html'),
     critical_controls()),
    tabPanel('殘差與影響點',value='influence',includeHTML('www/diagnostics.html')))),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
@@ -573,7 +574,7 @@ server <- function(input,output,session){
     strong(paste('第',h$a$observation[i],'筆')),
     div(paste0(if(zx)'zX' else 'X',' = ',chart_num(xval),'，',if(zy)'zY' else 'Y',' = ',chart_num(yval))),
     div(paste0(if(zy)'z 尺度殘差' else '殘差',' = ',chart_num(e))),
-    div(paste0('內部標準化殘差 = ',chart_num(h$standardized[i]))))
+    div(paste0('標準化殘差 = ',chart_num(h$standardized[i]))))
   })
   output[[paste0(id,'_plot_label')]]<-renderUI({
    if(selected_option('equation'))checks({
