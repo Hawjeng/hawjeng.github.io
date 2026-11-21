@@ -184,25 +184,87 @@ const surveySelectors=["survey-first","survey-second","survey-third"].map($);
 const surveyFactors=SURVEY_COUNTS.factors;
 const surveyCodeCases={"0,1":"s_phone","0,2":"s_plan","3":"s_zodiac","1,4":"s_score_phone","2,4":"s_score_plan"};
 
-function surveyBars(lines,max) {
-  return '<h4>次數長條圖</h4><div class="survey-bars">'+lines.map(([name,count])=>
-    '<div><span>'+safe(name)+'</span><span class="survey-bar-track" aria-hidden="true"><span style="width:'
-    +(100*count/max)+'%"></span></span><strong>'+count+'</strong></div>').join("")+'</div>';
-}
-function surveyTable(rows,cols,counts,first,second,max) {
+function surveyTable(rows,cols,counts,first,second,max,stratum) {
   const n=total(counts.flat());
+  const title=second?"二因子列聯表":"次數分配表";
+  const context=[first,second,stratum].filter(Boolean).join("｜")+"（N = "+n+"）";
+  let headers,body;
   if (!second) {
-    const lines=rows.map((name,i)=>[name,counts[i][0]]);
-    return '<h3>次數分配表</h3>'+table([first,"次數","百分比"],[
-      ...lines.map(([name,count])=>[name,count,fx(100*count/n,1)+"%"]),["合計",n,"100%"]
-    ])+surveyBars(lines,max);
+    headers=[first,"次數","百分比"];
+    body=rows.map((name,i)=>[name,counts[i][0],fx(100*counts[i][0]/n,1)+"%"]);
+    body.push(["合計",n,"100%"]);
+  } else {
+    headers=[first,...cols,"合計"];
+    body=rows.map((name,i)=>[name,...counts[i],total(counts[i])]);
+    body.push(["合計",...cols.map((_,j)=>total(counts.map(row=>row[j]))),n]);
   }
-  const colTotals=cols.map((_,j)=>total(counts.map(row=>row[j])));
-  const lines=rows.flatMap((name,i)=>cols.map((col,j)=>[name+"｜"+col,counts[i][j]]));
-  return '<h3>二因子列聯表</h3><p>列為 '+safe(first)+'，欄為 '+safe(second)+'。</p>'
-    +table([first,...cols,"合計"],[
-      ...rows.map((name,i)=>[name,...counts[i],total(counts[i])]),["合計",...colTotals,n]
-    ])+surveyBars(lines,max);
+  return '<div class="survey-results" data-context="'+safe(context)+'" data-max="'+max+'" data-series="'+cols.length+'">'
+    +'<div><div class="survey-result-head"><h3>'+title+'</h3><button type="button" data-survey-png="table">下載表格 PNG</button></div>'
+    +(second?'<p>列為 '+safe(first)+'，欄為 '+safe(second)+'。</p>':"")+table(headers,body)+'</div>'
+    +'<div><div class="survey-result-head"><h3>次數長條圖</h3><button type="button" data-survey-png="chart">下載圖表 PNG</button></div>'
+    +'<div class="scroll"><canvas class="survey-chart" role="img" aria-label="'+safe(context+' 次數長條圖，數值見表格')+'"></canvas></div></div></div>';
+}
+function surveyHypotheses(h0,h1) {
+  return '<article class="card report-card"><h3>檢定假設</h3><p><strong>H<sub>0</sub>（虛無假設）</strong>　'
+    +safe(h0)+'</p><p><strong>H<sub>1</sub>（對立假設）</strong>　'+safe(h1)+'</p></article>';
+}
+function surveyAssociations(m,counts,first,second) {
+  const prediction=(groups,margins)=>{
+    const modal=Math.max(...margins);
+    const lambda=(total(groups.map(group=>Math.max(...group)))-modal)/(m.N-modal);
+    const prior=total(margins.map(n=>n*n))/(m.N*m.N);
+    const informed=total(groups.map(group=>total(group.map(n=>n*n))/total(group)))/m.N;
+    return [lambda,Math.max(0,(informed-prior)/(1-prior))];
+  };
+  const forward=prediction(counts,m.byCol);
+  const reverse=prediction(m.byCol.map((_,j)=>counts.map(row=>row[j])),m.byRow);
+  const phi=counts.length===2&&counts[0].length===2?Math.sqrt(m.statistic/m.N):null;
+  const symmetric=[
+    ["Phi 係數 φ",phi===null?"適用於 2 × 2 表":fx(phi)],
+    ["Pearson 列聯係數 C",fx(Math.sqrt(m.statistic/(m.statistic+m.N)))],
+    ["Cramér V",fx(m.v)]
+  ];
+  const directional=["Goodman–Kruskal λ","Goodman–Kruskal τ"].map((name,i)=>[name,fx(forward[i]),fx(reverse[i])]);
+  return '<article class="card report-card"><h3>列聯表關聯係數</h3>'
+    +table(["係數","估計值"],symmetric)+table(["係數","用 "+first+" 預測 "+second,"用 "+second+" 預測 "+first],directional)
+    +'<p>φ 顯示關聯強度。λ 衡量依最常見類別預測時的相對錯誤減少比例，τ 依各類別機率衡量相對錯誤減少比例。預測方向交換時，λ 與 τ 可能改變。</p></article>';
+}
+function apaP(p) {
+  return '<i>p</i> '+(p<.001?'&lt; .001':'= '+fx(p,3).replace(/^0/,""));
+}
+function surveyTest(a,b,rows,cols,counts,legacy,alpha) {
+  const first="「"+a.label+"」";
+  const pair=b?first+"與「"+b.label+"」":"";
+  const hypotheses=b?surveyHypotheses(pair+"相互獨立。",pair+"存在關聯。")
+    :surveyHypotheses(first+"的各類別在母體中的比例相同。",first+"的各類別在母體中的比例並非全部相同。");
+  if (rows.length<2 || (b && cols.length<2)) {
+    return hypotheses+'<p class="flag">所選資料的有效類別不足，無法計算卡方檢定。</p>';
+  }
+  const values=b?counts:[counts.flat()];
+  const weights=b?null:rows.map(()=>1);
+  const m=pearson(values,weights);
+  const significant=m.p<=alpha;
+  const conclusion=b
+    ? (significant?pair+"有顯著關聯。":"資料未提供足夠證據顯示"+pair+"有關聯。")
+    : (significant?first+"的分布顯著偏離均等比例。":"資料未提供足夠證據顯示"+first+"的分布偏離均等比例。");
+  const expected=m.expected.flat();
+  const caution=expected.some(v=>v<1)||expected.filter(v=>v<5).length/expected.length>.2;
+  let supplement="", rankAPA="";
+  if (legacy && !isChi(CH17[legacy])) {
+    const result=PROGRAMS.results[legacy], rank=result.stats;
+    const group=a.label==="CT 量表得分"?b.label:a.label;
+    supplement=surveyHypotheses("依「"+group+"」分組後，各組的 CT 量表得分分布相同。",
+      "依「"+group+"」分組後，至少一組的 CT 量表得分分布不同。")+rankReport(CH17[legacy],result,alpha);
+    const finding=rank.p_kruskal<=alpha?"各組得分分布有顯著差異。":"資料未提供足夠證據顯示各組得分分布不同。";
+    rankAPA='<p>Kruskal–Wallis 檢定比較依「'+safe(group)+'」分組的 CT 得分。'+finding
+      +' <i>H</i>('+rank.df+') = '+fx(rank.h,2)+'，'+apaP(rank.p_kruskal)+'，<i>N</i> = '+rank.n+'。</p>';
+  }
+  return hypotheses+chiReport({method:b?"ind":"gof",rows,cols:b?cols:rows},values,weights,alpha)
+    +(b?surveyAssociations(m,counts,a.label,b.label):"")+supplement+(legacy?jumpCode(legacy):"")
+    +'<article class="card report-card"><h3>APA 格式解釋</h3><p>Pearson 卡方'+(b?"獨立性":"適合度")+'檢定顯示，'
+    +safe(conclusion)+' χ²('+m.df+', <i>N</i> = '+m.N+') = '+fx(m.statistic,2)+'，'+apaP(m.p)
+    +(m.v===null?"":"，Cramér <i>V</i> = "+fx(m.v,2).replace(/^0/,""))+'。</p>'
+    +(caution?'<p>部分期望次數偏低，以上 <i>p</i> 值為卡方近似，解讀時須保留。</p>':"")+rankAPA+'</article>';
 }
 function renderSurvey() {
   const [first,second,third]=surveySelectors.map(select=>select.value);
@@ -223,33 +285,25 @@ function renderSurvey() {
   const n=total(entries.map(cell=>cell.at(-1)));
   put("survey-sample","有效樣本數 N = "+n);
   const legacy=surveyCodeCases[key];
-  const singleZodiac=legacy==="s_zodiac";
-  $("survey-alpha-control").hidden=!(singleZodiac || (b && !c));
   const alpha=Number(value("survey-alpha"));
   const strata=c ? c.levels.map((label,i)=>[label,entries.filter(cell=>cell[2]===i)]) : [["",entries]];
-  put("survey-panel",strata.filter(([,cells])=>cells.length).map(([label,cells],index)=>{
-    const rowIds=a.levels.map((_,i)=>i).filter(i=>cells.some(cell=>cell[0]===i));
+  const strataNote=c?'<p class="note">各層檢定使用所選顯著水準，未做多重比較校正。</p>':"";
+  put("survey-panel",strataNote+strata.filter(([,cells])=>cells.length).map(([label,cells],index)=>{
+    const rowIds=a.levels.map((_,i)=>i).filter(i=>!b||cells.some(cell=>cell[0]===i));
     const colIds=b ? b.levels.map((_,j)=>j).filter(j=>cells.some(cell=>cell[1]===j)) : [0];
     const rows=rowIds.map(i=>a.levels[i]);
     const cols=b ? colIds.map(j=>b.levels[j]) : [];
     const countsByCell=new Map(cells.map(cell=>[cell[0]+","+(b?cell[1]:0),cell.at(-1)]));
     const counts=rowIds.map(i=>colIds.map(j=>countsByCell.get(i+","+j)??0));
-    const summary=surveyTable(rows,cols,counts,a.label,b?.label,max);
+    const summary=surveyTable(rows,cols,counts,a.label,b?.label,max,c?c.label+"："+label:"");
+    const report=surveyTest(a,b,rows,cols,counts,legacy,alpha);
     if (c) {
       return '<details class="card report-card"'+(index===0?' open':'')+'><summary>'
-        +safe(c.label+"｜"+label)+'（N = '+total(counts.flat())+'）</summary>'+summary+'</details>';
+        +safe(c.label+"｜"+label)+'（N = '+total(counts.flat())+'）</summary>'+summary+report+'</details>';
     }
-    let report="";
-    if (singleZodiac) {
-      report='<p>以十二星座機率相等為虛無假設。</p>'
-        +chiReport({cols:rows},[counts.flat()],rows.map(()=>1),alpha);
-    } else if (legacy && !isChi(CH17[legacy])) {
-      report=rankReport(CH17[legacy],PROGRAMS.results[legacy],alpha);
-    } else if (b && rows.length>1 && cols.length>1) {
-      report=chiReport({method:"ind",rows,cols},counts,null,alpha);
-    }
-    return '<article class="card">'+summary+'</article>'+report+(legacy?jumpCode(legacy):"");
+    return '<article class="card">'+summary+'</article>'+report;
   }).join(""));
+  $("survey-panel").querySelectorAll(".survey-results").forEach(result=>drawSurveyChart(result));
 }
 
 function setupSurvey() {
@@ -258,7 +312,10 @@ function setupSurvey() {
       +surveyFactors.map(({label},id)=>'<option value="'+id+'">'+safe(label)+'</option>').join(""));
     select.addEventListener("change",renderSurvey);
   });
-  surveySelectors[1].value="1";
+  $("survey-panel").addEventListener("click",event=>{
+    const button=event.target.closest("[data-survey-png]");
+    if (button) downloadSurveyImage(button);
+  });
   renderSurvey();
 }
 
