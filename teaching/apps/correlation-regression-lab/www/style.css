@@ -13,7 +13,7 @@ h1{font-size:clamp(28px,20.8px + 1.5vw,36px);font-weight:700;letter-spacing:.015
 .console-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:20px;margin-top:14px}
 .source-code,.console{max-height:480px;overflow:auto;background:#f3f8f8;border:1px solid var(--line)}.console{white-space:pre-wrap;overflow-wrap:anywhere}
 details{padding:10px 0}summary{cursor:pointer;font-weight:650;color:var(--accent)}
-.diag-frame{border:0;width:100%;height:765px}.theory-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.diag-frame{border:0;width:100%;height:820px}.theory-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 @media(max-width:760px){.console-grid,.theory-columns{grid-template-columns:minmax(0,1fr)}.diag-frame{height:900px}}
 
 .chart-panel{max-width:640px;margin:16px auto 0}.plot-key{display:flex;gap:6px 10px;flex-wrap:wrap;justify-content:center;margin:0 0 6px}.plot-key span{padding:4px 9px;background:#eaf4f4;border:1px solid #d4e4e6;border-radius:5px;font-size:13px;color:#244c55}
