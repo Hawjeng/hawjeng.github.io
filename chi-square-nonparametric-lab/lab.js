@@ -473,7 +473,7 @@ for(const [id,fn] of Object.entries({"chi-case":setupChi,"chi-alpha":renderChi,"
 }
 $("chi-reset").addEventListener("click",setupChi);
 put("rank-method",methodOptions);
-put("exercise-method",methodOptions+'<option value="chi">Pearson 卡方檢定</option>');
+put("exercise-method",'<option value="chi">Pearson 卡方檢定</option>'+methodOptions);
 setupSurvey();
 chooseChi("gof");
 setupRank();
