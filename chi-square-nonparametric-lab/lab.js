@@ -180,15 +180,86 @@ function renderRank() {
   const k=value("rank-case"), d=CH17[k];
   put("rank-panel",rankReport(d,PROGRAMS.results[k],Number(value("rank-alpha")))+jumpCode(k));
 }
-function surveyBars(d) {
-  if(d.method==="frequency") return '<p class="note">CT 為資料中的量表得分。結果比較兩組的得分排序。逐分數次數可在結果下方展開。</p>';
-  const lines=d.weights?d.values[0].map((x,i)=>[d.cols[i],x/total(d.values[0])]):d.values.map((r,i)=>[d.rows[i]+"｜"+d.cols[1],r[1]/total(r)]);
-  return '<article class="card"><h3>樣本中的觀察比例</h3><div class="survey-bars">'+lines.map(([name,p])=>
-    '<div><span>'+safe(name)+'</span><meter min="0" max="1" value="'+p+'" aria-label="'+safe(name)+'"></meter><strong>'+fx(p*100,1)+'%</strong></div>').join("")+'</div></article>';
+const surveySelectors=["survey-first","survey-second","survey-third"].map($);
+const surveyFactors=SURVEY_COUNTS.factors;
+const surveyCodeCases={"0,1":"s_phone","0,2":"s_plan","3":"s_zodiac","1,4":"s_score_phone","2,4":"s_score_plan"};
+
+function surveyBars(lines,max) {
+  return '<h4>次數長條圖</h4><div class="survey-bars">'+lines.map(([name,count])=>
+    '<div><span>'+safe(name)+'</span><span class="survey-bar-track" aria-hidden="true"><span style="width:'
+    +(100*count/max)+'%"></span></span><strong>'+count+'</strong></div>').join("")+'</div>';
+}
+function surveyTable(rows,cols,counts,first,second,max) {
+  const n=total(counts.flat());
+  if (!second) {
+    const lines=rows.map((name,i)=>[name,counts[i][0]]);
+    return '<h3>次數分配表</h3>'+table([first,"次數","百分比"],[
+      ...lines.map(([name,count])=>[name,count,fx(100*count/n,1)+"%"]),["合計",n,"100%"]
+    ])+surveyBars(lines,max);
+  }
+  const colTotals=cols.map((_,j)=>total(counts.map(row=>row[j])));
+  const lines=rows.flatMap((name,i)=>cols.map((col,j)=>[name+"｜"+col,counts[i][j]]));
+  return '<h3>二因子列聯表</h3><p>列為 '+safe(first)+'，欄為 '+safe(second)+'。</p>'
+    +table([first,...cols,"合計"],[
+      ...rows.map((name,i)=>[name,...counts[i],total(counts[i])]),["合計",...colTotals,n]
+    ])+surveyBars(lines,max);
 }
 function renderSurvey() {
-  const k=value("survey-case"),d=CH17[k], alpha=Number(value("survey-alpha"));
-  put("survey-panel",surveyBars(d)+(isChi(d)?chiReport(d,d.values,d.weights,alpha):rankReport(d,PROGRAMS.results[k],alpha))+jumpCode(k));
+  const [first,second,third]=surveySelectors.map(select=>select.value);
+  surveySelectors[2].disabled=second==="";
+  if (second==="") surveySelectors[2].value="";
+  const selected=[first,second,second===""?"":third].filter(v=>v!=="").map(Number);
+  surveySelectors.forEach(select=>{
+    for (const option of select.options) {
+      option.disabled=option.value!=="" && option.value!==select.value && selected.includes(Number(option.value));
+    }
+  });
+  const ordered=[...selected].sort((a,b)=>a-b);
+  const key=ordered.join(",");
+  const positions=selected.map(id=>ordered.indexOf(id));
+  const entries=SURVEY_COUNTS.tables[key].map(cell=>[...positions.map(i=>cell[i]),cell.at(-1)]);
+  const [a,b,c]=selected.map(i=>surveyFactors[i]);
+  const max=Math.max(...entries.map(cell=>cell.at(-1)));
+  const n=total(entries.map(cell=>cell.at(-1)));
+  put("survey-sample","有效樣本數 N = "+n);
+  const legacy=surveyCodeCases[key];
+  const singleZodiac=legacy==="s_zodiac";
+  $("survey-alpha-control").hidden=!(singleZodiac || (b && !c));
+  const alpha=Number(value("survey-alpha"));
+  const strata=c ? c.levels.map((label,i)=>[label,entries.filter(cell=>cell[2]===i)]) : [["",entries]];
+  put("survey-panel",strata.filter(([,cells])=>cells.length).map(([label,cells],index)=>{
+    const rowIds=a.levels.map((_,i)=>i).filter(i=>cells.some(cell=>cell[0]===i));
+    const colIds=b ? b.levels.map((_,j)=>j).filter(j=>cells.some(cell=>cell[1]===j)) : [0];
+    const rows=rowIds.map(i=>a.levels[i]);
+    const cols=b ? colIds.map(j=>b.levels[j]) : [];
+    const countsByCell=new Map(cells.map(cell=>[cell[0]+","+(b?cell[1]:0),cell.at(-1)]));
+    const counts=rowIds.map(i=>colIds.map(j=>countsByCell.get(i+","+j)??0));
+    const summary=surveyTable(rows,cols,counts,a.label,b?.label,max);
+    if (c) {
+      return '<details class="card report-card"'+(index===0?' open':'')+'><summary>'
+        +safe(c.label+"｜"+label)+'（N = '+total(counts.flat())+'）</summary>'+summary+'</details>';
+    }
+    let report="";
+    if (singleZodiac) {
+      report='<p>以十二星座機率相等為虛無假設。</p>'
+        +chiReport({cols:rows},[counts.flat()],rows.map(()=>1),alpha);
+    } else if (legacy && !isChi(CH17[legacy])) {
+      report=rankReport(CH17[legacy],PROGRAMS.results[legacy],alpha);
+    } else if (b && rows.length>1 && cols.length>1) {
+      report=chiReport({method:"ind",rows,cols},counts,null,alpha);
+    }
+    return '<article class="card">'+summary+'</article>'+report+(legacy?jumpCode(legacy):"");
+  }).join(""));
+}
+
+function setupSurvey() {
+  surveySelectors.forEach((select,i)=>{
+    put(select.id,(i===0?"":'<option value="">不選</option>')
+      +surveyFactors.map(({label},id)=>'<option value="'+id+'">'+safe(label)+'</option>').join(""));
+    select.addEventListener("change",renderSurvey);
+  });
+  surveySelectors[1].value="1";
+  renderSurvey();
 }
 
 const languages=[["R","R","Rscript chapter17.R "],["py","Python","python chapter17.py "]];
@@ -259,16 +330,15 @@ $("chi-input").addEventListener("input", e=>{
   renderChi();
 });
 for(const [id,fn] of Object.entries({"chi-case":setupChi,"chi-alpha":renderChi,"rank-case":renderRank,"rank-alpha":renderRank,
-  "survey-case":renderSurvey,"survey-alpha":renderSurvey,"exercise-case":renderExercise,"code-type":()=>setupCode(),"code-case":renderCode})) {
+  "survey-alpha":renderSurvey,"exercise-case":renderExercise,"code-type":()=>setupCode(),"code-case":renderCode})) {
   $(id).addEventListener("change",fn);
 }
 $("chi-reset").addEventListener("click",setupChi);
 choose("rank-case",books.filter(k=>!isChi(CH17[k])));
-choose("survey-case",survey);
+setupSurvey();
 choose("exercise-case",exercises);
 chooseChi("gof");
 renderRank();
-renderSurvey();
 renderExercise();
 setupCode("brand_gender");
 const distributionAlphas=[...$("dist-alpha").options].map(option=>option.value);

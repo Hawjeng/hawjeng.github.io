@@ -7,8 +7,8 @@
 <meta name="description" content="操作 Pearson 卡方、等級與符號檢定，探索調查範例與六組習作，重現 R 與 Python 結果。">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../time-series-lab/style.css?v=history">
-<link rel="stylesheet" href="style.css?v=chi-distribution">
-<script defer src="data.js"></script><script defer src="programs.js"></script><script defer src="stats.js"></script><script defer src="lab.js?v=chi-distribution"></script>
+<link rel="stylesheet" href="style.css?v=survey-factors">
+<script defer src="data.js"></script><script defer src="survey-counts.js"></script><script defer src="programs.js"></script><script defer src="stats.js"></script><script defer src="lab.js?v=survey-factors"></script>
 </head>
 <body>
 <header><div class="shell mast"><a href="../resources.html#statistics-apps" class="brand" aria-label="返回教學與資源"><img class="lab-brand-mark" src="../assets/favicon.svg" alt="C 字與常態曲線" aria-hidden="true" width="34" height="34"> 邱皓政｜教學與資源</a><a href="../time-series-lab/">時間序列分析</a></div></header>
@@ -61,8 +61,14 @@
 <div id="rank-panel"></div>
 </section>
 <section class="unit" id="survey" aria-labelledby="survey-title">
-<div class="section-head"><h2 id="survey-title">調查範例</h2><p>使用學生調查的彙總次數和 CT 量表得分分布。各案例只納入所需欄位皆有有效值的答卷，因此有效樣本數會不同。</p></div>
-<div class="toolbar analysis-toolbar"><label>研究問題 <select id="survey-case"></select></label><label>顯著水準 α <select id="survey-alpha"><option value=".05">0.05</option><option value=".01">0.01</option><option value=".10">0.10</option></select></label></div>
+<div class="section-head"><h2 id="survey-title">調查範例</h2><p>選一個因子查看次數分配，選兩個查看二因子列聯表。加選第三個因子，可按其類別分層查看。每次只納入所選因子皆有有效值的答卷。</p></div>
+<div class="toolbar analysis-toolbar">
+  <label>第一個因子 <select id="survey-first"></select></label>
+  <label>第二個因子 <select id="survey-second"></select></label>
+  <label>第三個因子 <select id="survey-third"></select></label>
+  <label id="survey-alpha-control">顯著水準 α <select id="survey-alpha"><option value=".05">0.05</option><option value=".01">0.01</option><option value=".10">0.10</option></select></label>
+</div>
+<p id="survey-sample" role="status"></p>
 <div id="survey-panel"></div>
 <p class="source">資料取自 data3.xlsx 的 Cleaned_Data。網頁及下載檔提供彙總資料。調查比較描述樣本中的關聯或差異。</p>
 </section>

@@ -17,9 +17,11 @@ input.chi-cell{width:6.2rem}
 .report-card{margin-top:.85rem}
 .flag{background:#fff1dc;border-left:4px solid #a24a14;padding:.6rem .75rem}
 .syntax-languages>.note{margin-top:.6rem}
-.survey-bars{display:grid;gap:.38rem;margin-top:.75rem}
-.survey-bars div{display:grid;grid-template-columns:minmax(5rem,10rem) 1fr 5rem;gap:.5rem;align-items:center}
-.survey-bars meter{width:100%;height:1.25rem;accent-color:#286d79}
+.survey-bars{display:grid;gap:.45rem;max-height:25rem;overflow:auto;margin:.75rem 0}
+.survey-bars div{display:grid;grid-template-columns:minmax(6rem,13rem) minmax(3rem,1fr) 3rem;gap:.5rem;align-items:center}
+.survey-bar-track{display:block;height:.8rem;background:#e3eef0;border-radius:.2rem}
+.survey-bar-track span{display:block;height:100%;background:#286d79;border-radius:inherit}
+#survey-alpha-control[hidden]{display:none}
 .rank-result th{white-space:normal}
 @media(max-width:850px){.concept-grid,.analysis-grid{grid-template-columns:1fr}}
 
