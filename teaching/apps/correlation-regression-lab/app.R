@@ -315,7 +315,7 @@ critical_curve_svg <- function(){
  tags$div(id='critical-curve',`data-values`=as.character(values_json))
 }
 ui <- fluidPage(
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=compact-scatter-layout'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=correlation-two-columns'),
   tags$script(src='console.js?v=square-plots'),tags$script(src='critical-curve.js?v=drag')),
  div(class='mast',tags$a(class='btn btn-default lab-main-menu',href='https://hawjeng.github.io/resources.html#statistics-apps','回到教材主選單'),
   p(class='eyebrow','STATISTICS LAB'),
@@ -323,10 +323,11 @@ ui <- fluidPage(
  tabsetPanel(id='unit',
   tabPanel('原理說明',tabsetPanel(id='theory_topic',
    tabPanel('相關分析',value='critical',
-    includeHTML('www/correlation-story.html'),
-    card(h3('操作散布圖的四象限'),
-     p('拖動觀測點，觀察兩條平均線、各象限的點數與 Pearson r 如何一起變動。勾選 X 軸 z、Y 軸 z，可在標準化尺度上比較。'),
-     tags$iframe(class='diag-frame',title='可拖曳的四象限散布圖',src='influence.html?quadrants=1&v=compact-scatter')),
+    div(class='correlation-layout',
+     div(includeHTML('www/correlation-story.html'),includeHTML('www/correlation-formulas.html')),
+     card(h3('操作散布圖的四象限'),
+      p('拖動觀測點，看看各點落在哪個象限，以及 Pearson r 如何改變。'),
+      tags$iframe(class='diag-frame correlation-frame',title='可拖曳的四象限散布圖',src='influence.html?quadrants=1&v=compact-scatter'))),
     includeHTML('www/correlation.html'),
     critical_controls()),
    tabPanel('迴歸分析',value='basics',includeHTML('www/theory.html'),includeHTML('www/diagnostics.html')),

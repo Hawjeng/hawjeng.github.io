@@ -1,16 +1,4 @@
 <article class="card">
-<h2>X、Y 的變異數與共變數</h2>
-<p>對 N 筆 X、Y 配對資料，先算每筆的兩個離均差 Xᵢ − X̄ 與 Yᵢ − Ȳ。三個公式的分子都把<strong>兩個離均差相乘</strong>再加總，樣本公式的分母都是 N − 1。</p>
-<div class="table-scroll"><table><thead><tr><th scope="col">量數</th><th scope="col">分子：逐筆相乘後加總</th><th scope="col">樣本公式</th></tr></thead><tbody>
-<tr><th scope="row">X 的變異數</th><td>SSₓ = Σ[(Xᵢ − X̄)(Xᵢ − X̄)]</td><td>sₓ² = SSₓ / (N − 1)</td></tr>
-<tr><th scope="row">Y 的變異數</th><td>SSᵧ = Σ[(Yᵢ − Ȳ)(Yᵢ − Ȳ)]</td><td>sᵧ² = SSᵧ / (N − 1)</td></tr>
-<tr><th scope="row">X、Y 的共變數</th><td>SPₓᵧ = Σ[(Xᵢ − X̄)(Yᵢ − Ȳ)]</td><td>Cov(X, Y) = SPₓᵧ / (N − 1)</td></tr>
-</tbody></table></div>
-<p>同一個離均差乘自己就是平方，所以變異數一定大於或等於 0。共變數每筆用一個 X 離均差乘一個 Y 離均差。同號相乘為正（第一、第三象限），異號相乘為負（第二、第四象限）。有一項為 0 時，乘積就是 0。</p>
-<p class="equation-box"><strong>Pearson r</strong> = Cov(X, Y) / (sₓsᵧ) = SPₓᵧ / √(SSₓ × SSᵧ)。分子與分母的 N − 1 約掉後，就得到右邊的積差和公式。</p>
-<p>上方散布圖的原始 10 筆資料中，SSₓ = 630、SSᵧ = 352、SPₓᵧ = 367。因此 sₓ² = 70、sᵧ² ≈ 39.111、Cov(X, Y) ≈ 40.778，最後得到 r ≈ .779。</p>
-</article>
-<article class="card">
 <h2>從散布圖（scatterplot）到模型</h2>
 <p>每個點代表一個觀察單位。先看方向、彎曲、離群、觀測密度與分組，再決定是否用直線描述。觀察性調查的關聯可能受混淆變項影響，推論時須說明研究設計。</p>
 </article>
@@ -37,5 +25,5 @@
 <tr><th scope="row">Q3 左下</th><td>X 低於平均，Y 低於平均</td><td>正</td></tr>
 <tr><th scope="row">Q4 右下</th><td>X 高於平均，Y 低於平均</td><td>負</td></tr>
 </tbody></table></div>
-<p>點若落在任一平均線上，乘積為 0。離兩條線都較遠的點，其乘積絕對值較大，所以判斷 r 的方向要看正負乘積的總和。上方圖中的藍色實線是全樣本迴歸線，紫色虛線是刪去選取點後的迴歸線，橘色線段表示該點的殘差。</p>
+<p>點若落在任一平均線上，乘積為 0。離兩條線都較遠的點，其乘積絕對值較大，所以判斷 r 的方向要看正負乘積的總和。四象限圖中的藍色實線是全樣本迴歸線，紫色虛線是刪去選取點後的迴歸線，橘色線段表示該點的殘差。</p>
 </article>
