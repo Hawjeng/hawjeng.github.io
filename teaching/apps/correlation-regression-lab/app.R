@@ -295,28 +295,25 @@ cor_critical <- function(n,alpha,tails){
 }
 critical_controls <- function(){
  card(h3('樣本數與相關係數臨界值'),
-  p('檢定 H₀：ρ = 0 時，df = N − 2。兩張圖與臨界值表共用同一個樣本數 N。'),
+  p('檢定 H₀：ρ = 0 時，df = N − 2。點選任一張圖或拖曳它的垂直虛線，兩張圖會一起更新樣本數 N。'),
   row_controls(select('critical_tails','檢定方向',c('雙尾'='2','右尾'='right','左尾'='left')),
    select('critical_alpha','顯著水準 α',c('0.10'='.10','0.05'='.05','0.02'='.02','0.01'='.01'),selected='.05')),
   sliderInput('critical_n','配對樣本數 N',min=3,max=2000,value=10,step=1,width='100%',sep=''),
-  h4('圖 13.6｜自由度與相關係數臨界值'),
-  p('在圖內點一下或左右拖曳虛線，即可更改 N。右上角即時顯示三種 α 的雙尾臨界 |r|。'),
-  div(class='chart-panel critical-chart-panel',critical_curve_svg()),
-  uiOutput('critical_lookup'),tags$details(tags$summary('查看臨界值對照表'),uiOutput('critical_table')),
-  h4('圖 13.7｜樣本數與雙尾 p 值'),
-  sliderInput('critical_r','觀察相關 |r|',min=.01,max=.99,value=.10,step=.01,width='100%'),
-  div(class='chart-panel',plotOutput('p_curve',height=350)),
-  uiOutput('p_lookup'))
+  sliderInput('critical_r','觀察相關 |r|',min=.01,max=.99,value=.10,step=.01,width='100%',sep=''),
+  div(class='paired-curves',
+   div(h4('圖 13.6｜自由度與相關係數臨界值'),critical_curve_svg(),
+    uiOutput('critical_lookup'),tags$details(tags$summary('查看臨界值對照表'),uiOutput('critical_table'))),
+   div(h4('圖 13.7｜樣本數與雙尾 p 值'),uiOutput('p_curve'),uiOutput('p_lookup'))))
 }
 critical_curve_svg <- function(){
  n<-3:2000
  values<-lapply(c(.01,.05,.10),function(alpha)cor_critical(n,alpha,2)$r)
  values_json<-jsonlite::toJSON(values,digits=9)
- tags$div(id='critical-curve',`data-values`=as.character(values_json))
+ tags$div(id='critical-curve',class='interactive-correlation-curve',`data-kind`='critical',`data-values`=as.character(values_json))
 }
 ui <- fluidPage(
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=correlation-two-columns'),
-  tags$script(src='console.js?v=square-plots'),tags$script(src='critical-curve.js?v=drag')),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=paired-curves'),
+  tags$script(src='console.js?v=square-plots'),tags$script(src='critical-curve.js?v=paired-curves')),
  div(class='mast',tags$a(class='btn btn-default lab-main-menu',href='https://hawjeng.github.io/resources.html#statistics-apps','回到教材主選單'),
   p(class='eyebrow','STATISTICS LAB'),
   h1('相關與迴歸'),p('從兩個變數的散布圖，到多元模型與個案診斷。')),
@@ -391,24 +388,15 @@ server <- function(input,output,session){
   if(is.numeric(n)&&length(n)==1L&&is.finite(n)&&n>=3&&n<=2000)
    updateSliderInput(session,'critical_n',value=round(n))
  })
- critical_plot <- function(x,curves,labels,ylab,xlab,selected_x,selected_y,threshold=NULL){
-  colors<-c('#7958a4','#176f7a','#ac512e','#284e85')
-  par(mar=c(4,4,1,1),las=1,fg='#9bb1b5',col.lab='#244c55')
-  plot(range(x),range(curves,threshold,selected_y),type='n',xlab=xlab,ylab=ylab)
-  abline(h=axTicks(2),col='#e5eef0')
-  for(i in seq_along(curves))lines(x,curves[[i]],col=colors[i],lwd=2,lty=if(i==4)2 else 1)
-  if(!is.null(threshold))abline(h=threshold,col='#687e83',lty=3)
-  abline(v=selected_x,col='#687e83',lty=3)
-  points(rep(selected_x,length(selected_y)),selected_y,pch=21,bg=colors[seq_along(selected_y)],col='white',cex=1.2)
-  legend('topright',labels,col=colors[seq_along(labels)],lty=c(1,1,1,2)[seq_along(labels)],lwd=2,bty='n',cex=.9)
- }
  p_for_r<-function(n,r)2*pt(-r*sqrt((n-2)/(1-r^2)),df=n-2)
- output$p_curve<-renderPlot({
-  q<-critical_settings();r<-req(input$critical_r)
+ output$p_curve<-renderUI({
+  r<-req(input$critical_r)
+  alpha<-as.numeric(req(input$critical_alpha))
   n<-3:2000
   values<-c(.05,.10,.30,r)
-  critical_plot(n,lapply(values,function(v)p_for_r(n,v)),c(paste('|r| =',values[1:3]),paste('Selected |r| =',r)),
-   'Two-sided p','Paired sample size N',q$n,p_for_r(q$n,values),q$alpha)
+  tags$div(class='interactive-correlation-curve',`data-kind`='p',
+   `data-alpha`=alpha,`data-r`=r,
+   `data-values`=as.character(jsonlite::toJSON(lapply(values,function(v)p_for_r(n,v)),digits=14)))
  })
  output$p_lookup<-renderUI({
   q<-critical_settings();r<-req(input$critical_r)
