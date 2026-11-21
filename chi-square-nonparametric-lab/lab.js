@@ -184,6 +184,7 @@ const interpretations={
   e6three:"將已婚者按有無子女分開，H 檢定使用 df=2 同時比較三組。兩組及三組分析均未達 .05。"
 };
 const methodOptions=Object.entries(rankMethods).map(([key,d])=>'<option value="'+key+'">'+safe(d.name)+'</option>').join("");
+const chiMethodOption='<option value="chi">Pearson 卡方檢定</option>';
 function rankLesson(method,key,alpha) {
   const lesson=rankMethods[method], d=CH17[key], result=PROGRAMS.results[key];
   return '<article class="card report-card"><h3>'+safe(lesson.name)+'</h3><p>'+safe(lesson.design)
@@ -362,14 +363,32 @@ function setupSurvey() {
 }
 
 const languages=[["R","R","Rscript chapter17.R "],["py","Python","python chapter17.py "]];
+function chiSyntax(d) {
+  if (d.method==="gof") {
+    const observed=d.values[0];
+    return [
+      "observed <- c("+observed.join(", ")+")\nweights <- c("+d.weights.join(", ")+")\n"
+        +"fit <- chisq.test(observed, p = weights / sum(weights))\nfit\nfit$expected",
+      "import numpy as np\nfrom scipy.stats import chisquare\n\nobserved = "+JSON.stringify(observed)
+        +"\nweights = np.array("+JSON.stringify(d.weights)+")\nexpected = sum(observed) * weights / weights.sum()\n"
+        +"print(chisquare(observed, f_exp=expected))\nprint(expected)"
+    ];
+  }
+  return [
+    "observed <- rbind("+d.values.map(row=>"c("+row.join(", ")+")").join(",\n                  ")+")\n"
+      +"fit <- chisq.test(observed, correct = FALSE)\nfit\nfit$expected",
+    "from scipy.stats import chi2_contingency\n\nobserved = "+JSON.stringify(d.values)
+      +"\nstat, p, df, expected = chi2_contingency(observed, correction=False)\nprint(stat, df, p)\nprint(expected)"
+  ];
+}
 function setupCode(preferred,key) {
   const methods=value("code-type")==="methods";
   $("code-rank-control").hidden=!methods;
   $("code-case-label").textContent=methods?"檢定方法":"案例";
   if (methods) {
-    put("code-case",methodOptions);
-    if (rankMethods[preferred]) $("code-case").value=preferred;
-    setupRankCode(key);
+    put("code-case",chiMethodOption+methodOptions);
+    if (preferred==="chi"||rankMethods[preferred]) $("code-case").value=preferred;
+    setupMethodCode(key);
     return;
   }
   const bag={books,survey,exercises}[value("code-type")];
@@ -377,9 +396,10 @@ function setupCode(preferred,key) {
   if (bag.includes(preferred)) $("code-case").value=preferred;
   renderCode();
 }
-function setupRankCode(key) {
-  const lesson=rankMethods[value("code-case")];
-  const items=[...lesson.books,...lesson.exercises];
+function setupMethodCode(key) {
+  const method=value("code-case");
+  const lesson=rankMethods[method];
+  const items=method==="chi"?books.filter(k=>isChi(CH17[k])):[...lesson.books,...lesson.exercises];
   choose("code-rank-data",items);
   if (items.includes(key)) $("code-rank-data").value=key;
   renderCode();
@@ -387,12 +407,20 @@ function setupRankCode(key) {
 function renderCode() {
   const key=value("code-case");
   if (value("code-type")==="methods") {
-    const lesson=rankMethods[key], d=CH17[value("code-rank-data")];
-    const snippets=rankSyntax(key,d);
-    put("code-panels",'<article class="card"><h3>'+safe(lesson.name)+'</h3><p>'+safe(lesson.code)+'</p></article>'
+    const lesson=rankMethods[key], caseKey=value("code-rank-data"), d=CH17[caseKey];
+    const chi=key==="chi";
+    const name=chi?"Pearson 卡方"+chiTheory[d.method][0]:lesson.name;
+    const description=chi?chiTheory[d.method][1]+" "+(d.method==="gof"
+      ?"R 的 chisq.test 輸入虛無假設的比例。Python 的 chisquare 輸入依該比例換算的期望次數。"
+      :"R 的 chisq.test 與 Python 的 chi2_contingency 都輸入觀察次數表，並關閉連續性修正，以重現教材的 Pearson χ²。")
+      :lesson.code;
+    const snippets=chi?chiSyntax(d):rankSyntax(key,d);
+    put("code-panels",'<article class="card"><h3>'+safe(name)+'</h3><p>'+safe(description)+'</p></article>'
       +languages.map(([lang,name],i)=>'<article class="card syntax-language"><h3>'+name+'</h3>'
         +'<button type="button" class="syntax-copy" data-copy="'+lang+'">複製 '+name+' 語法</button>'
-        +'<pre id="code-source-'+lang+'" class="syntax-console" tabindex="0">'+safe(snippets[i])+'</pre></article>').join("")
+        +'<pre id="code-source-'+lang+'" class="syntax-console" tabindex="0">'+safe(snippets[i])+'</pre>'
+        +(chi?'<details><summary>查看 '+name+' 執行結果</summary><pre class="syntax-console">'+safe(PROGRAMS.results[caseKey][lang])+'</pre></details>':"")
+        +'</article>').join("")
       +'<p id="copy-status" class="note" role="status"></p>');
     return;
   }
@@ -468,12 +496,12 @@ $("chi-input").addEventListener("input", e=>{
 });
 for(const [id,fn] of Object.entries({"chi-case":setupChi,"chi-alpha":renderChi,"rank-method":setupRank,"rank-case":renderRank,"rank-alpha":renderRank,
   "survey-alpha":renderSurvey,"exercise-method":setupExercise,"exercise-case":renderExercise,"code-type":()=>setupCode(),
-  "code-case":()=>value("code-type")==="methods"?setupRankCode():renderCode(),"code-rank-data":renderCode})) {
+  "code-case":()=>value("code-type")==="methods"?setupMethodCode():renderCode(),"code-rank-data":renderCode})) {
   $(id).addEventListener("change",fn);
 }
 $("chi-reset").addEventListener("click",setupChi);
 put("rank-method",methodOptions);
-put("exercise-method",'<option value="chi">Pearson 卡方檢定</option>'+methodOptions);
+put("exercise-method",chiMethodOption+methodOptions);
 setupSurvey();
 chooseChi("gof");
 setupRank();
