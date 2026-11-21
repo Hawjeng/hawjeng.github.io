@@ -82,7 +82,7 @@ def page(path, title, description, body, active=None):
     canonical = ''
     if S['siteUrl']:
         canonical = f'<link rel="canonical" href="{url(S["siteUrl"].rstrip("/")+"/"+public_path(path))}"><meta property="og:url" content="{url(S["siteUrl"].rstrip("/")+"/"+public_path(path))}">'
-    schema = {'@context':'https://schema.org','@type':'ProfilePage','dateModified':S['updated'],'mainEntity':{'@type':'Person','name':'邱皓政','alternateName':'Hawjeng Chiou','jobTitle':['特聘教授','合聘教授',R['title']],'affiliation':[{'@type':'CollegeOrUniversity','name':'國立臺灣師範大學'},{'@type':'Organization','name':R['institution'],'url':R['institutionUrl']}],'alumniOf':{'@type':'CollegeOrUniversity','name':'University of Southern California',**({'url':D['institutionUrl']} if D.get('institutionUrl') else {})},'email':S['email'],'knowsAbout':['Psychometrics','Structural Equation Modeling','Multilevel Modeling','Latent Class Analysis','Bayesian Statistics']}}
+    schema = {'@context':'https://schema.org','@type':'ProfilePage','mainEntity':{'@type':'Person','name':'邱皓政','alternateName':'Hawjeng Chiou','jobTitle':['特聘教授','合聘教授',R['title']],'affiliation':[{'@type':'CollegeOrUniversity','name':'國立臺灣師範大學'},{'@type':'Organization','name':R['institution'],'url':R['institutionUrl']}],'alumniOf':{'@type':'CollegeOrUniversity','name':'University of Southern California',**({'url':D['institutionUrl']} if D.get('institutionUrl') else {})},'email':S['email'],'knowsAbout':['Psychometrics','Structural Equation Modeling','Multilevel Modeling','Latent Class Analysis','Bayesian Statistics']}}
     schema_json = json.dumps(schema,ensure_ascii=False).replace('</','<\\/')
     structured_data = ''
     if path in ('index.html', 'about.html'):
