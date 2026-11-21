@@ -404,8 +404,8 @@ function setupMethodCode(key) {
   if (items.includes(key)) $("code-rank-data").value=key;
   renderCode();
 }
-function codeWithResult(code,name,result) {
-  return '<div class="syntax-pair"><div>'+code+'</div><div><details><summary>查看 '+name
+function codeWithResult(code,name,result,expanded=false) {
+  return '<div class="syntax-pair"><div>'+code+'</div><div><details'+(expanded?' open':'')+'><summary>查看 '+name
     +' 執行結果</summary><h4>主控台原始輸出</h4><pre class="syntax-console" tabindex="0">'
     +safe(result)+'</pre></details></div></div>';
 }
@@ -420,12 +420,13 @@ function renderCode() {
       :"R 的 chisq.test 與 Python 的 chi2_contingency 都輸入觀察次數表，並關閉連續性修正，以重現教材的 Pearson χ²。")
       :lesson.code;
     const snippets=chi?chiSyntax(d):rankSyntax(key,d);
+    const results=chi?PROGRAMS.results[caseKey]:RANK_RESULTS[key][caseKey];
     put("code-panels",'<article class="card"><h3>'+safe(name)+'</h3><p>'+safe(description)+'</p></article>'
       +languages.map(([lang,name],i)=>{
         const code='<button type="button" class="syntax-copy" data-copy="'+lang+'">複製 '+name+' 語法</button>'
           +'<pre id="code-source-'+lang+'" class="syntax-console" tabindex="0">'+safe(snippets[i])+'</pre>';
         return '<article class="card syntax-language"><h3>'+name+'</h3>'
-          +(chi?codeWithResult(code,name,PROGRAMS.results[caseKey][lang]):code)+'</article>';
+          +codeWithResult(code,name,results[lang],true)+'</article>';
       }).join("")
       +'<p id="copy-status" class="note" role="status"></p>');
     return;
