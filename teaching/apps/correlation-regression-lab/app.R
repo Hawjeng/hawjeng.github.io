@@ -315,7 +315,7 @@ critical_curve_svg <- function(){
  tags$div(id='critical-curve',`data-values`=as.character(values_json))
 }
 ui <- fluidPage(
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=correlation-topic'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=hubble-layout'),
   tags$script(src='console.js?v=square-plots'),tags$script(src='critical-curve.js?v=drag')),
  div(class='mast',tags$a(class='btn btn-default lab-main-menu',href='https://hawjeng.github.io/resources.html#statistics-apps','回到教材主選單'),
   p(class='eyebrow','STATISTICS LAB'),
