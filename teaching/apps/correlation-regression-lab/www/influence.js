@@ -107,6 +107,7 @@ const circles = original.map((_,i)=>{
   return node;
 });
 const quadrantOption = document.getElementById('quadrants');
+if(new URLSearchParams(location.search).get('quadrants')==='1')quadrantOption.checked=true;
 const quadrantLines = document.getElementById('quadrant-lines');
 const quadrantShading = document.getElementById('quadrant-shading');
 const quadrantCounts = document.getElementById('quadrant-counts');
@@ -215,7 +216,7 @@ function render(){
     const tip='第 '+(i+1)+' 筆\n'+(zx.checked?'zX':'X')+' = '+fmt(zx.checked?(px-full.mx)/sx:px)+
       '，'+(zy.checked?'zY':'Y')+' = '+fmt(zy.checked?(py-full.my)/sy:py)+
       '\n'+(zy.checked?'z 尺度殘差':'殘差')+' = '+fmt(zy.checked?residual/sy:residual)+
-      (zy.checked?'\n內部標準化殘差 = '+fmt(studentized):'');
+      '\n內部標準化殘差 = '+fmt(studentized);
     node.querySelector('title').textContent=tip;
     node.setAttribute('aria-label',tip.replaceAll('\n','，'));
   });

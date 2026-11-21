@@ -1,9 +1,3 @@
-<article class="card">
-<h2>從親子身高到相關係數</h2>
-<p>1886 年，法蘭西斯・高爾頓（Francis Galton）發表親子身高研究。他把父母的身高整理成可比較的平均值，發現父母較高的一組，子女平均也偏高，但偏離全體平均的幅度通常較小。父母較矮的一組也有類似現象。這就是後來所說的<strong>向平均數迴歸</strong>（regression toward the mean）。<a href="https://zenodo.org/records/1449548">Galton 1886 年原文</a></p>
-<p>十年後，卡爾・皮爾森（Karl Pearson）把這類問題放進數學模型，發展了今日常用的積差相關係數。皇家學會還保留高爾頓為皮爾森這篇論文撰寫的審查報告。兩人的工作讓研究者能以 <em>r</em> 描述線性關聯，再用迴歸線回答給定 X 時，Y 的預測值是多少。<a href="https://doi.org/10.1098/rsta.1896.0007">Pearson 1896 年論文</a> · <a href="https://makingscience.royalsociety.org/items/rr_13_94">Galton 的審查報告</a></p>
-<p>用兩欄的 z 分數做含截距的簡單迴歸時，預測式是 ẑᵧ = r × zₓ。例如 r = 0.6，X 比平均高 2 個標準差時，預測的 Y 比其平均高 1.2 個標準差。可到「原理說明」下的「殘差與影響點」切換兩軸的 z 分數，直接看出這個關係。</p>
-</article>
 <article class="card hubble-story">
 <h2>愛因斯坦造訪天文台前，哈伯已畫出什麼？</h2>
 <p>1931 年 1 月，愛因斯坦到加州威爾遜山天文台，與哈伯（Edwin Hubble）和亞當斯（Walter Adams）等人會面。加州理工學院保存的照片中，他正俯身從 100 吋胡克望遠鏡的目鏡向內看。兩年前，哈伯已發表下面這張圖，將星系距離和沿視線方向的速度放在同一張散布圖上。<a href="https://digital.archives.caltech.edu/collections/Photographs/1.6-16/">加州理工學院照片檔案</a></p>
@@ -13,18 +7,7 @@
 </figure>
 <p>先看點雲的方向。較遠的星系整體上退行得較快，但同一距離附近仍有速度差異。迴歸線把這個趨勢化成一個斜率，可讀作距離每多 1 Mpc，模型預測的速度平均增加多少 km/s。再比較實線與虛線，看看把個別觀測先分組，會如何改變估計。這張圖是早期觀測的結果，斜率反映當時的距離尺度。</p>
 </article>
-<article class="card">
-<h2>從散布圖（scatterplot）到模型</h2>
-<p>每個點代表一個觀察單位。先看方向、彎曲、離群、觀測密度與分組，再決定是否用直線描述。觀察性調查的關聯可能受混淆變項影響，推論時須說明研究設計。</p>
-</article>
 <div class="theory-columns">
-<article class="card"><h3>Pearson 積差相關（Pearson product–moment correlation）</h3>
-<p>將每筆 X、Y 分別減去欄平均數，乘積加總得到離均差乘積和（sum of cross-products, SP）。令 SSₓ 與 SSᵧ 為各欄離均差平方和，則 r = SP / √(SSₓSSᵧ)。同向偏離平均數使 SP 增加，反向則使 SP 減少。r 介於 −1 與 1，改用不同線性計量單位不會改變其絕對值。</p>
-<p>檢定 H₀：ρ = 0 時，t = r√[(n − 2)/(1 − r²)]，df = n − 2。對獨立成對觀察、近似雙變量常態的母體，可用 t 分配求 p 值。區間採 Fisher z 轉換（Fisher z transformation）z = atanh(r)，近似標準誤為 1/√(n − 3)，在 z 尺度求區間後用 tanh 轉回。</p>
-<p>先看原始散布圖。U 形關係可有很強的曲線結構，r 仍可能接近 0。</p></article>
-<article class="card"><h3>點二系列相關（point-biserial correlation）</h3>
-<p>指定兩個互斥類別，依序編成 0 與 1，再與連續變項計算 Pearson r。若第 1 類編為 0，而第 2 類編為 1，正號代表第 2 類平均數較高；交換兩類會反轉符號，絕對值與雙尾 p 值相同。</p>
-<p>用分母為 n 的整體標準差 σᵧ 表示時，r = (Ȳ₁ − Ȳ₀)√(pq)/σᵧ，p、q 為兩類比例。與二元虛擬變數的一元迴歸及共同變異數兩組 t 檢定具有相同的雙尾檢定結果。</p></article>
 <article class="card"><h3>簡單線性迴歸（simple linear regression）</h3>
 <p>模型 ŷ = b₀ + b₁x。普通最小平方法（ordinary least squares, OLS）使殘差平方和（residual sum of squares, SSE） = Σ(y − ŷ)² 最小。b₁ = SP/SSₓ，稱為斜率（slope），表示 X 每多 1 單位時，Y 的預測值平均改變多少；b₀ = ȳ − b₁x̄，是截距（intercept），在 x = 0 有意義且接近觀測範圍時才適合解釋。</p>
 <p>對含截距模型，SST = SSR + SSE，R² = SSR/SST，稱為決定係數（coefficient of determination）。一元迴歸有 R² = r²。殘差標準誤為 √[SSE/(n − 2)]。斜率 t = b₁/SE(b₁)，df = n − 2，整體 F 檢定在一個預測欄時等於 t²。</p></article>

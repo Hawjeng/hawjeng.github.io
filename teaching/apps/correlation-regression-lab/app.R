@@ -295,26 +295,39 @@ cor_critical <- function(n,alpha,tails){
 }
 critical_controls <- function(){
  card(h3('樣本數與相關係數臨界值'),
-  p('檢定 H₀：ρ = 0 時，df = N − 2。拖動 N，可對照兩張圖與臨界值表。'),
+  p('檢定 H₀：ρ = 0 時，df = N − 2。兩張圖與臨界值表共用同一個樣本數 N。'),
   row_controls(select('critical_tails','檢定方向',c('雙尾'='2','右尾'='right','左尾'='left')),
    select('critical_alpha','顯著水準 α',c('0.10'='.10','0.05'='.05','0.02'='.02','0.01'='.01'),selected='.05')),
   sliderInput('critical_n','配對樣本數 N',min=3,max=2000,value=10,step=1,width='100%',sep=''),
   h4('圖 13.6｜自由度與相關係數臨界值'),
-  p('雙尾檢定。三條曲線分別對應 α = .01、.05、.10，縱軸取臨界值的正值。'),
-  div(class='chart-panel',plotOutput('critical_curve',height=350)),
+  p('在圖內點一下或左右拖曳虛線，即可更改 N。右上角即時顯示三種 α 的雙尾臨界 |r|。'),
+  div(class='chart-panel critical-chart-panel',critical_curve_svg()),
   uiOutput('critical_lookup'),tags$details(tags$summary('查看臨界值對照表'),uiOutput('critical_table')),
   h4('圖 13.7｜樣本數與雙尾 p 值'),
   sliderInput('critical_r','觀察相關 |r|',min=.01,max=.99,value=.10,step=.01,width='100%'),
   div(class='chart-panel',plotOutput('p_curve',height=350)),
   uiOutput('p_lookup'))
 }
+critical_curve_svg <- function(){
+ n<-3:2000
+ values<-lapply(c(.01,.05,.10),function(alpha)cor_critical(n,alpha,2)$r)
+ values_json<-jsonlite::toJSON(values,digits=9)
+ tags$div(id='critical-curve',`data-values`=as.character(values_json))
+}
 ui <- fluidPage(
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=hubble-theory'),tags$script(src='console.js?v=square-plots')),
- div(class='mast',p(class='eyebrow','STATISTICS LAB'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=correlation-topic'),
+  tags$script(src='console.js?v=square-plots'),tags$script(src='critical-curve.js?v=drag')),
+ div(class='mast',tags$a(class='btn btn-default lab-main-menu',href='https://hawjeng.github.io/resources.html#statistics-apps','回到教材主選單'),
+  p(class='eyebrow','STATISTICS LAB'),
   h1('相關與迴歸'),p('從兩個變數的散布圖，到多元模型與個案診斷。')),
  tabsetPanel(id='unit',
   tabPanel('原理說明',tabsetPanel(id='theory_topic',
-   tabPanel('基本原理',value='basics',includeHTML('www/theory.html'),critical_controls()),
+   tabPanel('基本原理',value='basics',includeHTML('www/theory.html')),
+   tabPanel('相關係數與散布圖',value='critical',includeHTML('www/correlation.html'),
+    card(h3('操作散布圖的四象限'),
+     p('拖動觀測點，觀察兩條平均線、各象限的點數與 Pearson r 如何一起變動。勾選 X 軸 z、Y 軸 z，可在標準化尺度上比較。'),
+     tags$iframe(class='diag-frame',title='可拖曳的四象限散布圖',src='influence.html?quadrants=1&v=correlation')),
+    critical_controls()),
    tabPanel('殘差與影響點',value='influence',includeHTML('www/diagnostics.html')))),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
    card(plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520,hover=hoverOpts('book_hover',delay=75,nullOutside=TRUE)),uiOutput('book_point_tip',class='plot-label-layer'),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('book_result'),uiOutput('book_diagnostics')))),
@@ -350,6 +363,11 @@ server <- function(input,output,session){
   list(n=input$critical_n,alpha=as.numeric(input$critical_alpha),tails=if(direction=='2')2L else 1L,
        sign=if(direction=='2')'±' else if(direction=='left')'−' else '')
  })
+ observeEvent(input$critical_curve_n,{
+  n<-input$critical_curve_n
+  if(is.numeric(n)&&length(n)==1L&&is.finite(n)&&n>=3&&n<=2000)
+   updateSliderInput(session,'critical_n',value=round(n))
+ })
  critical_plot <- function(x,curves,labels,ylab,xlab,selected_x,selected_y,threshold=NULL){
   colors<-c('#7958a4','#176f7a','#ac512e','#284e85')
   par(mar=c(4,4,1,1),las=1,fg='#9bb1b5',col.lab='#244c55')
@@ -361,14 +379,6 @@ server <- function(input,output,session){
   points(rep(selected_x,length(selected_y)),selected_y,pch=21,bg=colors[seq_along(selected_y)],col='white',cex=1.2)
   legend('topright',labels,col=colors[seq_along(labels)],lty=c(1,1,1,2)[seq_along(labels)],lwd=2,bty='n',cex=.9)
  }
- output$critical_curve<-renderPlot({
-  q<-critical_settings()
-  alpha<-c(.01,.05,.10)
-  n<-3:max(502,q$n)
-  critical_plot(n-2,lapply(alpha,function(a)cor_critical(n,a,2)$r),paste('alpha =',alpha),
-   'Critical |r|','Degrees of freedom (N - 2)',q$n-2,
-   vapply(alpha,function(a)cor_critical(q$n,a,2)$r,numeric(1)))
- })
  p_for_r<-function(n,r)2*pt(-r*sqrt((n-2)/(1-r^2)),df=n-2)
  output$p_curve<-renderPlot({
   q<-critical_settings();r<-req(input$critical_r)
@@ -563,7 +573,7 @@ server <- function(input,output,session){
     strong(paste('第',h$a$observation[i],'筆')),
     div(paste0(if(zx)'zX' else 'X',' = ',chart_num(xval),'，',if(zy)'zY' else 'Y',' = ',chart_num(yval))),
     div(paste0(if(zy)'z 尺度殘差' else '殘差',' = ',chart_num(e))),
-    if(zy)div(paste0('內部標準化殘差 = ',chart_num(h$standardized[i]))))
+    div(paste0('內部標準化殘差 = ',chart_num(h$standardized[i]))))
   })
   output[[paste0(id,'_plot_label')]]<-renderUI({
    if(selected_option('equation'))checks({
