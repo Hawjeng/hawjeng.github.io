@@ -108,21 +108,22 @@ function chiReport(d,counts,weights,alpha) {
     +'<article class="card"><h3>右尾拒絕域</h3>'+chart+'<details><summary>查右尾卡方臨界值表</summary><p>依自由度 '+m.df+' 及 α = '+fx(alpha,2)+' 交叉讀取。</p>'
     +table(["自由度","α = .10","α = .05","α = .01"],rows)+'</details></article></div>'
     +'<details class="card report-card" open><summary>期望值與逐格殘差</summary>'
-    +table(["細格","觀察 O","期望 E","O−E","Pearson 殘差","調整殘差","χ² 貢獻"],cells)+comparisons+'</details>';
+    +'<p class="note">原始殘差 Δ = O−E。正值表示觀察次數高於期望，負值表示低於期望。</p>'
+    +table(["細格","觀察 O","期望 E","原始殘差 Δ = O−E","Pearson 殘差","調整殘差","χ² 貢獻"],cells)+comparisons+'</details>';
 }
 
-function rankReport(d,result,alpha) {
+function rankReport(d,result,alpha,method) {
   const m=result.stats, rows=[];
   const add=(label,stat,p)=>rows.push([label,stat,pfx(p),status(p,alpha)]);
   const parts=[];
-  if (d.method==="sign"||d.method==="paired") {
+  if (method==="sign"||(!method&&(d.method==="sign"||d.method==="paired"))) {
     add("符號檢定｜雙尾精確","正號 "+m.plus+"／"+m.n,m.p_two);
     add("符號檢定｜正向單尾精確","正號 "+m.plus+"／"+m.n,m.p_greater);
     add("符號檢定｜雙尾常態近似","連續性修正",m.normal_two);
     add("符號檢定｜正向單尾常態近似","連續性修正",m.normal_greater);
     parts.push("先排除 "+m.zeros+" 筆零差或無偏好，再以 Binomial(n, .5) 比較正號次數。正向單尾須由研究問題事先指定。");
   }
-  if(d.method==="paired") {
+  if(method==="signed"||(!method&&d.method==="paired")) {
     add("Wilcoxon 符號等級","T = "+fx(m.wilcoxon_t),m.p_signed_rank);
     parts.push("將非零差值的絕對值由小到大排名，同值用平均等級，再加回正負號。R⁺ = "+m.rank_plus+"，R⁻ = "+m.rank_minus+"。這裡使用含同級校正、未加連續性修正的常態近似。");
   }
@@ -132,26 +133,38 @@ function rankReport(d,result,alpha) {
     if (d.source.startsWith("t17.9")) parts.push("工作簿列出的 W 約為 .895。本頁使用原始分數及同級修正重算，W 約為 .913。");
   }
   if (d.method==="groups"||d.method==="frequency") {
-    if("u1" in m) {
-      add("Wilcoxon 等級和","第一組秩和 W = "+m.rank_sum,m.p_rank_sum);
-      add("Mann–Whitney U","U₁ = "+m.u1+"，U₂ = "+m.u2,m.p_rank_sum);
+    if("u1" in m && method!=="kruskal") {
+      if (method!=="mann") add("Wilcoxon 等級和","第一組秩和 R₁ = "+m.rank_sum,m.p_rank_sum);
+      if (method!=="ranksum") add("Mann–Whitney U","U₁ = "+m.u1+"，U₂ = "+m.u2,m.p_rank_sum);
       parts.push("合併兩組觀察後排行。第一組 U₁ = W−n₁(n₁+1)/2。兩法用相同的等級資訊，這裡使用同級修正的常態近似，不使用連續性修正。");
     }
-    add("Kruskal–Wallis H","H("+m.df+") = "+fx(m.h),m.p_kruskal);
-    parts.push("將所有組別的觀察一起排序，再用各組秩和衡量差異，H 採同級修正。顯著時可再做經多重比較校正的成對分析。");
-    if (d.source === "表 17.11") parts.push("工作簿摘要的 H 約為 2.296。本頁從原始成績重算並進行同級校正，因此 H 約為 2.304。");
+    if (!method||method==="kruskal") {
+      add("Kruskal–Wallis H","H("+m.df+") = "+fx(m.h),m.p_kruskal);
+      parts.push("將所有組別的觀察一起排序，再用各組秩和衡量差異，H 採同級修正。顯著時可再做經多重比較校正的成對分析。");
+      if (d.source === "表 17.11") parts.push("工作簿摘要的 H 約為 2.296。本頁從原始成績重算並進行同級校正，因此 H 約為 2.304。");
+    }
   }
   let steps="";
   if(d.method==="paired") {
     const diff=d.values[1].map((x,i)=>x-d.values[0][i]);
     const ranked=midranks(diff.filter(x=>x!==0).map(Math.abs));
     let at=0;
-    steps=table(["配對","前","後","差值","絕對差等級"],diff.map((x,i)=>[i+1,d.values[0][i],d.values[1][i],x,x?ranked[at++]:"排除"]));
+    const signed=method!=="sign";
+    steps=table(["配對","前","後","差值",signed?"絕對差等級":"符號"],diff.map((x,i)=>
+      [i+1,d.values[0][i],d.values[1][i],x,x?(signed?ranked[at++]:x>0?"+":"−"):"排除"]));
   } else if(d.method==="kendall") {
     const ranks=d.cols.map((_,j)=>midranks(d.values.map(row=>row[j])));
     steps=table(["對象",...d.cols,"秩和"],d.rows.map((r,i)=>[r,...ranks.map(c=>c[i]),total(ranks.map(c=>c[i]))]));
   } else if(d.method==="sign") {
     steps=table(["受訪順序","偏好"],d.values[0].map((x,i)=>[i+1,x===1?"H":x===-1?"S":"無偏好"]));
+  } else if (method && d.method==="groups") {
+    const groups=rankGroups(d), ranks=midranks(groups.flat());
+    let start=0;
+    steps=table(["組別","觀察值","各觀察值的合併等級","秩和"],groups.map((row,i)=>{
+      const groupRanks=ranks.slice(start,start+row.length);
+      start+=row.length;
+      return [d.rows[i],row.join("、"),groupRanks.join("、"),total(groupRanks)];
+    }));
   } else {
     steps=rawTable(d);
   }
@@ -170,21 +183,39 @@ const interpretations={
   e6two:"未婚對已婚的秩和與 U 檢定相同。兩組 H 檢定的卡方近似與無連續性修正的 U 常態近似給出相同的雙尾 p 值。再切換三組比較可評估婚育組別的整體差異。",
   e6three:"將已婚者按有無子女分開，H 檢定使用 df=2 同時比較三組。兩組及三組分析均未達 .05。"
 };
+const methodOptions=Object.entries(rankMethods).map(([key,d])=>'<option value="'+key+'">'+safe(d.name)+'</option>').join("");
+function rankLesson(method,key,alpha) {
+  const lesson=rankMethods[method], d=CH17[key], result=PROGRAMS.results[key];
+  return '<article class="card report-card"><h3>'+safe(lesson.name)+'</h3><p>'+safe(lesson.design)
+    +'</p><p class="formula">'+safe(lesson.math)+'</p></article>'
+    +surveyHypotheses(lesson.h0,lesson.h1)+rankReport(d,result,alpha,method)
+    +'<article class="card report-card"><h3>查表與判定</h3>'+rankLookupForm(method,key,result.stats,alpha)+'</article>'
+    +'<p class="inline-links"><a href="#syntax" data-rank-code="'+method+'" data-rank-case="'+key+'">查看本方法的 R 與 Python 語法</a></p>';
+}
+function setupExercise() {
+  const method=value("exercise-method");
+  choose("exercise-case",method==="chi"?["e1","e2"]:rankMethods[method].exercises);
+  renderExercise();
+}
 function renderExercise() {
   const k=value("exercise-case"),d=CH17[k];
-  put("exercise-panel",'<article class="card"><h3>'+safe(d.title)+'</h3><details><summary>展開解答與判讀</summary><p>'+interpretations[k]+'</p>'
-    +(isChi(d)?chiReport(d,d.values,d.weights,.05):rankReport(d,PROGRAMS.results[k],.05))
-    +jumpCode(k)+'</details></article>');
+  const method=value("exercise-method");
+  put("exercise-panel",'<article class="card"><h3>'+safe(d.title)+'</h3><p>'+interpretations[k]+'</p></article>'
+    +(method==="chi"?chiReport(d,d.values,d.weights,.05)+jumpCode(k):rankLesson(method,k,.05)));
+}
+function setupRank() {
+  choose("rank-case",rankMethods[value("rank-method")].books);
+  renderRank();
 }
 function renderRank() {
-  const k=value("rank-case"), d=CH17[k];
-  put("rank-panel",rankReport(d,PROGRAMS.results[k],Number(value("rank-alpha")))+jumpCode(k));
+  put("rank-panel",rankLesson(value("rank-method"),value("rank-case"),Number(value("rank-alpha"))));
 }
 const surveySelectors=["survey-first","survey-second","survey-third"].map($);
 const surveyFactors=SURVEY_COUNTS.factors;
 const surveyCodeCases={"0,1":"s_phone","0,2":"s_plan","3":"s_zodiac","1,4":"s_score_phone","2,4":"s_score_plan"};
+let surveyStratumFactor, surveyStratumIndex=0;
 
-function surveyTable(rows,cols,counts,first,second,max,stratum) {
+function surveyTable(rows,cols,counts,first,second,max,stratum,stratumControl) {
   const n=total(counts.flat());
   const title=second?"二因子列聯表":"次數分配表";
   const context=[first,second,stratum].filter(Boolean).join("｜")+"（N = "+n+"）";
@@ -200,6 +231,7 @@ function surveyTable(rows,cols,counts,first,second,max,stratum) {
   }
   return '<div class="survey-results" data-context="'+safe(context)+'" data-max="'+max+'" data-series="'+cols.length+'">'
     +'<div><div class="survey-result-head"><h3>'+title+'</h3><button type="button" data-survey-png="table">下載表格 PNG</button></div>'
+    +stratumControl
     +(second?'<p>列為 '+safe(first)+'，欄為 '+safe(second)+'。</p>':"")+table(headers,body)+'</div>'
     +'<div><div class="survey-result-head"><h3>次數長條圖</h3><button type="button" data-survey-png="chart">下載圖表 PNG</button></div>'
     +'<div class="scroll"><canvas class="survey-chart" role="img" aria-label="'+safe(context+' 次數長條圖，數值見表格')+'"></canvas></div></div></div>';
@@ -283,27 +315,31 @@ function renderSurvey() {
   const [a,b,c]=selected.map(i=>surveyFactors[i]);
   const max=Math.max(...entries.map(cell=>cell.at(-1)));
   const n=total(entries.map(cell=>cell.at(-1)));
-  put("survey-sample","有效樣本數 N = "+n);
   const legacy=surveyCodeCases[key];
   const alpha=Number(value("survey-alpha"));
-  const strata=c ? c.levels.map((label,i)=>[label,entries.filter(cell=>cell[2]===i)]) : [["",entries]];
-  const strataNote=c?'<p class="note">各層檢定使用所選顯著水準，未做多重比較校正。</p>':"";
-  put("survey-panel",strataNote+strata.filter(([,cells])=>cells.length).map(([label,cells],index)=>{
-    const rowIds=a.levels.map((_,i)=>i).filter(i=>!b||cells.some(cell=>cell[0]===i));
-    const colIds=b ? b.levels.map((_,j)=>j).filter(j=>cells.some(cell=>cell[1]===j)) : [0];
-    const rows=rowIds.map(i=>a.levels[i]);
-    const cols=b ? colIds.map(j=>b.levels[j]) : [];
-    const countsByCell=new Map(cells.map(cell=>[cell[0]+","+(b?cell[1]:0),cell.at(-1)]));
-    const counts=rowIds.map(i=>colIds.map(j=>countsByCell.get(i+","+j)??0));
-    const summary=surveyTable(rows,cols,counts,a.label,b?.label,max,c?c.label+"："+label:"");
-    const report=surveyTest(a,b,rows,cols,counts,legacy,alpha);
-    if (c) {
-      return '<details class="card report-card"'+(index===0?' open':'')+'><summary>'
-        +safe(c.label+"｜"+label)+'（N = '+total(counts.flat())+'）</summary>'+summary+report+'</details>';
-    }
-    return '<article class="card">'+summary+'</article>'+report;
-  }).join(""));
-  $("survey-panel").querySelectorAll(".survey-results").forEach(result=>drawSurveyChart(result));
+  if (third!==surveyStratumFactor) {
+    surveyStratumFactor=third;
+    surveyStratumIndex=0;
+  }
+  const strata=c?c.levels.map((label,i)=>[label,entries.filter(cell=>cell[2]===i)]).filter(([,cells])=>cells.length):[["",entries]];
+  surveyStratumIndex=Math.min(surveyStratumIndex,strata.length-1);
+  const [label,cells]=strata[surveyStratumIndex];
+  const stratumControl=c?'<div class="toolbar survey-stratum"><label>'+safe(c.label)+' <select id="survey-stratum">'
+    +strata.map(([name,group],i)=>'<option value="'+i+'"'+(i===surveyStratumIndex?' selected':'')+'>'
+      +safe(name)+'（N = '+total(group.map(cell=>cell.at(-1)))+'）</option>').join("")
+    +'</select></label></div>':"";
+  put("survey-sample","有效樣本數 N = "+n+(c?"，目前分層 n = "+total(cells.map(cell=>cell.at(-1))):""));
+  const note=c?'<p class="note">各層檢定使用所選顯著水準，未做多重比較校正。</p>':"";
+  const rowIds=a.levels.map((_,i)=>i).filter(i=>!b||cells.some(cell=>cell[0]===i));
+  const colIds=b ? b.levels.map((_,j)=>j).filter(j=>cells.some(cell=>cell[1]===j)) : [0];
+  const rows=rowIds.map(i=>a.levels[i]);
+  const cols=b ? colIds.map(j=>b.levels[j]) : [];
+  const countsByCell=new Map(cells.map(cell=>[cell[0]+","+(b?cell[1]:0),cell.at(-1)]));
+  const counts=rowIds.map(i=>colIds.map(j=>countsByCell.get(i+","+j)??0));
+  const summary=surveyTable(rows,cols,counts,a.label,b?.label,max,c?c.label+"："+label:"",stratumControl);
+  const report=surveyTest(a,b,rows,cols,counts,legacy,alpha);
+  put("survey-panel",'<article class="card">'+summary+'</article>'+note+report);
+  drawSurveyChart($("survey-panel").querySelector(".survey-results"));
 }
 
 function setupSurvey() {
@@ -316,18 +352,50 @@ function setupSurvey() {
     const button=event.target.closest("[data-survey-png]");
     if (button) downloadSurveyImage(button);
   });
+  $("survey-panel").addEventListener("change",event=>{
+    if (event.target.id!=="survey-stratum") return;
+    surveyStratumIndex=Number(event.target.value);
+    renderSurvey();
+    $("survey-stratum").focus({preventScroll:true});
+  });
   renderSurvey();
 }
 
 const languages=[["R","R","Rscript chapter17.R "],["py","Python","python chapter17.py "]];
-function setupCode(preferred) {
+function setupCode(preferred,key) {
+  const methods=value("code-type")==="methods";
+  $("code-rank-control").hidden=!methods;
+  $("code-case-label").textContent=methods?"檢定方法":"案例";
+  if (methods) {
+    put("code-case",methodOptions);
+    if (rankMethods[preferred]) $("code-case").value=preferred;
+    setupRankCode(key);
+    return;
+  }
   const bag={books,survey,exercises}[value("code-type")];
   choose("code-case",bag);
   if (bag.includes(preferred)) $("code-case").value=preferred;
   renderCode();
 }
+function setupRankCode(key) {
+  const lesson=rankMethods[value("code-case")];
+  const items=[...lesson.books,...lesson.exercises];
+  choose("code-rank-data",items);
+  if (items.includes(key)) $("code-rank-data").value=key;
+  renderCode();
+}
 function renderCode() {
   const key=value("code-case");
+  if (value("code-type")==="methods") {
+    const lesson=rankMethods[key], d=CH17[value("code-rank-data")];
+    const snippets=rankSyntax(key,d);
+    put("code-panels",'<article class="card"><h3>'+safe(lesson.name)+'</h3><p>'+safe(lesson.code)+'</p></article>'
+      +languages.map(([lang,name],i)=>'<article class="card syntax-language"><h3>'+name+'</h3>'
+        +'<button type="button" class="syntax-copy" data-copy="'+lang+'">複製 '+name+' 語法</button>'
+        +'<pre id="code-source-'+lang+'" class="syntax-console" tabindex="0">'+safe(snippets[i])+'</pre></article>').join("")
+      +'<p id="copy-status" class="note" role="status"></p>');
+    return;
+  }
   put("code-panels",languages.map(([lang,name,command])=>'<article class="card syntax-language"><h3>'+name+'</h3>'
     +'<div class="syntax-pair"><div><div class="toolbar"><button type="button" class="syntax-copy" data-copy="'+lang+'">複製 '+name+' 語法</button>'
     +'<a class="syntax-download" href="downloads/chapter17.'+lang+'" download>下載 .'+lang+'</a></div><h4>可執行程式</h4>'
@@ -354,6 +422,10 @@ document.addEventListener("click",async e=>{
       $("code-type").value=survey.includes(key)?"survey":exercises.includes(key)?"exercises":"books";
       setupCode(key);
     }
+    if (link.dataset.rankCode) {
+      $("code-type").value="methods";
+      setupCode(link.dataset.rankCode,link.dataset.rankCase);
+    }
     e.preventDefault();
     if(link.hash!==location.hash) history.pushState(null,"",link.hash);
     route();
@@ -375,6 +447,14 @@ document.addEventListener("click",async e=>{
     }
   }
 });
+document.addEventListener("submit",event=>{
+  const form=event.target;
+  if (!form.matches(".rank-lookup")) return;
+  event.preventDefault();
+  const {methodKey,caseKey,alpha}=form.dataset;
+  const reference=Object.fromEntries(Array.from(new FormData(form),([key,value])=>[key,Number(value)]));
+  form.nextElementSibling.innerHTML=rankLookup(methodKey,CH17[caseKey],PROGRAMS.results[caseKey].stats,Number(alpha),reference);
+});
 window.addEventListener("hashchange",route);
 document.querySelectorAll("[data-method]").forEach(button=>button.addEventListener("click",()=>chooseChi(button.dataset.method)));
 $("chi-input").addEventListener("input", e=>{
@@ -386,18 +466,19 @@ $("chi-input").addEventListener("input", e=>{
   }
   renderChi();
 });
-for(const [id,fn] of Object.entries({"chi-case":setupChi,"chi-alpha":renderChi,"rank-case":renderRank,"rank-alpha":renderRank,
-  "survey-alpha":renderSurvey,"exercise-case":renderExercise,"code-type":()=>setupCode(),"code-case":renderCode})) {
+for(const [id,fn] of Object.entries({"chi-case":setupChi,"chi-alpha":renderChi,"rank-method":setupRank,"rank-case":renderRank,"rank-alpha":renderRank,
+  "survey-alpha":renderSurvey,"exercise-method":setupExercise,"exercise-case":renderExercise,"code-type":()=>setupCode(),
+  "code-case":()=>value("code-type")==="methods"?setupRankCode():renderCode(),"code-rank-data":renderCode})) {
   $(id).addEventListener("change",fn);
 }
 $("chi-reset").addEventListener("click",setupChi);
-choose("rank-case",books.filter(k=>!isChi(CH17[k])));
+put("rank-method",methodOptions);
+put("exercise-method",methodOptions+'<option value="chi">Pearson 卡方檢定</option>');
 setupSurvey();
-choose("exercise-case",exercises);
 chooseChi("gof");
-renderRank();
-renderExercise();
-setupCode("brand_gender");
+setupRank();
+setupExercise();
+setupCode();
 const distributionAlphas=[...$("dist-alpha").options].map(option=>option.value);
 const distributionRows=Array.from({length:30},(_,i)=>i+1);
 const distributionCritical=distributionRows.map(df=>distributionAlphas.map(alpha=>chiCritical(df,Number(alpha))));

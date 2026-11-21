@@ -7,8 +7,8 @@
 <meta name="description" content="操作 Pearson 卡方、等級與符號檢定，探索調查範例與六組習作，重現 R 與 Python 結果。">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../time-series-lab/style.css?v=history">
-<link rel="stylesheet" href="style.css?v=survey-images">
-<script defer src="data.js"></script><script defer src="survey-counts.js"></script><script defer src="programs.js"></script><script defer src="stats.js"></script><script defer src="survey-images.js"></script><script defer src="lab.js?v=survey-images"></script>
+<link rel="stylesheet" href="style.css?v=rank-methods">
+<script defer src="data.js"></script><script defer src="survey-counts.js"></script><script defer src="programs.js"></script><script defer src="stats.js"></script><script defer src="survey-images.js?v=compact"></script><script defer src="rank-methods.js"></script><script defer src="lab.js?v=rank-methods"></script>
 </head>
 <body>
 <header><div class="shell mast"><a href="../resources.html#statistics-apps" class="brand" aria-label="返回教學與資源"><img class="lab-brand-mark" src="../assets/favicon.svg" alt="C 字與常態曲線" aria-hidden="true" width="34" height="34"> 邱皓政｜教學與資源</a><a href="../time-series-lab/">時間序列分析</a></div></header>
@@ -57,7 +57,7 @@
 <section class="unit" id="ranks" aria-labelledby="ranks-title">
 <div class="section-head"><h2 id="ranks-title">無母數檢定</h2><p>依配對、評分一致性或獨立組別選擇案例，查看原始資料、統計量及解讀方式。</p></div>
 <article class="card history-story"><h3>威爾科克森為什麼使用等級</h3><p>兩種處理的結果只知道大小順序時，還能比較嗎？威爾科克森（Frank Wilcoxon）在 1945 年發表以排序進行比較的方法。對成對觀察，他將差異按絕對值排等級，再加回正負號；比較兩組獨立觀察時，則將資料合併排序。試著比較下面的符號檢定與符號等級檢定，看看加入差距排序後多用了哪些資訊。 <a href="https://doi.org/10.2307/3001968">威爾科克森 1945 年原文</a></p></article>
-<div class="toolbar analysis-toolbar"><label>案例 <select id="rank-case"></select></label><label>顯著水準 α <select id="rank-alpha"><option value=".05">0.05</option><option value=".01">0.01</option><option value=".10">0.10</option></select></label></div>
+<div class="toolbar analysis-toolbar"><label>檢定方法 <select id="rank-method"></select></label><label>案例 <select id="rank-case"></select></label><label>顯著水準 α <select id="rank-alpha"><option value=".05">0.05</option><option value=".01">0.01</option><option value=".10">0.10</option></select></label></div>
 <div id="rank-panel"></div>
 </section>
 <section class="unit" id="survey" aria-labelledby="survey-title">
@@ -74,14 +74,16 @@
 </section>
 <section class="unit" id="exercises" aria-labelledby="exercise-title">
 <div class="section-head"><h2 id="exercise-title">習作詳解</h2><p>逐題查看資料與解題步驟。習作 17.6 分開呈現兩組與三組結果。</p></div>
-<div class="toolbar analysis-toolbar"><label>題目 <select id="exercise-case"></select></label></div><div id="exercise-panel"></div>
+<div class="toolbar analysis-toolbar"><label>檢定方法 <select id="exercise-method"></select></label><label>題目 <select id="exercise-case"></select></label></div><div id="exercise-panel"></div>
 </section>
 <section class="unit" id="syntax" aria-labelledby="syntax-title">
 <div class="section-head"><h2 id="syntax-title">R 與 Python 語法與結果</h2><p>同一份案例 CSV 可重現兩種語言的輸出。R 使用內建函式，Python 需要 NumPy 與 SciPy。</p></div>
 <div class="syntax-layout">
 <details class="card syntax-settings" open><summary>分析設定</summary>
-<label for="code-type">資料類型</label><select id="code-type"><option value="books">課本範例</option><option value="survey">調查範例</option><option value="exercises">課後習作</option></select>
-<label for="code-case">案例</label><select id="code-case"></select><a href="downloads/chapter17.csv" download>下載案例 CSV</a></details>
+<label for="code-type">資料類型</label><select id="code-type"><option value="methods">六種無母數檢定</option><option value="books">課本範例</option><option value="survey">調查範例</option><option value="exercises">課後習作</option></select>
+<label for="code-case" id="code-case-label">檢定方法</label><select id="code-case"></select>
+<div id="code-rank-control"><label for="code-rank-data">案例</label><select id="code-rank-data"></select></div>
+<a href="downloads/chapter17.csv" download>下載案例 CSV</a></details>
 <div id="code-panels" class="syntax-languages"></div></div>
 </section>
 </div></main>

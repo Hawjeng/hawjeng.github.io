@@ -28,13 +28,17 @@ function drawSurveyChart(result) {
   const width=Math.max(540,68+groups.length*Math.max(70,series*13));
   const legendColumns=Math.floor((width-48)/115);
   const legendHeight=series?25*Math.ceil(series/legendColumns):0;
-  const height=308+legendHeight;
+  const compact=groups.length<=3;
+  const height=(compact?248:308)+legendHeight;
   const canvas=result.querySelector("canvas");
+  canvas.style.setProperty("--survey-chart-width",width+"px");
   canvas.style.minWidth=Math.max(320,width*.72)+"px";
   const ctx=surveyImageContext(canvas,width,height);
   ctx.fillText(result.dataset.context,20,26);
-  const left=56, top=59, bottom=249, plotWidth=width-left-18;
-  const tickSize=Math.ceil(Number(result.dataset.max)/4);
+  const left=56, top=59, bottom=height-59-legendHeight, plotWidth=width-left-18;
+  const roughStep=Number(result.dataset.max)/4;
+  const magnitude=10**Math.floor(Math.log10(roughStep));
+  const tickSize=Math.max(1,[1,2,2.5,5,10].find(step=>step>=roughStep/magnitude)*magnitude);
   const axisMax=4*tickSize;
   ctx.fillText("次數",20,49);
   ctx.textAlign="right";
@@ -43,7 +47,7 @@ function drawSurveyChart(result) {
     ctx.fillStyle=i===0?"#78929b":"#dce8ec";
     ctx.fillRect(left,y,plotWidth,1);
     ctx.fillStyle="#17343f";
-    ctx.fillText(i*tickSize,left-7,y+4);
+    ctx.fillText(Number((i*tickSize).toPrecision(8)),left-7,y+4);
   }
   const groupWidth=plotWidth/groups.length;
   const barsPerGroup=Math.max(1,series);
@@ -68,7 +72,7 @@ function drawSurveyChart(result) {
   ctx.fillText(header[0],left+plotWidth/2,bottom+47);
   ctx.textAlign="left";
   labels.forEach((label,i)=>{
-    const x=24+(i%legendColumns)*115, y=313+Math.floor(i/legendColumns)*25;
+    const x=24+(i%legendColumns)*115, y=height-legendHeight+5+Math.floor(i/legendColumns)*25;
     ctx.fillStyle=surveyColors[i];
     ctx.fillRect(x,y-11,13,13);
     ctx.fillStyle="#17343f";

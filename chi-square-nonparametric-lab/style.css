@@ -17,11 +17,12 @@ input.chi-cell{width:6.2rem}
 .report-card{margin-top:.85rem}
 .flag{background:#fff1dc;border-left:4px solid #a24a14;padding:.6rem .75rem}
 .syntax-languages>.note{margin-top:.6rem}
-.survey-results{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:1rem 1.5rem}
+.survey-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem 1.5rem;align-items:start}
 .survey-result-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.5rem;margin:.5rem 0}
 .survey-result-head h3{margin:0}
 .survey-result-head button{font-size:.875rem;padding:.3rem .65rem}
-.survey-chart{display:block;width:100%;height:auto}
+.survey-chart{display:block;width:100%;height:auto;max-width:var(--survey-chart-width);margin-inline:auto}
+.rank-lookup input{width:5rem}
 @media(max-width:720px){.survey-results{grid-template-columns:minmax(0,1fr)}}
 #survey-alpha-control[hidden]{display:none}
 .rank-result th{white-space:normal}
