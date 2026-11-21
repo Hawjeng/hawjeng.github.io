@@ -213,7 +213,7 @@ function renderRank() {
 }
 const surveySelectors=["survey-first","survey-second","survey-third"].map($);
 const surveyFactors=SURVEY_COUNTS.factors;
-const surveyCodeCases={"0,1":"s_phone","0,2":"s_plan","3":"s_zodiac","1,4":"s_score_phone","2,4":"s_score_plan"};
+const surveyCodeCases={"0,1":"s_phone","0,2":"s_plan","3":"s_zodiac"};
 let surveyStratumFactor, surveyStratumIndex=0;
 
 function surveyTable(rows,cols,counts,first,second,max,stratum,stratumControl) {
@@ -282,22 +282,12 @@ function surveyTest(a,b,rows,cols,counts,legacy,alpha) {
     : (significant?first+"的分布顯著偏離均等比例。":"資料未提供足夠證據顯示"+first+"的分布偏離均等比例。");
   const expected=m.expected.flat();
   const caution=expected.some(v=>v<1)||expected.filter(v=>v<5).length/expected.length>.2;
-  let supplement="", rankAPA="";
-  if (legacy && !isChi(CH17[legacy])) {
-    const result=PROGRAMS.results[legacy], rank=result.stats;
-    const group=a.label==="CT 量表得分"?b.label:a.label;
-    supplement=surveyHypotheses("依「"+group+"」分組後，各組的 CT 量表得分分布相同。",
-      "依「"+group+"」分組後，至少一組的 CT 量表得分分布不同。")+rankReport(CH17[legacy],result,alpha);
-    const finding=rank.p_kruskal<=alpha?"各組得分分布有顯著差異。":"資料未提供足夠證據顯示各組得分分布不同。";
-    rankAPA='<p>Kruskal–Wallis 檢定比較依「'+safe(group)+'」分組的 CT 得分。'+finding
-      +' <i>H</i>('+rank.df+') = '+fx(rank.h,2)+'，'+apaP(rank.p_kruskal)+'，<i>N</i> = '+rank.n+'。</p>';
-  }
   return hypotheses+chiReport({method:b?"ind":"gof",rows,cols:b?cols:rows},values,weights,alpha)
-    +(b?surveyAssociations(m,counts,a.label,b.label):"")+supplement+(legacy?jumpCode(legacy):"")
+    +(b?surveyAssociations(m,counts,a.label,b.label):"")+(legacy?jumpCode(legacy):"")
     +'<article class="card report-card"><h3>APA 格式解釋</h3><p>Pearson 卡方'+(b?"獨立性":"適合度")+'檢定顯示，'
     +safe(conclusion)+' χ²('+m.df+', <i>N</i> = '+m.N+') = '+fx(m.statistic,2)+'，'+apaP(m.p)
     +(m.v===null?"":"，Cramér <i>V</i> = "+fx(m.v,2).replace(/^0/,""))+'。</p>'
-    +(caution?'<p>部分期望次數偏低，以上 <i>p</i> 值為卡方近似，解讀時須保留。</p>':"")+rankAPA+'</article>';
+    +(caution?'<p>部分期望次數偏低，以上 <i>p</i> 值為卡方近似，解讀時須保留。</p>':"")+'</article>';
 }
 function renderSurvey() {
   const [first,second,third]=surveySelectors.map(select=>select.value);
