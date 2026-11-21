@@ -322,14 +322,18 @@ ui <- fluidPage(
   h1('相關與迴歸'),p('從兩個變數的散布圖，到多元模型與個案診斷。')),
  tabsetPanel(id='unit',
   tabPanel('原理說明',tabsetPanel(id='theory_topic',
-   tabPanel('基本原理',value='basics',includeHTML('www/theory.html')),
-   tabPanel('相關係數與散布圖',value='critical',
+   tabPanel('相關分析',value='critical',
     card(h3('操作散布圖的四象限'),
      p('拖動觀測點，觀察兩條平均線、各象限的點數與 Pearson r 如何一起變動。勾選 X 軸 z、Y 軸 z，可在標準化尺度上比較。'),
      tags$iframe(class='diag-frame',title='可拖曳的四象限散布圖',src='influence.html?quadrants=1&v=standardized-residual')),
     includeHTML('www/correlation.html'),
     critical_controls()),
-   tabPanel('殘差與影響點',value='influence',includeHTML('www/diagnostics.html')))),
+   tabPanel('迴歸分析',value='basics',includeHTML('www/theory.html'),includeHTML('www/diagnostics.html')),
+   tabPanel('多元迴歸',value='multiple',includeHTML('www/multiple.html'),
+    card(h3('比較預測值與實際值'),
+     select('multiple_example','課本案例',c('家庭開銷｜人口數與社經地位'='house','體重｜年齡與身高'='weight')),
+     div(class='chart-panel',plotOutput('multiple_fit_plot',height=420)),
+     uiOutput('multiple_fit_summary'))))),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
    card(plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520,hover=hoverOpts('book_hover',delay=75,nullOutside=TRUE)),uiOutput('book_point_tip',class='plot-label-layer'),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('book_result'),uiOutput('book_diagnostics')))),
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
@@ -358,6 +362,22 @@ ui <- fluidPage(
     select('manual_method','分析方法',methods),uiOutput('manual_options'),uiOutput('manual_levels')),
    card(plot_controls('manual'),div(class='chart-panel',uiOutput('manual_plot_key'),div(class='plot-surface',plotOutput('manual_plot',height=520,hover=hoverOpts('manual_hover',delay=75,nullOutside=TRUE)),uiOutput('manual_point_tip',class='plot-label-layer'),uiOutput('manual_plot_label',class='plot-label-layer')),uiOutput('manual_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('manual_result'),uiOutput('manual_diagnostics'))))))
 server <- function(input,output,session){
+ multiple_example<-reactive({
+  d<-case_data(req(input$multiple_example))
+  prepare_design(d,'lm',head(names(d),-1),tail(names(d),1))
+ })
+ output$multiple_fit_plot<-renderPlot(plot_analysis(multiple_example()))
+ output$multiple_fit_summary<-renderUI({
+  a<-multiple_example()
+  fit<-fit_design(a$data)
+  m<-summary(fit)
+  v<-vif_table(fit)
+  v$變數<-unname(a$labels[-1])
+  v$允差<-num(v$允差)
+  v$VIF<-num(v$VIF)
+  tagList(p(paste0('有效 N = ',nobs(fit),'｜R² = ',num(m$r.squared),'｜調整後 R² = ',num(m$adj.r.squared))),
+   h4('各預測變數的允差與 VIF'),show_table(v))
+ })
  critical_settings<-reactive({
   req(input$critical_n,input$critical_alpha,input$critical_tails)
   direction<-input$critical_tails
