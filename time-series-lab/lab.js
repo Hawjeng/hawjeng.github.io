@@ -372,10 +372,13 @@ function renderBG() {
   const cutoff = criticalValue(tail, alpha);
   const value = useF ? test.f : test.lm;
   const p = clamp(tail(value), 0, 1);
+  const lags = q === 1 ? "第一階" : "第 1 至 " + q + " 階";
   set("bg-result", "<strong>" + (useF ? "F" : "LM") + " = " + fixed(value, 3) + "　"
     + (p <= alpha ? "拒絕 H₀" : "不拒絕 H₀") + "</strong><small>p "
     + (p < .0001 ? "&lt; .0001" : "= " + fixed(p, 4)) + "，臨界值 " + fixed(cutoff, 3)
-    + "，R²<sub>aux</sub> = " + fixed(test.r2, 3) + "，n<sub>aux</sub> = " + diag.n + "</small>");
+    + "，R²<sub>aux</sub> = " + fixed(test.r2, 3) + "，n<sub>aux</sub> = " + diag.n + "</small><small>"
+    + (p <= alpha ? "聯合檢定顯示，" + lags + "的落後殘差係數並非全為 0。"
+      : "資料未提供足夠證據拒絕" + lags + "落後殘差係數全為 0 的假設。") + "</small>");
   const max = Math.max(cutoff, value, 1) * 1.14;
   set("bg-scale", numberScale({max, bands: [[0, cutoff, "#bde3de"], [cutoff, max, "#f1b99c"]],
     marker: value, marks: [[0, "0"], [cutoff, fixed(cutoff, 2)]],

@@ -7,7 +7,7 @@
 <title>時間序列分析｜邱皓政統計互動教材</title>
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css?v=history">
-<script defer src="data.js"></script><script defer src="stats.js?v=chapter-examples"></script><script defer src="lesson-data.js?v=chapter-examples"></script><script defer src="lab.js?v=population-labels"></script>
+<script defer src="data.js"></script><script defer src="stats.js?v=chapter-examples"></script><script defer src="lesson-data.js?v=chapter-examples"></script><script defer src="lab.js?v=diagnostic-explanations"></script>
 <script defer src="lessons.js?v=syntax-layout"></script>
 </head>
 <body>
@@ -72,7 +72,7 @@
 </aside></div>
 </section>
 <section id="diagnostics" class="unit" aria-labelledby="diagnostics-title">
-<div class="section-head"><h2 id="diagnostics-title">殘差自我相關檢測</h2><p>殘差 eₜ = Yₜ − Ŷₜ。當正殘差或負殘差連續成群，模型可能仍遺留有時間結構。切換擬合模型，對照殘差及兩種檢定。</p></div>
+<div class="section-head"><h2 id="diagnostics-title">殘差自我相關檢測</h2><p>殘差 eₜ = Yₜ − Ŷₜ，表示模型在第 t 期估錯多少。若過去的殘差仍能預測當期殘差，原模型就留下了時間結構。在其他迴歸假設成立時，自我相關仍可能使通常的 OLS 標準誤及其信賴區間失準。</p></div>
 <nav class="sub-nav" aria-label="殘差檢測主題"><a href="#residual-plot">殘差圖</a><a href="#dw">Durbin–Watson</a><a href="#bg">Breusch–Godfrey</a></nav>
 <div class="card diagnostic-input">
 <div class="toolbar"><label>資料 <select id="diag-data"><option value="diagnostic">課本表 16.10</option><option value="positive">模擬正向相依</option><option value="weak">模擬弱相依</option><option value="negative">模擬負向相依</option><option value="lag2">模擬二階相依</option></select></label><label>原模型 <select id="diag-model"><option value="1">線性趨勢</option><option value="2">二次趨勢</option><option value="3">三次趨勢</option><option value="4">四次趨勢</option><option value="ar">時間趨勢＋Yₜ₋₁</option></select></label></div>
@@ -83,22 +83,38 @@
 <div class="card"><div id="residuals"></div></div>
 </div>
 <article id="dw" class="card test sub-panel" aria-labelledby="dw-title">
-<h3 id="dw-title">Durbin–Watson（DW）</h3><p>檢查一階殘差相關。相鄰殘差越接近，d 越小。若經常正負交替，d 趨近 4。接近 2 只提供方向上的線索。</p>
+<h3 id="dw-title">Durbin–Watson（DW）</h3>
+<p><strong>問題：</strong>前一期的誤差是否傾向延續到這一期，或反向出現？H₀ 為誤差的一階自我相關 ρ₁ = 0。正向單尾的 H₁ 為 ρ₁ &gt; 0，負向單尾為 ρ₁ &lt; 0。</p>
 <p class="formula">d = Σ (eₜ − eₜ₋₁)² / Σ eₜ²</p>
+<p>分子累加相鄰殘差的差平方，分母用整體殘差平方和標準化。若模型連續幾期都低估或都高估，且相鄰殘差接近，d 會偏小。若高估和低估經常交替，差平方會變大，d 會偏向 4。近似關係 d ≈ 2(1 − r₁) 說明方向，是否顯著仍須查表。</p>
 <div class="toolbar"><label>單尾 α <select id="dw-alpha"><option value=".05">.05</option><option value=".01">.01</option></select></label><label>對立假設 <select id="dw-side"><option value="positive">正向自我相關</option><option value="negative">負向自我相關</option></select></label></div>
 <div id="dw-result" class="result" aria-live="polite"></div><div id="dw-scale"></div>
 <p>由附錄 H 找原模型的樣本數 n、解釋變數個數 k（不含截距）和單尾 α。負向檢定把 d 換成 4 − d。比較值低於 d<sub>L</sub> 時拒絕 H₀，高於 d<sub>U</sub> 時不拒絕，介於兩界或等於界值時無法判定。</p>
+<p>DW 的虛無分配會隨原模型的解釋變數而變。附錄用 n 和 k 給出上下界，因而可能出現無法判定的區間。當原模型含 Yₜ₋₁ 時，傳統 DW 界限檢定不適用，可改用 BG。</p>
 <details><summary>展開附錄 H 查表</summary><div class="toolbar"><label>查表 n <select id="dw-n"></select></label><label>查表 k <select id="dw-k"></select></label><button id="dw-use-model">帶入目前模型</button></div><div id="dw-table" class="scroll"></div></details>
 </article>
 <article id="bg" class="card test sub-panel" aria-labelledby="bg-title">
-<h3 id="bg-title">Breusch–Godfrey（BG）</h3><p>用原模型的全部解釋變數及前 q 期殘差，對當期殘差做輔助迴歸。H₀ 為第 1 至 q 階殘差係數同時為零。含落後依變數的模型也能使用 BG。</p>
+<h3 id="bg-title">Breusch–Godfrey（BG）</h3>
+<p><strong>問題：</strong>控制原模型的解釋變數後，過去 q 期的殘差能否共同解釋這一期的殘差？先估計原模型並取殘差，再以當期殘差為依變數，把原模型的解釋變數與 eₜ₋₁ 至 eₜ₋q 一起放入輔助迴歸。</p>
+<p>H₀ 為第 1 至 q 階殘差係數全為 0。H₁ 為至少一個係數不為 0。q = 2 同時檢驗第一階和第二階。若拒絕 H₀，可再看殘差自我相關圖來辨認可能涉及哪些階數。</p>
 <p class="formula">LM = n<sub>aux</sub> × R²<sub>aux</sub>　│　χ²(q) 右尾</p>
+<p>加入落後殘差後，若能解釋較多殘差變異，輔助迴歸的 R² 和 LM 就會變大。F 版本用同一項聯合假設，比較加入 q 個落後殘差前後的殘差平方和。LM 和 F 的參考分配不同，有限樣本下的 p 值可能不同。</p>
 <div class="toolbar"><label>落後階數 q <select id="bg-order"><option>1</option><option>2</option><option>3</option><option>4</option></select></label><label>統計量 <select id="bg-type"><option value="chi">LM（χ²）</option><option value="f">F 版本</option></select></label><label>α <select id="bg-alpha"><option value=".05">.05</option><option value=".01">.01</option><option value=".10">.10</option></select></label></div>
 <div id="bg-result" class="result" aria-live="polite"></div><div id="bg-scale"></div>
 <p>LM 查右尾卡方表，自由度為 q。F 版本查右尾 F 表，分子自由度 q，分母自由度 n<sub>aux</sub> − k − 1 − q，其中 k 不含截距。觀察值達到右尾臨界值時拒絕 H₀，等同 p ≤ α。</p>
 <details><summary>展開 BG 臨界值查表與 R 寫法</summary><div id="bg-table" class="scroll"></div><p>本站比照 <code>lmtest::bgtest</code> 預設 <code>fill = 0</code>，缺少的起始落後殘差補零，保留原迴歸樣本。若採省略前 q 期的方式，有效樣本與結果會改變。</p><pre id="bg-code"></pre></details>
 </article>
-<p class="source">DW 臨界值取自教材附錄 H。BG 版本與起始殘差處理參考 <a href="https://cran.r-project.org/web/packages/lmtest/refman/lmtest.html#bgtest">R lmtest 套件文件</a>。</p>
+<article class="card" aria-labelledby="diagnostic-compare-title">
+<h3 id="diagnostic-compare-title">DW 與 BG 怎麼選</h3>
+<div class="scroll"><table><thead><tr><th scope="col">比較項目</th><th scope="col">DW</th><th scope="col">BG</th></tr></thead><tbody>
+<tr><th scope="row">檢驗範圍</th><td>相鄰兩期的一階自我相關，依先設定的正向或負向假設檢驗。</td><td>聯合檢驗第 1 至 q 階，自我相關可為正或負。</td></tr>
+<tr><th scope="row">判定方式</th><td>比較 d 或 4 − d 與附錄 H 的上下界，可能落入無法判定區。</td><td>比較 LM 或 F 的右尾 p 值與 α。未拒絕表示所選階數下證據不足。</td></tr>
+<tr><th scope="row">使用情境</th><td>原模型無落後依變數，研究問題關注相鄰期誤差。</td><td>關注多個階數或模型含落後依變數。依資料頻率與研究問題選 q，例如季度資料可用 q = 4 檢查到相隔一年的誤差。</td></tr>
+</tbody></table></div>
+<p><strong>用同一份資料比較：</strong>選「模擬二階相依」與「線性趨勢」。DW 的 d = 2.084，在單尾 α = .05 下，正向與負向檢定都不拒絕 H₀。BG 的 LM 版本在 q = 1 時 p = .706，改成 q = 2 時 p &lt; .001。這組模擬把關聯放在相隔兩期，加入第二階後才檢出關聯。</p>
+<p><strong>對照課本表 16.10：</strong>保留線性趨勢，DW 的 d = .188，低於正向單尾 α = .05 的下界 1.201。BG 在 q = 1 時也拒絕 H₀（LM = 16.492，p &lt; .001）。DW 的正向結論來自所選的單尾方向，BG 的顯著結果則來自對落後係數是否為零的檢驗。</p>
+</article>
+<p class="source">DW 臨界值取自教材附錄 H。檢定適用條件與輔助迴歸參考 <a href="https://www.stata.com/manuals15/rregresspostestimationtimeseries.pdf">Stata 時間序列迴歸手冊</a>及 <a href="https://cran.r-project.org/web/packages/lmtest/refman/lmtest.html#bgtest">R lmtest 套件文件</a>。</p>
 </section>
 <section id="examples" class="unit" aria-labelledby="examples-title">
 <div class="section-head"><h2 id="examples-title">課本範例</h2><p>依各節挑選範例，查看逐期資料、計算結果及判讀。</p></div>
