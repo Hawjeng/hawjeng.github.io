@@ -44,3 +44,8 @@ details{padding:10px 0}summary{cursor:pointer;font-weight:650;color:var(--accent
 .book-example-layout .chart-panel,.book-example-layout .chart-results{width:100%}
 .book-example-layout .chart-results{padding-top:0;border-top:0}
 @media(max-width:760px){.book-example-layout{grid-template-columns:minmax(0,1fr);gap:0}}
+
+.controls .predictor-options{flex:1 1 340px;min-width:0;max-width:100%}
+.controls .predictor-options .shiny-input-container{width:auto}
+.predictor-options .shiny-options-group{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(175px,100%),1fr));gap:4px 12px}
+.predictor-options .checkbox{margin:0}

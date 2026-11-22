@@ -136,7 +136,8 @@ plot_controls <- function(prefix) {
   checkboxInput(paste0(prefix,'_mean'),'平均交點'),
   checkboxInput(paste0(prefix,'_equation'),'方程式'),
   checkboxInput(paste0(prefix,'_zx'),'X 軸 z'),
-  checkboxInput(paste0(prefix,'_zy'),'Y 軸 z'))
+  checkboxInput(paste0(prefix,'_zy'),'Y 軸 z'),
+  if(prefix %in% c('survey','manual'))uiOutput(paste0(prefix,'_fitted_control')))
 }
 equation_label <- function(a,zx,zy,plot_label=FALSE,model=NULL){
  d<-a$data;kind<-a$kind
@@ -180,9 +181,10 @@ plot_equation <- function(a,zx,zy){
   if(mult)p('圖的 X 軸是模型預測值；方程式列的是完整模型的原始預測變數。'),
   if(named_design&&zx)p('X 軸的 z 分數只套用到圖上的橫軸。'))
 }
-plot_x <- function(a,fit=NULL){
+fitted_axis <- function(a,use_fitted=FALSE)a$kind=='lm'&&(ncol(a$data)>2||use_fitted)
+plot_x <- function(a,fit=NULL,use_fitted=FALSE){
  d<-a$data
- if(a$kind=='lm'&&ncol(d)>2)return(fitted(if(is.null(fit))fit_design(d) else fit))
+ if(fitted_axis(a,use_fitted))return(fitted(if(is.null(fit))fit_design(d) else fit))
  if(a$kind=='dummy'&&ncol(d)>2)return(max.col(cbind(1-rowSums(d[-1]),d[-1]))-1L)
  d[[2]]
 }
@@ -195,13 +197,13 @@ plot_offsets <- function(x) {
  offset
 }
 pair_label <- function(x,y,zx,zy)paste0('(',paste(ifelse(c(zx,zy),'0',chart_num(c(x,y))),collapse=', '),')')
-plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_mean=FALSE){
+plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_mean=FALSE,use_fitted=FALSE){
  d<-a$data;kind<-a$kind
- model_plot<-kind=='lm'&&ncol(d)>2
+ model_plot<-fitted_axis(a,use_fitted)
  group_plot<-kind %in% c('dummy','pb')
  fit<-if(kind %in% c('cor','pb'))NULL else fit_design(d)
  palette<-c('#176f7a','#ac512e','#7465a1','#567537','#a15378')
- x_plot<-plot_x(a,fit)
+ x_plot<-plot_x(a,fit,use_fitted)
  groups<-sort(unique(x_plot))
  point_colors<-if(quadrants)quadrant_colors[quadrant_index(x_plot,d$y)] else rep('#176f7a',nrow(d))
  xlim<-if(group_plot)range(groups)+c(-.62,.62) else range(x_plot)
@@ -219,7 +221,7 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_mean=FALSE){
   cex.axis=1.0,cex.lab=1.03,col.axis='#456168',col.lab='#244c55',fg='#9bb1b5')
  plot(x_plot,d$y,type='n',xlim=xlim,ylim=ylim,axes=FALSE,
   asp=if(equal_z)sx/sy else NA_real_,
-  xlab=paste0(if(group_plot)'Group' else if(model_plot)'Fitted Y' else 'X',if(zx)' (z)'),
+  xlab=paste0(if(group_plot)'Group' else if(model_plot)'Predicted Y' else 'X',if(zx)' (z)'),
   ylab=paste0(if(model_plot)'Observed Y' else 'Y',if(zy)' (z)'))
  limits<-par('usr')
  if(quadrants)shade_quadrants(x_plot,d$y,limits)
@@ -274,7 +276,7 @@ plot_analysis <- function(a,quadrants=FALSE,zx=FALSE,zy=FALSE,show_mean=FALSE){
  }
 
 }
-plot_key <- function(a){
+plot_key <- function(a,use_fitted=FALSE){
  labels<-a$labels
  if(a$kind %in% c('pb','dummy')){
   return(div(class='plot-key',
@@ -282,10 +284,10 @@ plot_key <- function(a){
    lapply(seq_along(a$groups),function(i)span(paste0(i-1L,'｜',a$groups[i]))),
    span('◆ 組別平均')))
  }
- if(a$kind=='lm'&&ncol(a$data)>2)return(div(class='plot-key',span(paste0('Y｜',labels[1])),span('橫軸為預測值；藍色虛線為預測等於觀測')))
+ if(fitted_axis(a,use_fitted))return(div(class='plot-key',span('X｜預測值 Ŷ'),span(paste0('Y｜',labels[1])),span('藍色虛線｜預測等於觀測')))
  div(class='plot-key',span(paste0('X｜',labels[2])),span(paste0('Y｜',labels[1])),span('藍色線｜擬合值'))
 }
-data_controls <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
+data_selection <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
  numeric_names <- names(d)[vapply(d,is.numeric,logical(1))]
  category_names <- setdiff(names(d),numeric_names)
  groups <- if(length(category_names))unique(c(category_names,numeric_names[vapply(d[numeric_names],function(x)length(unique(na.omit(x)))<=15,logical(1))])) else numeric_names
@@ -295,11 +297,15 @@ data_controls <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
  x <- setdiff(intersect(current_x,x_choices),y)
  if(!length(x))x <- if(prefix=='survey' && '玩手遊時間' %in% x_choices && !kind %in% c('pb','dummy'))'玩手遊時間' else head(setdiff(x_choices,y),1)
  if(kind!='lm')x<-head(x,1)
+ list(numeric_names=numeric_names,x_choices=x_choices,x=x,y=y)
+}
+data_controls <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
+ options<-data_selection(prefix,d,kind,current_x,current_y)
  row_controls(
-  select(paste0(prefix,'_y'),'Y 結果變數',numeric_names,selected=y),
-  selectInput(paste0(prefix,'_x'),'X 預測／分組變數',x_choices,multiple=kind=='lm',
-   selected=x,
-   selectize=kind=='lm'),
+  select(paste0(prefix,'_y'),'Y 結果變數',options$numeric_names,selected=options$y),
+  if(kind=='lm')div(class='predictor-options',
+   checkboxGroupInput(paste0(prefix,'_x'),'X 解釋變數（可複選）',setdiff(options$x_choices,options$y),selected=options$x))
+  else select(paste0(prefix,'_x'),'X 預測／分組變數',options$x_choices,selected=options$x),
   if(kind=='poly')select(paste0(prefix,'_degree'),'多項式次數',2:3))
 }
 cor_critical <- function(n,alpha,tails){
@@ -324,7 +330,7 @@ critical_curve_svg <- function(){
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=book-example-results'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=survey-predictors'),
   tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
@@ -361,7 +367,7 @@ ui <- fluidPage(
      fileInput('survey_file','選擇調查逐筆資料 CSV',accept='.csv')),
     row_controls(uiOutput('survey_group'),select('survey_method','分析方法',methods)),uiOutput('survey_options'),uiOutput('survey_levels'),
     downloadButton('raw_survey','下載逐筆分析資料 CSV')),
-   card(plot_controls('survey'),div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=520,hover=hoverOpts('survey_hover',delay=75,nullOutside=TRUE)),uiOutput('survey_point_tip',class='plot-label-layer'),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('survey_result'),uiOutput('survey_diagnostics'))),
+   card(plot_controls('survey'),div(class='book-example-layout',div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=520,hover=hoverOpts('survey_hover',delay=75,nullOutside=TRUE)),uiOutput('survey_point_tip',class='plot-label-layer'),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('survey_result'),uiOutput('survey_diagnostics')))),
    includeHTML('www/survey-practice.html')),
   tabPanel('R 與 Python 語法',
    card(h3('語法與執行結果'),
@@ -472,9 +478,16 @@ server <- function(input,output,session){
   outputOptions(output,paste0(prefix,'_options'),suspendWhenHidden=FALSE)
   outputOptions(output,paste0(prefix,'_levels'),suspendWhenHidden=FALSE)
   reactive(checks({
-   method<-input[[paste0(prefix,'_method')]];d<-get_data()
+   method<-input[[paste0(prefix,'_method')]]
+   if(is.null(method))method<-'cor'
+   d<-get_data()
    x<-input[[paste0(prefix,'_x')]];y<-input[[paste0(prefix,'_y')]]
-   req(length(x),length(y),all(c(x,y) %in% names(d)))
+   if(is.null(y)){
+    defaults<-data_selection(prefix,d,method)
+    x<-defaults$x;y<-defaults$y
+   }
+   validate(need(length(x)&&length(y)&&all(c(x,y) %in% names(d)),
+    '請回到分析來源選擇結果變數與至少一個解釋變數。'))
    g<-if(method=='pb')c(input[[paste0(prefix,'_g0')]],input[[paste0(prefix,'_g1')]]) else input[[paste0(prefix,'_g0')]]
    degree<-if(method=='poly')req(input[[paste0(prefix,'_degree')]]) else 2L
    prepare_design(d,method,x,y,g,degree)
@@ -549,13 +562,19 @@ server <- function(input,output,session){
   output[[paste0(id,'_residual_csv')]]<-downloadHandler(
    function()paste0(id,'-regression-residuals.csv'),
    function(file)write.csv(diagnostics(),file,row.names=FALSE,fileEncoding='UTF-8',na=''))
-  output[[paste0(id,'_plot_key')]]<-renderUI(checks(plot_key(get_analysis())))
   selected_option<-function(name)isTRUE(input[[paste0(id,'_',name)]])
+  if(id %in% c('survey','manual')){
+   output[[paste0(id,'_fitted_control')]]<-renderUI({
+    req(input[[paste0(id,'_method')]]=='lm',length(input[[paste0(id,'_x')]])==1)
+    checkboxInput(paste0(id,'_fitted'),'橫軸用預測值 Ŷ',value=isolate(selected_option('fitted')))
+   })
+  }
+  output[[paste0(id,'_plot_key')]]<-renderUI(checks(plot_key(get_analysis(),selected_option('fitted'))))
   draw_current_plot<-function()plot_analysis(get_analysis(),selected_option('quadrants'),
-   selected_option('zx'),selected_option('zy'),selected_option('mean'))
+   selected_option('zx'),selected_option('zy'),selected_option('mean'),selected_option('fitted'))
   output[[paste0(id,'_plot')]]<-renderPlot(checks(draw_current_plot()))
   hover_model<-reactive({
-   a<-get_analysis();d<-a$data;fit<-fit_design(d);x<-plot_x(a,fit)
+   a<-get_analysis();d<-a$data;fit<-fit_design(d);x<-plot_x(a,fit,selected_option('fitted'))
    locations<-if(a$kind %in% c('pb','dummy'))x+plot_offsets(x) else x
    list(a=a,x=x,locations=data.frame(x=locations,y=d$y,index=seq_len(nrow(d))),
     residual=residuals(fit),standardized=rstandard(fit))
@@ -573,10 +592,11 @@ server <- function(input,output,session){
    e<-if(zy)h$residual[i]/sd(y) else h$residual[i]
    width<-session$clientData[[paste0('output_',id,'_plot_width')]]
    flip<-isTRUE(hover$coords_css$x>(if(is.null(width))600 else width)*.67)
+   x_label<-if(fitted_axis(h$a,selected_option('fitted')))if(zx)'z(Ŷ)' else 'Ŷ' else if(zx)'zX' else 'X'
    div(class=paste('point-tip',if(flip)'tip-left'),
     style=sprintf('left:%dpx;top:%dpx',round(hover$coords_css$x),round(hover$coords_css$y)),
     strong(paste('第',h$a$observation[i],'筆')),
-    div(paste0(if(zx)'zX' else 'X',' = ',chart_num(xval),'，',if(zy)'zY' else 'Y',' = ',chart_num(yval))),
+    div(paste0(x_label,' = ',chart_num(xval),'，',if(zy)'zY' else 'Y',' = ',chart_num(yval))),
     div(paste0(if(zy)'z 尺度殘差' else '殘差',' = ',chart_num(e))),
     div(paste0('標準化殘差 = ',chart_num(h$standardized[i]))))
   })
@@ -585,7 +605,7 @@ server <- function(input,output,session){
     a<-get_analysis()
     model<-fit_design(a$data)
     div(class='plot-equation-label',tabindex=0,title='拖曳或使用方向鍵移動方程式',
-     span(equation_label(a,selected_option('zx'),selected_option('zy'),plot_label=TRUE,model=model)),
+     span(equation_label(a,selected_option('zx')&&!fitted_axis(a,selected_option('fitted')),selected_option('zy'),plot_label=TRUE,model=model)),
      span(paste0('R² = ',chart_num(summary(model)$r.squared))))
    })
   })
