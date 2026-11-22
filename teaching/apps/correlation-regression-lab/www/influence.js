@@ -110,7 +110,12 @@ const quadrantOption = document.getElementById('quadrants');
 const params = new URLSearchParams(location.search);
 const correlationMode = params.get('mode')==='correlation';
 if(correlationMode||params.get('quadrants')==='1')quadrantOption.checked=true;
-if(correlationMode)document.body.classList.add('correlation-mode');
+const pearsonOverlay = document.getElementById('pearson-overlay');
+const pearsonText = pearsonOverlay.querySelector('text');
+if(correlationMode){
+  document.body.classList.add('correlation-mode');
+  pearsonOverlay.removeAttribute('visibility');
+}
 const quadrantLines = document.getElementById('quadrant-lines');
 const quadrantShading = document.getElementById('quadrant-shading');
 const quadrantCounts = document.getElementById('quadrant-counts');
@@ -225,10 +230,13 @@ function render(){
     node.setAttribute('aria-label',tip.replaceAll('\n','，'));
   });
   selectPoint.value=selected;
-  const values=[['Pearson r',full.r]];
-  if(!correlationMode)values.push(['全部點斜率',full.slope],['刪除該點後斜率',removed.slope],
+  if(correlationMode){
+    pearsonText.textContent='Pearson r = '+fmt(full.r);
+    return;
+  }
+  const values=[['Pearson r',full.r],['全部點斜率',full.slope],['刪除該點後斜率',removed.slope],
     ['預測值 ŷ',yhat],['殘差 e',e],['槓桿值 h',h],['Cook 距離',cook]
-  );
+  ];
   metrics.replaceChildren(...values.map(([key,value])=>{
     const node=document.createElement('div'), strong=document.createElement('strong');
     strong.textContent=fmt(value);

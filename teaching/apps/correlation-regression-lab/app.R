@@ -325,7 +325,7 @@ ui <- fluidPage(
      div(includeHTML('www/correlation-story.html'),includeHTML('www/correlation-formulas.html')),
      card(h3('操作散布圖的四象限'),
       p('拖動觀測點，看看各點落在哪個象限，以及 Pearson r 如何改變。'),
-      tags$iframe(class='diag-frame correlation-frame',title='可拖曳的四象限散布圖',src='influence.html?mode=correlation&v=correlation-focus'))),
+      tags$iframe(class='diag-frame correlation-frame',title='可拖曳的四象限散布圖',src='influence.html?mode=correlation&v=pearson-overlay'))),
     includeHTML('www/correlation.html'),
     critical_controls()),
    tabPanel('迴歸分析',value='basics',
