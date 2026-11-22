@@ -31,10 +31,10 @@ file_link<-function(label,name,content,mime){
  encoded<-gsub('[\r\n]','',encoded)
  tags$a(class='btn btn-default',download=name,href=paste0('data:',mime,';charset=utf-8;base64,',encoded),label)
 }
-show_table <- function(t,highlight=rep(FALSE,nrow(t))){
+show_table <- function(t,row_class=rep(NA_character_,nrow(t))){
  rows<-lapply(seq_len(nrow(t)),function(i){
   cells<-lapply(t,function(column)tags$td(column[i]))
-  tags$tr(class=if(highlight[i])'significant-coefficient',cells)
+  tags$tr(class=if(!is.na(row_class[i]))row_class[i],cells)
  })
  div(class='table-scroll',tags$table(
   tags$thead(tags$tr(lapply(names(t),function(name)tags$th(scope='col',name)))),
@@ -133,11 +133,16 @@ display_collinearity <- function(fit,labels){
  if(is.null(v))return(NULL)
  names_x<-unname(labels[v$變數])
  auxiliary_r2<-1-v$允差
+ severity<-ifelse(v$VIF>10,'嚴重',ifelse(v$VIF>4,'需留意','低'))
+ severity_class<-c('低'='collinearity-low','需留意'='collinearity-watch','嚴重'='collinearity-high')
  tagList(
   h4('共線性診斷'),
   p('逐一把某個解釋欄當成結果，用其他解釋欄做輔助迴歸。R²ⱼ 表示該欄的變異有多少比例可由其他欄解釋。'),
   show_table(data.frame(變數=names_x,`輔助迴歸 R²ⱼ`=num(auxiliary_r2),
-   允差=num(v$允差),VIF=num(v$VIF),check.names=FALSE)),
+   允差=num(v$允差),VIF=num(v$VIF),嚴重程度=severity,check.names=FALSE),
+   row_class=unname(severity_class[severity])),
+  p(tags$small('判讀參考。低：VIF ≤ 4，允差 ≥ .25。需留意：4 < VIF ≤ 10，.10 ≤ 允差 < .25。嚴重：VIF > 10，允差 < .10。分級以未四捨五入的數值判定。',
+   ' ',tags$a(href='https://online.stat.psu.edu/stat501/Lesson12',target='_blank',rel='noopener noreferrer','判讀依據'))),
   tags$details(tags$summary('查看各欄計算過程'),
    tags$ol(lapply(seq_along(names_x),function(j)tags$li(
     strong(names_x[j]),'。用 ',paste(names_x[-j],collapse='、'),' 預測，得到 R²ⱼ = ',num(auxiliary_r2[j]),'。',
@@ -184,7 +189,7 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
  tagList(if(section=='all')overview,
   if(book||section=='details')h4('迴歸係數、雙尾 t 檢定與 95% 信賴區間'),
   div(class='coefficient-table',
-   show_table(t,highlight=nzchar(stars)),
+   show_table(t,row_class=ifelse(nzchar(stars),'significant-coefficient',NA_character_)),
    p(tags$small('* p < .05　 ** p < .01　 *** p < .001')),
    file_link('下載係數表 CSV','regression-coefficients.csv',
     paste0('\ufeff',paste(capture.output(write.csv(t,row.names=FALSE)),collapse='\n')),'text/csv')),
@@ -444,7 +449,7 @@ critical_curve_svg <- function(){
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=coefficient-stars-column'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=collinearity-severity'),
   tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),

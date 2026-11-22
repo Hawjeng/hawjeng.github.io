@@ -63,3 +63,7 @@ details{padding:10px 0}summary{cursor:pointer;font-weight:650;color:var(--accent
 .coefficient-table tbody tr.significant-coefficient{background:#fff2d6;color:#553a0d}
 .coefficient-table .significant-coefficient td:nth-child(2){font-weight:700}
 .coefficient-table th:nth-child(3),.coefficient-table td:nth-child(3){width:1%;text-align:center}
+
+.collinearity-low td:last-child{background:#e6f3ec;color:#205940}
+.collinearity-watch td:last-child{background:#fff2d6;color:#6a4500;font-weight:600}
+.collinearity-high td:last-child{background:#fce7e7;color:#8a2424;font-weight:700}
