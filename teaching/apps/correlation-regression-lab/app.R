@@ -92,7 +92,7 @@ cor_inference_plots <- function(t,df,r,ci){
    tags$g(fill='#173b44',`font-size`=11,lapply(ticks,function(tick)axis_text(rx(tick),68,num(tick))))),
   p(tags$small(strong('95% Wald 信賴區間'), '｜r ± 1.96 × SE = [',paste(num(ci),collapse=', '),']。上圖將 t 的水平位置換算成 r，讓兩圖的觀察值對齊。')))
 }
-display_result <- function(analysis, extra=NULL, book=FALSE) {
+display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=NULL) {
  d <- analysis$data
  kind <- analysis$kind
  labels <- analysis$labels
@@ -109,19 +109,24 @@ display_result <- function(analysis, extra=NULL, book=FALSE) {
    if(any(abs(ci)>1))p('Wald 近似區間超出相關係數的範圍 [−1, 1]。'),
    if(kind=='pb')p('正相關表示編碼 1 組的平均數較高。')))
  }
- fit <- fit_design(d)
+ if(is.null(fit))fit<-fit_design(d)
  s <- summary(fit)
  f <- s$fstatistic
+ p_model<-pf(f[1],f[2],f[3],lower.tail=FALSE)
+ overview<-tagList(h3(paste0('結果變數｜',labels[1])),
+  p('有效 n = ',nrow(d),'｜R² = ',num(s$r.squared),'｜調整後 R² = ',num(s$adj.r.squared),'｜殘差 SE = ',num(s$sigma)),
+  h4('R² 的整體 F 檢定'),
+  p('H₀：ρ² = 0'),
+  p('F(',f[2],', ',f[3],') = ',num(f[1]),'｜p = ',format.pval(p_model,digits=4)))
+ if(section=='overview')return(overview)
  coef <- s$coefficients
  ci <- confint(fit)
  diag <- vif_table(fit)
  t <- data.frame(變數=c('截距',unname(labels[-1])),b=num(coef[,1]),SE=num(coef[,2]),t=num(coef[,3]),
   p=format.pval(coef[,4],digits=4),下限=num(ci[,1]),上限=num(ci[,2]),
   顯著不為零=ifelse(is.na(coef[,4]),'—',ifelse(coef[,4]<.05,'是','否')))
- tagList(h3(paste0('結果變數｜',labels[1])),
-  p('有效 n = ',nrow(d),'｜R² = ',num(s$r.squared),'｜調整後 R² = ',num(s$adj.r.squared),'｜殘差 SE = ',num(s$sigma)),
-  p('F(',f[2],', ',f[3],') = ',num(f[1]),'｜p = ',format.pval(pf(f[1],f[2],f[3],lower.tail=FALSE),digits=4)),
-  if(book)h4('各係數的雙尾 t 檢定與 95% 信賴區間'),
+ tagList(if(section=='all')overview,
+  if(book||section=='details')h4('迴歸係數、雙尾 t 檢定與 95% 信賴區間'),
   div(class='coefficient-table',
    show_table(t),
    file_link('下載係數表 CSV','regression-coefficients.csv',
@@ -418,7 +423,8 @@ ui <- fluidPage(
      fileInput('survey_file','選擇調查逐筆資料 CSV',accept='.csv')),
     row_controls(uiOutput('survey_group'),select('survey_method','分析方法',methods)),uiOutput('survey_options'),uiOutput('survey_levels'),
     downloadButton('raw_survey','下載逐筆分析資料 CSV')),
-   card(plot_controls('survey'),div(class='book-example-layout',div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=520,hover=hoverOpts('survey_hover',delay=75,nullOutside=TRUE)),uiOutput('survey_point_tip',class='plot-label-layer'),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('survey_result'),uiOutput('survey_diagnostics'))))),
+   card(plot_controls('survey'),div(class='book-example-layout',div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=520,hover=hoverOpts('survey_hover',delay=75,nullOutside=TRUE)),uiOutput('survey_point_tip',class='plot-label-layer'),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('survey_result'))),
+    uiOutput('survey_coefficients'),uiOutput('survey_diagnostics'))),
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
    card(plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),div(class='plot-surface',plotOutput('exercise_plot',height=520,hover=hoverOpts('exercise_hover',delay=75,nullOutside=TRUE)),uiOutput('exercise_point_tip',class='plot-label-layer'),uiOutput('exercise_plot_label',class='plot-label-layer')),uiOutput('exercise_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('exercise_result'),uiOutput('exercise_diagnostics')),uiOutput('worked_answers'))),
   tabPanel('R 與 Python 語法',
@@ -609,8 +615,16 @@ server <- function(input,output,session){
  analyses<-list(book=book_analysis,exercise=exercise_analysis,survey=survey_analysis,manual=manual_analysis)
  for(key in names(analyses))local({
   id<-key;get_analysis<-analyses[[id]]
+  if(id=='survey'){
+   survey_fit<-reactive(fit_design(get_analysis()$data))
+   output$survey_coefficients<-renderUI(checks({
+    a<-get_analysis()
+    if(!a$kind %in% c('cor','pb'))display_result(a,section='details',fit=survey_fit())
+   }))
+  }
   output[[paste0(id,'_result')]]<-renderUI(checks({
    a<-get_analysis()
+   if(id=='survey'&&!a$kind %in% c('cor','pb'))return(display_result(a,section='overview',fit=survey_fit()))
    tagList(if(!is.null(a$reduced))tags$details(tags$summary('查看縮減模型與共線性診斷'),display_result(a$reduced,book=id=='book')),
     display_result(a,a$comparison,book=id=='book'))
   }))
