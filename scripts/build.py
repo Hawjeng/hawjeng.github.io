@@ -63,7 +63,7 @@ def header(active, prefix):
 
 def footer(prefix):
     return f'''<section class="contact-band" id="contact" aria-labelledby="contact-title"><div class="container contact-inner">
-<div class="contact-details"><a href="mailto:{url(S['email'])}">{E(S['email'])}</a><div class="contact-meta">國立臺灣師範大學管理學院 · <a class="phone-link" href="tel:{url(S['telephone'])}">02-7749-3312</a></div><div class="copy-row"><button type="button" data-copy="{E(S['email'])}" hidden>複製 Email</button><span role="status" aria-live="polite"></span></div></div>
+<div class="contact-details"><div class="eyebrow" lang="en">Email</div><a href="mailto:{url(S['email'])}">{E(S['email'])}</a><div class="contact-meta">國立臺灣師範大學管理學院 · <a class="phone-link" href="tel:{url(S['telephone'])}">02-7749-3312</a></div><div class="copy-row"><button type="button" data-copy="{E(S['email'])}" hidden>複製 Email</button><span role="status" aria-live="polite"></span></div></div>
 <div class="project-citation" id="citation">
 <div class="eyebrow" lang="en">Citation</div><div class="citation-heading"><h2 id="contact-title">引述方法說明</h2><p>引用其他專案時，請替換名稱、年份與網址。</p></div>
 <p>邱皓政（2026）。<i>相關與迴歸</i>［互動統計教材］。<a href="https://hawjeng.github.io/correlation-regression-lab/">https://hawjeng.github.io/correlation-regression-lab/</a></p>
