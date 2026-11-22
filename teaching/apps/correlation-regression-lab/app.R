@@ -465,7 +465,7 @@ data_controls <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
  options<-data_selection(prefix,d,kind,current_x,current_y)
  x_choices<-setNames(options$x_choices,options$x_choices)
  if(prefix=='survey'&&kind %in% c('cor','lm')){
-  labels<-c('性別'='性別(1:男;0:女)','是否為 iPhone'='iPhone(1:是;0:否)','是否吃到飽'='吃到飽(1:是;0:否)')
+  labels<-c('性別'='性別（1:男）','是否為 iPhone'='iPhone(1:是;0:否)','是否吃到飽'='吃到飽(1:是;0:否)')
   names(x_choices)<-ifelse(x_choices %in% names(labels),unname(labels[x_choices]),x_choices)
  }
  predictor_choices<-x_choices[x_choices!=options$y]
@@ -670,7 +670,7 @@ server <- function(input,output,session){
     validate(need(length(levels)==2L,'性別須有兩個有效類別才能納入此分析。'))
     d[['性別']]<-match(gender,levels)-1L
     analysis<-prepare_design(d,method,x,y,g,degree)
-    analysis$labels[match('性別',analysis$labels)]<-paste0('性別（0 = ',levels[1],'，1 = ',levels[2],'）')
+    analysis$labels[match('性別',analysis$labels)]<-paste0('性別（1:',levels[2],'）')
     return(analysis)
    }
    prepare_design(d,method,x,y,g,degree)
