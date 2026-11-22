@@ -60,4 +60,4 @@
 
 .project-citation{min-width:0}.project-citation > p,.project-citation > div[lang="en"]{margin-top:10px}.project-citation p{font-size:.92rem;margin-top:4px}.project-citation p+p{margin-top:6px}.project-citation a{text-decoration:underline;overflow-wrap:anywhere}
 
-.citation-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 12px}.project-citation .citation-heading p{margin:0}
+.citation-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 12px}.project-citation .citation-heading h2{font-size:1.2rem}.project-citation .citation-heading p{margin:0;font-size:.82rem}

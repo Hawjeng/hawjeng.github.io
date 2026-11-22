@@ -504,7 +504,7 @@ critical_curve_svg <- function(){
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=aligned-anova'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=book-layout'),
   tags$script(src='console.js?v=correlation-png'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
@@ -531,7 +531,8 @@ ui <- fluidPage(
       uiOutput('multiple_fit_summary'))),
     includeHTML('www/multiple.html')))),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
-   card(plot_controls('book'),div(class='book-example-layout book-plot-right',div(class='chart-results',uiOutput('book_result'),uiOutput('book_diagnostics')),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520,hover=hoverOpts('book_hover',delay=75,nullOutside=TRUE)),uiOutput('book_point_tip',class='plot-label-layer'),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG'))))),
+   card(div(class='book-example-layout book-plot-right',div(class='chart-results',uiOutput('book_result')),div(class='chart-panel',plot_controls('book'),uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=440,hover=hoverOpts('book_hover',delay=75,nullOutside=TRUE)),uiOutput('book_point_tip',class='plot-label-layer'),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG'))),
+    uiOutput('book_coefficients'),uiOutput('book_diagnostics'))),
   tabPanel('調查習作',
    card(h3('手機使用行為調查'),p('預設案例為玩手遊時間與手機遊戲成癮的 Pearson 相關。可切換全體或單一星座，也可改選變數。'),
     tags$details(tags$summary('載入其他調查資料'),
@@ -727,19 +728,21 @@ server <- function(input,output,session){
  analyses<-list(book=book_analysis,exercise=exercise_analysis,survey=survey_analysis,manual=manual_analysis)
  for(key in names(analyses))local({
   id<-key;get_analysis<-analyses[[id]]
-  if(id=='survey'){
-   survey_fit<-reactive(fit_design(get_analysis()$data))
-   output$survey_correlation_matrix<-renderUI(checks(display_correlation_matrix(get_analysis())))
-   output$survey_coefficients<-renderUI(checks({
+  split_results<-id %in% c('book','survey')
+  if(id=='survey')output$survey_correlation_matrix<-renderUI(checks(display_correlation_matrix(get_analysis())))
+  if(split_results){
+   fitted_model<-reactive(fit_design(get_analysis()$data))
+   output[[paste0(id,'_coefficients')]]<-renderUI(checks({
     a<-get_analysis()
-    if(!a$kind %in% c('cor','pb'))display_result(a,section='details',fit=survey_fit())
+    if(!a$kind %in% c('cor','pb'))display_result(a,a$comparison,section='details',fit=fitted_model())
    }))
   }
   output[[paste0(id,'_result')]]<-renderUI(checks({
    a<-get_analysis()
-   if(id=='survey'&&!a$kind %in% c('cor','pb'))return(display_result(a,section='overview',fit=survey_fit()))
+   split_model<-split_results&&!a$kind %in% c('cor','pb')
+   if(id=='survey'&&split_model)return(display_result(a,section='overview',fit=fitted_model()))
    tagList(if(!is.null(a$reduced))tags$details(tags$summary('查看縮減模型與共線性診斷'),display_result(a$reduced,book=id=='book')),
-    display_result(a,a$comparison,book=id=='book'))
+    if(split_model)display_result(a,section='overview',fit=fitted_model()) else display_result(a,a$comparison,book=id=='book'))
   }))
   diagnostics<-reactive(checks(diagnostic_data(get_analysis())))
   output[[paste0(id,'_diagnostics')]]<-renderUI({

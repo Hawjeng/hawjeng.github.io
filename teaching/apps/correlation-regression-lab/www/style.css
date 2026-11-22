@@ -41,7 +41,8 @@ details{padding:10px 0}summary{cursor:pointer;font-weight:650;color:var(--accent
 @media(max-width:760px){.hubble-layout{grid-template-columns:minmax(0,1fr);gap:.5rem}}
 
 .book-example-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;align-items:start}
-.book-example-layout.book-plot-right{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}
+.book-plot-right .chart-panel{max-width:540px}
+.book-plot-right .plot-controls{justify-content:center;margin-bottom:12px}
 .book-example-layout .chart-panel,.book-example-layout .chart-results{width:100%}
 .book-example-layout .chart-results{padding-top:0;border-top:0}
 @media(max-width:760px){.book-example-layout,.book-example-layout.book-plot-right{grid-template-columns:minmax(0,1fr);gap:0}}
@@ -52,7 +53,7 @@ details{padding:10px 0}summary{cursor:pointer;font-weight:650;color:var(--accent
 .predictor-options .checkbox{margin:0}
 
 .coefficient-table .table-scroll,.anova-table .table-scroll{margin:10px 0 8px;border:1px solid var(--line);border-radius:7px}
-.coefficient-table table,.anova-table table{font-size:12px;font-variant-numeric:tabular-nums}
+.coefficient-table table,.anova-table table{font-size:14px;font-variant-numeric:tabular-nums}
 .coefficient-table th,.coefficient-table td,.anova-table th,.anova-table td{padding:5px 6px;text-align:right}
 .coefficient-table th:first-child,.coefficient-table td:first-child,.anova-table th:first-child,.anova-table td:first-child{text-align:left;white-space:normal}
 .coefficient-table tbody tr:nth-child(even),.anova-table tbody tr:nth-child(even){background:#f5f9f9}
