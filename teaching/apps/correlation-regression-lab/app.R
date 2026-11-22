@@ -181,22 +181,21 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
  mse<-sse/residual_df
  overview<-tagList(h3(paste0('結果變數｜',labels[1])),
   p('有效 n = ',nrow(d),'｜R² = ',num(s$r.squared),'｜調整後 R² = ',num(s$adj.r.squared),'｜殘差 SE = ',num(s$sigma)),
-  if(section=='overview')tags$details(tags$summary('查看 R² 與調整後 R² 的計算過程'),tags$ol(
+  tags$details(tags$summary('查看 R² 與調整後 R² 的計算過程'),tags$ol(
    tags$li('平方和。SS',tags$sub('reg'),' = Σ(Ŷᵢ − Ȳ)² = ',num(ssr),'。SS',tags$sub('error'),' = Σ(Yᵢ − Ŷᵢ)² = ',num(sse),'。SS',tags$sub('total'),' = SS',tags$sub('reg'),' + SS',tags$sub('error'),' = ',num(sst),'。'),
    tags$li('R² = 1 − SS',tags$sub('error'),' ÷ SS',tags$sub('total'),' = 1 − ',num(sse),' ÷ ',num(sst),' ≈ ',num(s$r.squared),'。'),
    tags$li('調整後 R² = 1 − [SS',tags$sub('error'),' ÷ (n − k − 1)] ÷ [SS',tags$sub('total'),' ÷ (n − 1)]。',
     '代入得 1 − (',num(sse),' ÷ ',residual_df,') ÷ (',num(sst),' ÷ ',n-1L,') ≈ ',num(s$adj.r.squared),'。k = ',k,'，為模型的解釋欄數。'))),
   h4('R² 的整體 F 檢定'),
-  if(section!='overview')p('H₀：ρ² = 0'),
   p('F(',f[2],', ',f[3],') = ',num(f[1]),'｜p = ',format.pval(p_model,digits=4)),
-  if(section=='overview')tags$details(tags$summary('查看 F 檢定的計算過程'),tags$ol(
+  tags$details(tags$summary('查看 F 檢定的計算過程'),tags$ol(
    tags$li('分子自由度 = k = ',k,'。分母自由度 = n − k − 1 = ',n,' − ',k,' − 1 = ',residual_df,'。'),
    tags$li('迴歸均方 MSR = SS',tags$sub('reg'),' ÷ k = ',num(ssr),' ÷ ',k,' ≈ ',num(msr),'。殘差均方 MSE = SS',tags$sub('error'),' ÷ (n − k − 1) = ',
     num(sse),' ÷ ',residual_df,' ≈ ',num(mse),'。'),
    tags$li('F = MSR ÷ MSE = ',num(msr),' ÷ ',num(mse),' ≈ ',num(f[1]),'。p 為 H₀ 下 F 分配的右尾機率 P(F ≥ ',
     num(f[1]),') = ',format.pval(p_model,digits=4),'。'))),
-  if(section=='overview'&&is.finite(f[1]))f_inference_plot(unname(f[1]),unname(f[2]),unname(f[3]),p_model),
-  if(section=='overview'&&!is.finite(f[1]))p('H₀：ρ² = 0'))
+  if(is.finite(f[1]))f_inference_plot(unname(f[1]),unname(f[2]),unname(f[3]),p_model),
+  if(!is.finite(f[1]))p('H₀：ρ² = 0'))
  if(section=='overview')return(overview)
  coef <- s$coefficients
  p_coef<-coef[,4]
