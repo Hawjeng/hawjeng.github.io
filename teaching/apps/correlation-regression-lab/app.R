@@ -52,20 +52,26 @@ diagnostic_data <- function(a){
 }
 cor_inference_plots <- function(t,df,r,ci){
  cv<-qt(.975,df)
- edge<-max(5,min(abs(t)+.5,8),cv+.5)
- tx<-function(x)210+180*x/edge
+ # Position t values on the r scale so the observed marker aligns with r.
+ t_to_r<-function(x)x/sqrt(x^2+df)
+ limit<-max(abs(c(ci,r)),t_to_r(max(5,cv+.5))) * 1.10
+ rx<-function(x)210+180*x/limit
+ tx<-function(x)rx(t_to_r(x))
+ curve_limit<-min(limit,.9999)
+ edge<-curve_limit*sqrt(df/(1-curve_limit^2))
  ty<-function(x)110-75*dt(x,df)/dt(0,df)
  density_path<-function(from,to){
-  x<-seq(from,to,length.out=100)
+  r_positions<-seq(t_to_r(from),t_to_r(to),length.out=180)
+  x<-r_positions*sqrt(df/(1-r_positions^2))
   paste(sprintf('%.2f,%.2f',tx(x),ty(x)),collapse='L')
  }
  tail_path<-function(from,to)sprintf('M%.2f,110L%sV110Z',tx(from),density_path(from,to))
- marker<-tx(max(-edge,min(edge,t)))
- limit<-max(1,abs(ci))+.08
- rx<-function(x)210+180*x/limit
+ marker<-rx(r)
+ ticks<-pretty(c(-limit,limit),n=4)
+ ticks<-ticks[abs(ticks)<=min(limit,1)+1e-8]
  axis_text<-function(x,y,label)tags$text(x=x,y=y,`text-anchor`='middle',label)
- tagList(
-  tags$svg(viewBox='0 0 420 144',width='100%',role='img',
+ div(
+  tags$svg(viewBox='0 0 420 144',style='display:block',width='100%',role='img',
    `aria-label`=paste('雙尾 t 分配、拒絕區與觀察到的 t 值',num(t)),
    tags$path(d=tail_path(-edge,-cv),fill='#f3c4ad'),
    tags$path(d=tail_path(cv,edge),fill='#f3c4ad'),
@@ -75,18 +81,16 @@ cor_inference_plots <- function(t,df,r,ci){
    tags$circle(cx=marker,cy=110,r=4,fill='#ac512e'),
    tags$g(fill='#173b44',`font-size`=13,
     axis_text(210,24,'H₀：ρ = 0'),axis_text(tx(-cv),132,num(-cv)),axis_text(210,132,'0'),axis_text(tx(cv),132,num(cv)))),
-  if(abs(t)>edge)tags$small('觀察到的 t 超出圖示範圍，圓點標在相應的圖邊。'),
-  h4('95% Wald 信賴區間'),
-  p('r ± 1.96 × SE = [',paste(num(ci),collapse=', '),']'),
-  tags$svg(viewBox='0 0 420 100',width='100%',role='img',
+  tags$svg(viewBox='0 0 420 73',style='display:block',width='100%',role='img',
    `aria-label`=paste('95% Wald 信賴區間',paste(num(ci),collapse=' 至 ')),
-   tags$line(x1=rx(-1),x2=rx(1),y1=72,y2=72,stroke='#9bb1b5'),
-   tags$line(x1=210,x2=210,y1=20,y2=72,stroke='#9bb1b5',`stroke-dasharray`='4 3'),
-   tags$line(x1=rx(ci[1]),x2=rx(ci[2]),y1=45,y2=45,stroke='#176f7a',`stroke-width`=3),
-   lapply(ci,function(endpoint)tags$line(x1=rx(endpoint),x2=rx(endpoint),y1=39,y2=51,stroke='#176f7a',`stroke-width`=2)),
-   tags$circle(cx=rx(r),cy=45,r=4,fill='#176f7a'),
-   tags$g(fill='#173b44',`font-size`=13,
-    axis_text(rx(-1),91,'−1'),axis_text(210,91,'0'),axis_text(rx(1),91,'1'))))
+   tags$line(x1=rx(-min(limit,1)),x2=rx(min(limit,1)),y1=50,y2=50,stroke='#9bb1b5'),
+   tags$line(x1=210,x2=210,y1=0,y2=50,stroke='#9bb1b5',`stroke-dasharray`='4 3'),
+   tags$line(x1=marker,x2=marker,y1=0,y2=25,stroke='#ac512e',`stroke-dasharray`='4 3'),
+   tags$line(x1=rx(ci[1]),x2=rx(ci[2]),y1=25,y2=25,stroke='#176f7a',`stroke-width`=3),
+   lapply(ci,function(endpoint)tags$line(x1=rx(endpoint),x2=rx(endpoint),y1=19,y2=31,stroke='#176f7a',`stroke-width`=2)),
+   tags$circle(cx=marker,cy=25,r=4,fill='#176f7a'),
+   tags$g(fill='#173b44',`font-size`=11,lapply(ticks,function(tick)axis_text(rx(tick),68,num(tick))))),
+  p(tags$small(strong('95% Wald 信賴區間'), '｜r ± 1.96 × SE = [',paste(num(ci),collapse=', '),']。上圖將 t 的水平位置換算成 r，讓兩圖的觀察值對齊。')))
 }
 display_result <- function(analysis, extra=NULL, book=FALSE) {
  d <- analysis$data
