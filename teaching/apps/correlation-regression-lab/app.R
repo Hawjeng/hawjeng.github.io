@@ -128,6 +128,24 @@ f_inference_plot <- function(observed,df1,df2,p_value){
   tags$figcaption(tags$small('陰影為右尾拒絕區（α = .05）。紅線為觀察 F',
    if(observed>right)'，數值超出圖示範圍，標在右緣','。')))
 }
+display_collinearity <- function(fit,labels){
+ v<-vif_table(fit)
+ if(is.null(v))return(NULL)
+ names_x<-unname(labels[v$變數])
+ auxiliary_r2<-1-v$允差
+ tagList(
+  h4('共線性診斷'),
+  p('逐一把某個解釋欄當成結果，用其他解釋欄做輔助迴歸。R²ⱼ 表示該欄的變異有多少比例可由其他欄解釋。'),
+  show_table(data.frame(變數=names_x,`輔助迴歸 R²ⱼ`=num(auxiliary_r2),
+   允差=num(v$允差),VIF=num(v$VIF),check.names=FALSE)),
+  tags$details(tags$summary('查看各欄計算過程'),
+   tags$ol(lapply(seq_along(names_x),function(j)tags$li(
+    strong(names_x[j]),'。用 ',paste(names_x[-j],collapse='、'),' 預測，得到 R²ⱼ = ',num(auxiliary_r2[j]),'。',
+    '允差 = 1 − ',num(auxiliary_r2[j]),' ≈ ',num(v$允差[j]),'。',
+    'VIF = 1 ÷ ',num(v$允差[j]),' ≈ ',num(v$VIF[j]),'。'))),
+   p('計算採用未四捨五入的數值。虛擬變數與多項式按實際納入模型的欄位計算。')),
+  p('允差越接近 0、VIF 越大，代表該欄與其他欄的重疊越多。VIF 接近 1 時，係數的變異幾乎沒有膨脹。例如 VIF = 4 表示估計變異為無共線性時的 4 倍，標準誤為 2 倍。'))
+}
 display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=NULL) {
  d <- analysis$data
  kind <- analysis$kind
@@ -161,7 +179,6 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
  p_coef<-coef[,4]
  stars<-ifelse(is.na(p_coef),'',ifelse(p_coef<.001,'***',ifelse(p_coef<.01,'**',ifelse(p_coef<.05,'*',''))))
  ci <- confint(fit)
- diag <- vif_table(fit)
  t <- data.frame(變數=c('截距',unname(labels[-1])),b=num(coef[,1]),顯著性=stars,SE=num(coef[,2]),t=num(coef[,3]),
   p=format.pval(coef[,4],digits=4),下限=num(ci[,1]),上限=num(ci[,2]))
  tagList(if(section=='all')overview,
@@ -171,8 +188,7 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
    p(tags$small('* p < .05　 ** p < .01　 *** p < .001')),
    file_link('下載係數表 CSV','regression-coefficients.csv',
     paste0('\ufeff',paste(capture.output(write.csv(t,row.names=FALSE)),collapse='\n')),'text/csv')),
-  if(!is.null(diag))tagList(h4('共線性診斷'),p('允差 = 1 − R²ⱼ；VIF = 1 / 允差。每欄都用其他設計欄來預測。'),
-   show_table(transform(diag,變數=unname(labels[colnames(d)[-1]]),允差=num(允差),VIF=num(VIF)))),
+  display_collinearity(fit,labels),
   if(!is.null(extra))extra)
 }
 shade_quadrants <- function(x,y,limits){
@@ -490,12 +506,8 @@ server <- function(input,output,session){
   a<-multiple_example()
   fit<-fit_design(a$data)
   m<-summary(fit)
-  v<-vif_table(fit)
-  v$變數<-unname(a$labels[-1])
-  v$允差<-num(v$允差)
-  v$VIF<-num(v$VIF)
   tagList(p(paste0('有效 N = ',nobs(fit),'｜R² = ',num(m$r.squared),'｜調整後 R² = ',num(m$adj.r.squared))),
-   h4('各預測變數的允差與 VIF'),show_table(v))
+   display_collinearity(fit,a$labels))
  })
  critical_settings<-reactive({
   req(input$critical_n,input$critical_alpha,input$critical_tails)
