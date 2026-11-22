@@ -69,7 +69,7 @@ display_correlation_matrix <- function(analysis){
    tagList(value,tags$sup(class='correlation-stars',stars_at(i,j)))
   },cell_class=function(i,j)if(nzchar(stars_at(i,j)))'significant-correlation')),
   p('雙尾檢定：* p < .05　 ** p < .01　 *** p < .001'),
-  tags(type='button',class='btn btn-default',onclick='downloadCorrelationMatrix(this)','下載相關矩陣 PNG'))
+  tags$button(type='button',class='btn btn-default',onclick='downloadCorrelationMatrix(this)','下載相關矩陣 PNG'))
 }
 diagnostic_data <- function(a){
  fit<-fit_design(a$data)
