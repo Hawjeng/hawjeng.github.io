@@ -182,8 +182,8 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
  overview<-tagList(h3(paste0('結果變數｜',labels[1])),
   p('有效 n = ',nrow(d),'｜R² = ',num(s$r.squared),'｜調整後 R² = ',num(s$adj.r.squared),'｜殘差 SE = ',num(s$sigma)),
   if(section=='overview')tags$ol(
-   tags$li('平方和。SSR = Σ(Ŷᵢ − Ȳ)² = ',num(ssr),'。SSE = Σ(Yᵢ − Ŷᵢ)² = ',num(sse),'。SST = SSR + SSE = ',num(sst),'。'),
-   tags$li('R² = SSR ÷ SST = ',num(ssr),' ÷ ',num(sst),' ≈ ',num(s$r.squared),'。'),
+   tags$li('平方和。SS',tags$sub('reg'),' = Σ(Ŷᵢ − Ȳ)² = ',num(ssr),'。SS',tags$sub('error'),' = Σ(Yᵢ − Ŷᵢ)² = ',num(sse),'。SS',tags$sub('total'),' = SS',tags$sub('reg'),' + SS',tags$sub('error'),' = ',num(sst),'。'),
+   tags$li('R² = SS',tags$sub('reg'),' ÷ SS',tags$sub('total'),' = ',num(ssr),' ÷ ',num(sst),' ≈ ',num(s$r.squared),'。'),
    tags$li('調整後 R² = 1 − (1 − R²) × (n − 1) ÷ (n − k − 1) = 1 − (1 − ',num(s$r.squared),') × ',
     n-1L,' ÷ ',residual_df,' ≈ ',num(s$adj.r.squared),'。k = ',k,'，為模型的解釋欄數。')),
   h4('R² 的整體 F 檢定'),
@@ -191,7 +191,7 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
   p('F(',f[2],', ',f[3],') = ',num(f[1]),'｜p = ',format.pval(p_model,digits=4)),
   if(section=='overview')tags$ol(
    tags$li('分子自由度 = k = ',k,'。分母自由度 = n − k − 1 = ',n,' − ',k,' − 1 = ',residual_df,'。'),
-   tags$li('迴歸均方 MSR = SSR ÷ k = ',num(ssr),' ÷ ',k,' ≈ ',num(msr),'。殘差均方 MSE = SSE ÷ (n − k − 1) = ',
+   tags$li('迴歸均方 MSR = SS',tags$sub('reg'),' ÷ k = ',num(ssr),' ÷ ',k,' ≈ ',num(msr),'。殘差均方 MSE = SS',tags$sub('error'),' ÷ (n − k − 1) = ',
     num(sse),' ÷ ',residual_df,' ≈ ',num(mse),'。'),
    tags$li('F = MSR ÷ MSE = ',num(msr),' ÷ ',num(mse),' ≈ ',num(f[1]),'。p 為 H₀ 下 F 分配的右尾機率 P(F ≥ ',
     num(f[1]),') = ',format.pval(p_model,digits=4),'。')),
