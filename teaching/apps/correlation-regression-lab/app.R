@@ -226,13 +226,13 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
    tags$li('F = MSR ÷ MSE = ',num(msr),' ÷ ',num(mse),' ≈ ',num(f[1]),'。p 為 H₀ 下 F 分配的右尾機率 P(F ≥ ',
     num(f[1]),') = ',format.pval(p_model,digits=4),'。'))),
   if(is.finite(f[1]))f_inference_plot(unname(f[1]),unname(f[2]),unname(f[3]),p_model),
-  if(!is.finite(f[1]))p('H₀：ρ² = 0'),
-  h4('變異數分析（ANOVA）'),
-  show_table(data.frame(變異來源=c('迴歸','殘差','總計'),
+  if(!is.finite(f[1]))p('H₀：ρ² = 0'))
+ if(section=='overview')return(overview)
+ anova_table<-tagList(h4('變異數分析（ANOVA）'),
+  div(class='anova-table',show_table(data.frame(變異來源=c('迴歸','殘差','總計'),
    平方和=num(c(ssr,sse,sst)),自由度=c(k,residual_df,n-1L),
    均方=c(num(c(msr,mse)),'—'),F=c(num(f[1]),'—','—'),
-   p=c(format.pval(p_model,digits=4),'—','—'),check.names=FALSE)))
- if(section=='overview')return(overview)
+   p=c(format.pval(p_model,digits=4),'—','—'),check.names=FALSE))))
  coef <- s$coefficients
  p_coef<-coef[,4]
  stars<-significance_stars(p_coef)
@@ -240,7 +240,7 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
  standardized_b<-coef[-1,1]*vapply(d[-1],sd,numeric(1))/sd(d$y)
  t <- data.frame(變數=c('截距',unname(labels[-1])),b=num(coef[,1]),顯著性=stars,SE=num(coef[,2]),t=num(coef[,3]),
   p=format.pval(coef[,4],digits=4),`b′`=c('—',num(standardized_b)),下限=num(ci[,1]),上限=num(ci[,2]),check.names=FALSE)
- tagList(if(section=='all')overview,
+ tagList(if(section=='all')overview,anova_table,
   if(book||section=='details')h4('迴歸係數、雙尾 t 檢定與 95% 信賴區間'),
   div(class='coefficient-table',
    show_table(t,row_class=ifelse(nzchar(stars),'significant-coefficient',NA_character_)),
@@ -504,7 +504,7 @@ critical_curve_svg <- function(){
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=survey-matrix-highlight'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=aligned-anova'),
   tags$script(src='console.js?v=correlation-png'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
