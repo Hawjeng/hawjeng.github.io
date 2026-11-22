@@ -343,16 +343,22 @@ data_selection <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
 }
 data_controls <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
  options<-data_selection(prefix,d,kind,current_x,current_y)
+ x_choices<-setNames(options$x_choices,options$x_choices)
+ if(prefix=='survey'&&kind %in% c('cor','lm')){
+  labels<-c('性別'='性別(1:男;0:女)','是否為 iPhone'='iPhone(1:是;0:否)','是否吃到飽'='吃到飽(1:是;0:否)')
+  names(x_choices)<-ifelse(x_choices %in% names(labels),unname(labels[x_choices]),x_choices)
+ }
+ predictor_choices<-x_choices[x_choices!=options$y]
  y_control<-select(paste0(prefix,'_y'),'Y 結果變數',options$numeric_names,selected=options$y)
  if(prefix=='survey'&&kind=='lm')return(tagList(
   row_controls(y_control),
   div(class='predictor-options',
-   checkboxGroupInput(paste0(prefix,'_x'),'X 解釋變數（可複選）',setdiff(options$x_choices,options$y),selected=options$x,width='100%'))))
+   checkboxGroupInput(paste0(prefix,'_x'),'X 解釋變數（可複選）',predictor_choices,selected=options$x,width='100%'))))
  row_controls(
   y_control,
   if(kind=='lm')div(class='predictor-options',
-   checkboxGroupInput(paste0(prefix,'_x'),'X 解釋變數（可複選）',setdiff(options$x_choices,options$y),selected=options$x))
-  else select(paste0(prefix,'_x'),'X 變數',options$x_choices,selected=options$x),
+   checkboxGroupInput(paste0(prefix,'_x'),'X 解釋變數（可複選）',predictor_choices,selected=options$x))
+  else select(paste0(prefix,'_x'),'X 變數',x_choices,selected=options$x),
   if(kind=='poly')select(paste0(prefix,'_degree'),'多項式次數',2:3))
 }
 cor_critical <- function(n,alpha,tails){
