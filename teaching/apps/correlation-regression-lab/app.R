@@ -313,7 +313,7 @@ critical_curve_svg <- function(){
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=correlation-focus'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=correlation-formula-size'),
   tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=paired-curves')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
