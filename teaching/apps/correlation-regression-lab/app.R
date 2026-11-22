@@ -34,9 +34,9 @@ file_link<-function(label,name,content,mime){
 significance_stars <- function(p){
  ifelse(is.na(p),'',ifelse(p<.001,'***',ifelse(p<.01,'**',ifelse(p<.05,'*',''))))
 }
-show_table <- function(t,row_class=rep(NA_character_,nrow(t)),cell=function(i,j)t[[j]][i]){
+show_table <- function(t,row_class=rep(NA_character_,nrow(t)),cell=function(i,j)t[[j]][i],cell_class=function(i,j)NULL){
  rows<-lapply(seq_len(nrow(t)),function(i){
-  cells<-lapply(seq_along(t),function(j)tags$td(cell(i,j)))
+  cells<-lapply(seq_along(t),function(j)tags$td(class=cell_class(i,j),cell(i,j)))
   tags$tr(class=if(!is.na(row_class[i]))row_class[i],cells)
  })
  div(class='table-scroll',tags$table(
@@ -60,14 +60,14 @@ display_correlation_matrix <- function(analysis){
  section<-data.frame(變數=paste0(indices,'. ',unname(analysis$labels[names(d)])),
   Mean=format_value(means),SD=format_value(sds),cells,check.names=FALSE)
  names(section)[-(1:3)]<-as.character(indices)
+ stars_at<-function(i,j)if(j>3L && i>j-3L)significance_stars(p_values[i,j-3L]) else ''
  tagList(h4('Pearson 相關係數矩陣'),
   p(paste0('依目前分析的有效樣本計算（n = ',nrow(d),'）。SD 為樣本標準差。')),
   div(class='survey-correlation-table',show_table(section,cell=function(i,j){
    value<-section[[j]][i]
    if(j==1L)return(value)
-   stars<-if(j>3L && i>j-3L)significance_stars(p_values[i,j-3L]) else ''
-   tagList(value,tags$sup(class='correlation-stars',stars))
-  })),
+   tagList(value,tags$sup(class='correlation-stars',stars_at(i,j)))
+  },cell_class=function(i,j)if(nzchar(stars_at(i,j)))'significant-correlation')),
   p('雙尾檢定：* p < .05　 ** p < .01　 *** p < .001'))
 }
 diagnostic_data <- function(a){
@@ -503,7 +503,7 @@ critical_curve_svg <- function(){
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=survey-matrix-significance'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=survey-matrix-highlight'),
   tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
