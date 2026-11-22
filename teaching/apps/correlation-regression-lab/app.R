@@ -183,9 +183,9 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
   p('有效 n = ',nrow(d),'｜R² = ',num(s$r.squared),'｜調整後 R² = ',num(s$adj.r.squared),'｜殘差 SE = ',num(s$sigma)),
   if(section=='overview')tags$ol(
    tags$li('平方和。SS',tags$sub('reg'),' = Σ(Ŷᵢ − Ȳ)² = ',num(ssr),'。SS',tags$sub('error'),' = Σ(Yᵢ − Ŷᵢ)² = ',num(sse),'。SS',tags$sub('total'),' = SS',tags$sub('reg'),' + SS',tags$sub('error'),' = ',num(sst),'。'),
-   tags$li('R² = SS',tags$sub('reg'),' ÷ SS',tags$sub('total'),' = ',num(ssr),' ÷ ',num(sst),' ≈ ',num(s$r.squared),'。'),
-   tags$li('調整後 R² = 1 − (1 − R²) × (n − 1) ÷ (n − k − 1) = 1 − (1 − ',num(s$r.squared),') × ',
-    n-1L,' ÷ ',residual_df,' ≈ ',num(s$adj.r.squared),'。k = ',k,'，為模型的解釋欄數。')),
+   tags$li('R² = 1 − SS',tags$sub('error'),' ÷ SS',tags$sub('total'),' = 1 − ',num(sse),' ÷ ',num(sst),' ≈ ',num(s$r.squared),'。'),
+   tags$li('調整後 R² = 1 − [SS',tags$sub('error'),' ÷ (n − k − 1)] ÷ [SS',tags$sub('total'),' ÷ (n − 1)]。',
+    '代入得 1 − (',num(sse),' ÷ ',residual_df,') ÷ (',num(sst),' ÷ ',n-1L,') ≈ ',num(s$adj.r.squared),'。k = ',k,'，為模型的解釋欄數。')),
   h4('R² 的整體 F 檢定'),
   if(section!='overview')p('H₀：ρ² = 0'),
   p('F(',f[2],', ',f[3],') = ',num(f[1]),'｜p = ',format.pval(p_model,digits=4)),
