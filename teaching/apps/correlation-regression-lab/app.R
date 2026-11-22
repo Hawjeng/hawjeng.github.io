@@ -171,11 +171,30 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
  s <- summary(fit)
  f <- s$fstatistic
  p_model<-pf(f[1],f[2],f[3],lower.tail=FALSE)
+ n<-nobs(fit)
+ k<-unname(f[2])
+ residual_df<-unname(f[3])
+ sse<-deviance(fit)
+ ssr<-sum((fitted(fit)-mean(d$y))^2)
+ sst<-ssr+sse
+ msr<-ssr/k
+ mse<-sse/residual_df
  overview<-tagList(h3(paste0('結果變數｜',labels[1])),
   p('有效 n = ',nrow(d),'｜R² = ',num(s$r.squared),'｜調整後 R² = ',num(s$adj.r.squared),'｜殘差 SE = ',num(s$sigma)),
+  if(section=='overview')tags$ol(
+   tags$li('平方和。SSR = Σ(Ŷᵢ − Ȳ)² = ',num(ssr),'。SSE = Σ(Yᵢ − Ŷᵢ)² = ',num(sse),'。SST = SSR + SSE = ',num(sst),'。'),
+   tags$li('R² = SSR ÷ SST = ',num(ssr),' ÷ ',num(sst),' ≈ ',num(s$r.squared),'。'),
+   tags$li('調整後 R² = 1 − (1 − R²) × (n − 1) ÷ (n − k − 1) = 1 − (1 − ',num(s$r.squared),') × ',
+    n-1L,' ÷ ',residual_df,' ≈ ',num(s$adj.r.squared),'。k = ',k,'，為模型的解釋欄數。')),
   h4('R² 的整體 F 檢定'),
   if(section!='overview')p('H₀：ρ² = 0'),
   p('F(',f[2],', ',f[3],') = ',num(f[1]),'｜p = ',format.pval(p_model,digits=4)),
+  if(section=='overview')tags$ol(
+   tags$li('分子自由度 = k = ',k,'。分母自由度 = n − k − 1 = ',n,' − ',k,' − 1 = ',residual_df,'。'),
+   tags$li('迴歸均方 MSR = SSR ÷ k = ',num(ssr),' ÷ ',k,' ≈ ',num(msr),'。殘差均方 MSE = SSE ÷ (n − k − 1) = ',
+    num(sse),' ÷ ',residual_df,' ≈ ',num(mse),'。'),
+   tags$li('F = MSR ÷ MSE = ',num(msr),' ÷ ',num(mse),' ≈ ',num(f[1]),'。p 為 H₀ 下 F 分配的右尾機率 P(F ≥ ',
+    num(f[1]),') = ',format.pval(p_model,digits=4),'。')),
   if(section=='overview'&&is.finite(f[1]))f_inference_plot(unname(f[1]),unname(f[2]),unname(f[3]),p_model),
   if(section=='overview'&&!is.finite(f[1]))p('H₀：ρ² = 0'))
  if(section=='overview')return(overview)
