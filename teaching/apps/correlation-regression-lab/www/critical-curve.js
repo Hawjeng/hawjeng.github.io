@@ -57,7 +57,17 @@ function createCorrelationCurve(host, min, max, select, commit) {
   const readings = colors.map((fill, i) => {
     const row = 73 + 24*i;
     draw("line", {x1:600,x2:618,y1:row-5,y2:row-5,stroke:fill,"stroke-width":3,"stroke-dasharray":i===3?"6 3":"none"});
-    return draw("text", {x:628,y:row,fill,"font-size":16});
+    const label = draw("text", {x:628,y:row,fill,"font-size":16});
+    if (pCurve) return label;
+
+    label.textContent = labels[i] + "  r";
+    const subscript = document.createElementNS(svgNS, "tspan");
+    subscript.setAttribute("baseline-shift", "sub");
+    subscript.setAttribute("font-size", "11");
+    subscript.textContent = "cv";
+    const value = document.createElementNS(svgNS, "tspan");
+    label.append(subscript, value);
+    return value;
   });
 
   let n, activePointer = null;
@@ -75,7 +85,7 @@ function createCorrelationCurve(host, min, max, select, commit) {
       dots[i].setAttribute("cx", cx);
       dots[i].setAttribute("cy", y(r));
       const number = pCurve && r < .0001 ? "< .0001" : r.toFixed(4);
-      readings[i].textContent = `${labels[i]}　${number}`;
+      readings[i].textContent = pCurve ? `${labels[i]}　${number}` : ` = ${number}`;
       description.push(`${labels[i]} 的${pCurve?"雙尾 p 值":"臨界值"} ${number}`);
     });
     svg.setAttribute("aria-valuetext", `N = ${n}，自由度 ${n-2}，${description.join("，")}`);
