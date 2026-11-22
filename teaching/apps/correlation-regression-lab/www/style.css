@@ -59,3 +59,7 @@ details{padding:10px 0}summary{cursor:pointer;font-weight:650;color:var(--accent
 .coefficient-table>.btn{font-size:13px;padding:4px 8px}
 
 #survey_levels .form-control{font-size:13px}
+
+.coefficient-table tbody tr.significant-coefficient{background:#fff2d6;color:#553a0d}
+.coefficient-table .significant-coefficient td:nth-child(2){font-weight:700}
+.coefficient-table sup{margin-left:2px}

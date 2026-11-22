@@ -31,9 +31,17 @@ file_link<-function(label,name,content,mime){
  encoded<-gsub('[\r\n]','',encoded)
  tags$a(class='btn btn-default',download=name,href=paste0('data:',mime,';charset=utf-8;base64,',encoded),label)
 }
-show_table <- function(t) HTML(paste0('<div class="table-scroll"><table><thead><tr>',
-  paste0('<th>',htmltools::htmlEscape(names(t)),'</th>',collapse=''),'</tr></thead><tbody>',
-  paste(apply(t,1,function(row)paste0('<tr>',paste0('<td>',htmltools::htmlEscape(row),'</td>',collapse=''),'</tr>')),collapse=''),'</tbody></table></div>'))
+show_table <- function(t,coefficient_stars=rep('',nrow(t))){
+ rows<-lapply(seq_len(nrow(t)),function(i){
+  cells<-lapply(t,function(column)tags$td(column[i]))
+  stars<-coefficient_stars[i]
+  if(nzchar(stars))cells[['b']]<-tags$td(t$b[i],tags$sup(stars))
+  tags$tr(class=if(nzchar(stars))'significant-coefficient',cells)
+ })
+ div(class='table-scroll',tags$table(
+  tags$thead(tags$tr(lapply(names(t),function(name)tags$th(scope='col',name)))),
+  tags$tbody(rows)))
+}
 diagnostic_data <- function(a){
  fit<-fit_design(a$data)
  external<-suppressWarnings(rstudent(fit))
@@ -152,6 +160,8 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
   if(section=='overview'&&!is.finite(f[1]))p('H₀：ρ² = 0'))
  if(section=='overview')return(overview)
  coef <- s$coefficients
+ p_coef<-coef[,4]
+ stars<-ifelse(is.na(p_coef),'',ifelse(p_coef<.001,'***',ifelse(p_coef<.01,'**',ifelse(p_coef<.05,'*',''))))
  ci <- confint(fit)
  diag <- vif_table(fit)
  t <- data.frame(變數=c('截距',unname(labels[-1])),b=num(coef[,1]),SE=num(coef[,2]),t=num(coef[,3]),
@@ -160,7 +170,8 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
  tagList(if(section=='all')overview,
   if(book||section=='details')h4('迴歸係數、雙尾 t 檢定與 95% 信賴區間'),
   div(class='coefficient-table',
-   show_table(t),
+   show_table(t,coefficient_stars=stars),
+   p(tags$small('* p < .05　 ** p < .01　 *** p < .001')),
    file_link('下載係數表 CSV','regression-coefficients.csv',
     paste0('\ufeff',paste(capture.output(write.csv(t,row.names=FALSE)),collapse='\n')),'text/csv')),
   if(!is.null(diag))tagList(h4('共線性診斷'),p('允差 = 1 − R²ⱼ；VIF = 1 / 允差。每欄都用其他設計欄來預測。'),
@@ -420,7 +431,7 @@ critical_curve_svg <- function(){
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=compact-category-labels'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=coefficient-significance'),
   tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
