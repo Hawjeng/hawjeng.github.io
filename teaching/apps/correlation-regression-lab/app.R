@@ -232,7 +232,7 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
   div(class='anova-table',show_table(data.frame(變異來源=c('迴歸','殘差','總計'),
    平方和=num(c(ssr,sse,sst)),自由度=c(k,residual_df,n-1L),
    均方=c(num(c(msr,mse)),'—'),F=c(num(f[1]),'—','—'),
-   `F 臨界值（α = .05）`=c(num(qf(.95,k,residual_df)),'—','—'),
+   Fcv=c(num(qf(.95,k,residual_df)),'—','—'),
    p=c(format.pval(p_model,digits=4),'—','—'),check.names=FALSE))))
  coef <- s$coefficients
  p_coef<-coef[,4]
