@@ -26,6 +26,11 @@ checks <- function(expr) tryCatch(expr,error=function(e){
  if(inherits(e,"shiny.silent.error"))stop(e)
  validate(need(FALSE,conditionMessage(e)))
 })
+file_link<-function(label,name,content,mime){
+ encoded<-jsonlite::base64_enc(charToRaw(enc2utf8(paste0(content,'\n'))))
+ encoded<-gsub('[\r\n]','',encoded)
+ tags$a(class='btn btn-default',download=name,href=paste0('data:',mime,';charset=utf-8;base64,',encoded),label)
+}
 show_table <- function(t) HTML(paste0('<div class="table-scroll"><table><thead><tr>',
   paste0('<th>',htmltools::htmlEscape(names(t)),'</th>',collapse=''),'</tr></thead><tbody>',
   paste(apply(t,1,function(row)paste0('<tr>',paste0('<td>',htmltools::htmlEscape(row),'</td>',collapse=''),'</tr>')),collapse=''),'</tbody></table></div>'))
@@ -84,7 +89,10 @@ display_result <- function(analysis, extra=NULL, book=FALSE) {
   p('有效 n = ',nrow(d),'｜R² = ',num(s$r.squared),'｜調整後 R² = ',num(s$adj.r.squared),'｜殘差 SE = ',num(s$sigma)),
   p('F(',f[2],', ',f[3],') = ',num(f[1]),'｜p = ',format.pval(pf(f[1],f[2],f[3],lower.tail=FALSE),digits=4)),
   if(book)h4('各係數的雙尾 t 檢定與 95% 信賴區間'),
-  show_table(t),
+  div(class='coefficient-table',
+   show_table(t),
+   file_link('下載係數表 CSV','regression-coefficients.csv',
+    paste0('\ufeff',paste(capture.output(write.csv(t,row.names=FALSE)),collapse='\n')),'text/csv')),
   if(!is.null(diag))tagList(h4('共線性診斷'),p('允差 = 1 − R²ⱼ；VIF = 1 / 允差。每欄都用其他設計欄來預測。'),
    show_table(transform(diag,變數=unname(labels[colnames(d)[-1]]),允差=num(允差),VIF=num(VIF)))),
   if(!is.null(extra))extra)
@@ -330,7 +338,7 @@ critical_curve_svg <- function(){
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=survey-predictors'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=coefficient-table'),
   tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
@@ -641,11 +649,6 @@ server <- function(input,output,session){
   filename<-if(req(input$lang)=='R')'analysis.R' else 'analysis.py'
   source_code<-script()
   csv_data<-paste(capture.output(write.csv(a$data,row.names=FALSE)),collapse='\n')
-  file_link<-function(label,name,content,mime){
-   encoded<-jsonlite::base64_enc(charToRaw(enc2utf8(paste0(content,'\n'))))
-   encoded<-gsub('[\r\n]','',encoded)
-   tags$a(class='btn btn-default',download=name,href=paste0('data:',mime,';charset=utf-8;base64,',encoded),label)
-  }
   tagList(
    div(class='toolbar',
     tags$button(type='button',class='btn btn-default',onclick='copyCode(this)','複製語法'),

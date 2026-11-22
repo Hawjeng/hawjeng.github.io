@@ -49,3 +49,11 @@ details{padding:10px 0}summary{cursor:pointer;font-weight:650;color:var(--accent
 .controls .predictor-options .shiny-input-container{width:auto}
 .predictor-options .shiny-options-group{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(175px,100%),1fr));gap:4px 12px}
 .predictor-options .checkbox{margin:0}
+
+.coefficient-table .table-scroll{margin:10px 0 8px;border:1px solid var(--line);border-radius:7px}
+.coefficient-table table{font-size:13px;font-variant-numeric:tabular-nums}
+.coefficient-table th,.coefficient-table td{padding:5px 6px;text-align:right}
+.coefficient-table th:first-child,.coefficient-table td:first-child{text-align:left;white-space:normal}
+.coefficient-table tbody tr:nth-child(even){background:#f5f9f9}
+.coefficient-table tbody tr:last-child td{border-bottom:0}
+.coefficient-table>.btn{font-size:13px;padding:4px 8px}
