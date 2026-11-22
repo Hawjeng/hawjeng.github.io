@@ -92,6 +92,33 @@ cor_inference_plots <- function(t,df,r,ci){
    tags$g(fill='#173b44',`font-size`=11,lapply(ticks,function(tick)axis_text(rx(tick),68,num(tick))))),
   p(tags$small(strong('95% Wald 信賴區間'), '｜r ± 1.96 × SE = [',paste(num(ci),collapse=', '),']。上圖將 t 的水平位置換算成 r，讓兩圖的觀察值對齊。')))
 }
+f_inference_plot <- function(observed,df1,df2){
+ critical<-qf(.95,df1,df2)
+ right<-min(max(qf(.995,df1,df2),observed*1.1),4*qf(.999,df1,df2))
+ peak_x<-if(df1>2)(df1-2)/df1*df2/(df2+2) else 0
+ peak_density<-df(if(df1==1)qf(.15,df1,df2) else peak_x,df1,df2)
+ x<-function(value)30+360*value/right
+ y<-function(value)123-82*pmin(df(value,df1,df2)/peak_density,1)
+ path<-function(values)paste(sprintf('%.2f,%.2f',x(values),y(values)),collapse='L')
+ grid<-sort(unique(c(seq(0,right,length.out=241),peak_x,critical)))
+ marker<-x(min(observed,right))
+ label_x<-max(77,min(343,x(peak_x)))
+ tags$figure(style='margin:0',
+  tags$svg(viewBox='0 0 420 153',width='100%',style='display:block',role='img',
+   `aria-label`=paste0('H₀：ρ² = 0。F 分配自由度 ',df1,'、',df2,'。觀察 F = ',num(observed)),
+   tags$path(d=paste0('M',x(critical),',123L',path(grid[grid>=critical]),'V123Z'),fill='#f3c4ad'),
+   tags$path(d=paste0('M',path(grid)),fill='none',stroke='#176f7a',`stroke-width`=2),
+   tags$path(d='M30 123H390',stroke='#9bb1b5'),
+   tags$line(x1=x(critical),x2=x(critical),y1=y(critical),y2=128,stroke='#526f75'),
+   tags$line(x1=marker,x2=marker,y1=72,y2=123,stroke='#ac512e',`stroke-width`=2),
+   tags$circle(cx=marker,cy=123,r=4,fill='#ac512e'),
+   tags$g(fill='#173b44',`font-size`=13,
+    tags$text(x=label_x,y=27,`text-anchor`='middle','H₀：ρ² = 0'),
+    tags$text(x=30,y=143,`text-anchor`='middle','0'),
+    tags$text(x=391,y=143,`text-anchor`='end','F'))),
+  tags$figcaption(tags$small('陰影為右尾拒絕區（α = .05），F 臨界值 = ',num(critical),'。紅線為觀察 F',
+   if(observed>right)'，數值超出圖示範圍，標在右緣','。')))
+}
 display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=NULL) {
  d <- analysis$data
  kind <- analysis$kind
@@ -116,8 +143,10 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
  overview<-tagList(h3(paste0('結果變數｜',labels[1])),
   p('有效 n = ',nrow(d),'｜R² = ',num(s$r.squared),'｜調整後 R² = ',num(s$adj.r.squared),'｜殘差 SE = ',num(s$sigma)),
   h4('R² 的整體 F 檢定'),
-  p('H₀：ρ² = 0'),
-  p('F(',f[2],', ',f[3],') = ',num(f[1]),'｜p = ',format.pval(p_model,digits=4)))
+  if(section!='overview')p('H₀：ρ² = 0'),
+  p('F(',f[2],', ',f[3],') = ',num(f[1]),'｜p = ',format.pval(p_model,digits=4)),
+  if(section=='overview'&&is.finite(f[1]))f_inference_plot(unname(f[1]),unname(f[2]),unname(f[3])),
+  if(section=='overview'&&!is.finite(f[1]))p('H₀：ρ² = 0'))
  if(section=='overview')return(overview)
  coef <- s$coefficients
  ci <- confint(fit)
