@@ -39,3 +39,8 @@ details{padding:10px 0}summary{cursor:pointer;font-weight:650;color:var(--accent
 .hubble-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,min(46%,400px));align-items:start;gap:1.25rem}
 .hubble-figure{width:100%;max-width:400px;margin:0}.hubble-figure img{display:block;width:100%;height:auto;border:1px solid var(--line)}.hubble-figure figcaption{font-size:.9em;line-height:1.65;margin-top:.65rem}
 @media(max-width:760px){.hubble-layout{grid-template-columns:minmax(0,1fr);gap:.5rem}}
+
+.book-example-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;align-items:start}
+.book-example-layout .chart-panel,.book-example-layout .chart-results{width:100%}
+.book-example-layout .chart-results{padding-top:0;border-top:0}
+@media(max-width:760px){.book-example-layout{grid-template-columns:minmax(0,1fr);gap:0}}

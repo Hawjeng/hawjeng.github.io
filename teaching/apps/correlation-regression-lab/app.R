@@ -45,12 +45,25 @@ diagnostic_data <- function(a){
   p=unname(p),校正後p=unname(adjusted),
   顯著異常=ifelse(is.na(adjusted),'—',ifelse(adjusted<.05,'是','否')),check.names=FALSE)
 }
-display_result <- function(analysis, extra=NULL) {
+display_result <- function(analysis, extra=NULL, book=FALSE) {
  d <- analysis$data
  kind <- analysis$kind
  labels <- analysis$labels
  if(kind %in% c('cor','pb')){
   r <- cor_fit(d)
+  if(book){
+   se <- (1-r$estimate^2)/sqrt(nrow(d))
+   ci <- r$estimate+c(-1,1)*qnorm(.975)*se
+   return(tagList(
+    h3(paste0(if(kind=='pb')analysis$x_name else labels[2]," × ",labels[1])),
+    p('配對有效 n = ',nrow(d),'｜r = ',num(r$estimate)),
+    h4('雙尾 t 檢定'),
+    p('H₀：ρ = 0｜t(',r$parameter,') = ',num(r$statistic),'｜p = ',format.pval(r$p.value,digits=4)),
+    h4('95% Wald 信賴區間'),
+    p('r ± 1.96 × SE = [',paste(num(ci),collapse=', '),']'),
+    if(any(abs(ci)>1))p('Wald 近似區間超出相關係數的範圍 [−1, 1]。'),
+    if(kind=='pb')p('正相關表示編碼 1 組的平均數較高。')))
+  }
   return(tagList(
    h3(paste0(if(kind=='pb')analysis$x_name else labels[2]," × ",labels[1])),
    p('配對有效 n = ',nrow(d),'｜r = ',num(r$estimate),'｜t = ',num(r$statistic),'｜df = ',r$parameter),
@@ -70,6 +83,7 @@ display_result <- function(analysis, extra=NULL) {
  tagList(h3(paste0('結果變數｜',labels[1])),
   p('有效 n = ',nrow(d),'｜R² = ',num(s$r.squared),'｜調整後 R² = ',num(s$adj.r.squared),'｜殘差 SE = ',num(s$sigma)),
   p('F(',f[2],', ',f[3],') = ',num(f[1]),'｜p = ',format.pval(pf(f[1],f[2],f[3],lower.tail=FALSE),digits=4)),
+  if(book)h4('各係數的雙尾 t 檢定與 95% 信賴區間'),
   show_table(t),
   if(!is.null(diag))tagList(h4('共線性診斷'),p('允差 = 1 − R²ⱼ；VIF = 1 / 允差。每欄都用其他設計欄來預測。'),
    show_table(transform(diag,變數=unname(labels[colnames(d)[-1]]),允差=num(允差),VIF=num(VIF)))),
@@ -310,7 +324,7 @@ critical_curve_svg <- function(){
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=single-critical-curve'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=book-example-results'),
   tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
@@ -337,7 +351,7 @@ ui <- fluidPage(
       uiOutput('multiple_fit_summary'))),
     includeHTML('www/multiple.html')))),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
-   card(plot_controls('book'),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520,hover=hoverOpts('book_hover',delay=75,nullOutside=TRUE)),uiOutput('book_point_tip',class='plot-label-layer'),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('book_result'),uiOutput('book_diagnostics')))),
+   card(plot_controls('book'),div(class='book-example-layout',div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520,hover=hoverOpts('book_hover',delay=75,nullOutside=TRUE)),uiOutput('book_point_tip',class='plot-label-layer'),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('book_result'),uiOutput('book_diagnostics'))))),
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
    card(plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),div(class='plot-surface',plotOutput('exercise_plot',height=520,hover=hoverOpts('exercise_hover',delay=75,nullOutside=TRUE)),uiOutput('exercise_point_tip',class='plot-label-layer'),uiOutput('exercise_plot_label',class='plot-label-layer')),uiOutput('exercise_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('exercise_result'),uiOutput('exercise_diagnostics')),uiOutput('worked_answers'))),
   tabPanel('調查習作',
@@ -518,8 +532,8 @@ server <- function(input,output,session){
   id<-key;get_analysis<-analyses[[id]]
   output[[paste0(id,'_result')]]<-renderUI(checks({
    a<-get_analysis()
-   tagList(if(!is.null(a$reduced))tags$details(tags$summary('查看縮減模型與共線性診斷'),display_result(a$reduced)),
-    display_result(a,a$comparison))
+   tagList(if(!is.null(a$reduced))tags$details(tags$summary('查看縮減模型與共線性診斷'),display_result(a$reduced,book=id=='book')),
+    display_result(a,a$comparison,book=id=='book'))
   }))
   diagnostics<-reactive(checks(diagnostic_data(get_analysis())))
   output[[paste0(id,'_diagnostics')]]<-renderUI({
