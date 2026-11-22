@@ -2,9 +2,8 @@
 body{background:var(--canvas);color:var(--ink);font:16px/1.65 "Microsoft JhengHei","Noto Sans TC",sans-serif}
 .container-fluid{max-width:1410px;padding:28px clamp(14px,4vw,55px)}
 .mast{padding:26px 0 16px}.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.22em;font-size:12px}
-.paired-curves{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.critical-chart{max-width:740px}
 .interactive-correlation-curve{border:1px solid var(--line);border-radius:8px}
-@media(max-width:760px){.paired-curves{grid-template-columns:minmax(0,1fr)}}
 .correlation-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:16px}
 .correlation-layout .correlation-frame{height:690px}
 .correlation-formula{overflow-x:auto;margin:.7rem 0;padding:.4rem 0;text-align:left}

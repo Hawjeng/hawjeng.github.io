@@ -295,26 +295,23 @@ cor_critical <- function(n,alpha,tails){
 }
 critical_controls <- function(){
  card(h3('樣本數與相關係數臨界值'),
-  p('檢定 H₀：ρ = 0 時，df = N − 2。點選任一張圖或拖曳它的垂直虛線，兩張圖會一起更新樣本數 N。'),
+  p('檢定 H₀：ρ = 0 時，df = N − 2。拖曳滑桿或圖上的虛線調整樣本數 N。'),
   row_controls(select('critical_tails','檢定方向',c('雙尾'='2','右尾'='right','左尾'='left')),
    select('critical_alpha','顯著水準 α',c('0.10'='.10','0.05'='.05','0.02'='.02','0.01'='.01'),selected='.05')),
-  sliderInput('critical_n','配對樣本數 N',min=3,max=2000,value=10,step=1,width='100%',sep=''),
-  sliderInput('critical_r','觀察相關 |r|',min=.01,max=.99,value=.10,step=.01,width='100%',sep=''),
-  div(class='paired-curves',
-   div(h4('圖 13.6｜自由度與相關係數臨界值'),critical_curve_svg(),
-    uiOutput('critical_lookup'),tags$details(tags$summary('查看臨界值對照表'),uiOutput('critical_table'))),
-   div(h4('圖 13.7｜樣本數與雙尾 p 值'),uiOutput('p_curve'),uiOutput('p_lookup'))))
+  sliderInput('critical_n','配對樣本數 N',min=3,max=2000,value=10,step=1,width='340px',sep='',ticks=FALSE),
+  div(class='critical-chart',h4('自由度與相關係數臨界值'),critical_curve_svg(),
+   uiOutput('critical_lookup'),tags$details(tags$summary('查看臨界值對照表'),uiOutput('critical_table'))))
 }
 critical_curve_svg <- function(){
  n<-3:2000
  values<-lapply(c(.01,.05,.10),function(alpha)cor_critical(n,alpha,2)$r)
  values_json<-jsonlite::toJSON(values,digits=9)
- tags$div(id='critical-curve',class='interactive-correlation-curve',`data-kind`='critical',`data-values`=as.character(values_json))
+ tags$div(id='critical-curve',class='interactive-correlation-curve',`data-values`=as.character(values_json))
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=correlation-formula-size'),
-  tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=critical-value-label')),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=single-critical-curve'),
+  tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
   h1('相關與迴歸'),p('從兩個變數的散布圖，到多元模型與個案診斷。')),
@@ -392,28 +389,6 @@ server <- function(input,output,session){
   n<-input$critical_curve_n
   if(is.numeric(n)&&length(n)==1L&&is.finite(n)&&n>=3&&n<=2000)
    updateSliderInput(session,'critical_n',value=round(n))
- })
- p_for_r<-function(n,r)2*pt(-r*sqrt((n-2)/(1-r^2)),df=n-2)
- output$p_curve<-renderUI({
-  r<-req(input$critical_r)
-  alpha<-as.numeric(req(input$critical_alpha))
-  n<-3:2000
-  values<-c(.05,.10,.30,r)
-  tags$div(class='interactive-correlation-curve',`data-kind`='p',
-   `data-alpha`=alpha,`data-r`=r,
-   `data-values`=as.character(jsonlite::toJSON(lapply(values,function(v)p_for_r(n,v)),digits=14)))
- })
- output$p_lookup<-renderUI({
-  q<-critical_settings();r<-req(input$critical_r)
-  p<-p_for_r(q$n,r)
-  candidates<-3:2000
-  minimum<-candidates[which(p_for_r(candidates,r)<q$alpha)[1]]
-  div(class='equation-box',
-   p(paste0('N = ',q$n,'｜|r| = ',num(r),'｜雙尾 p = ',format.pval(p,digits=4),
-    if(p<q$alpha)' < ' else ' ≥ ','α = ',num(q$alpha))),
-   p(if(is.na(minimum))'在 N ≤ 2,000 的範圍內，雙尾 p 仍未低於所選 α。'
-    else paste0('在這個 |r| 下，雙尾 p 首次低於 α 的樣本數是 N = ',minimum,'。')),
-   p('灰色水平線是所選的 α。'))
  })
  output$critical_lookup<-renderUI({
   q<-critical_settings();v<-cor_critical(q$n,q$alpha,q$tails)
