@@ -62,4 +62,4 @@ details{padding:10px 0}summary{cursor:pointer;font-weight:650;color:var(--accent
 
 .coefficient-table tbody tr.significant-coefficient{background:#fff2d6;color:#553a0d}
 .coefficient-table .significant-coefficient td:nth-child(2){font-weight:700}
-.coefficient-table sup{margin-left:2px}
+.coefficient-table th:nth-child(3),.coefficient-table td:nth-child(3){width:1%;text-align:center}
