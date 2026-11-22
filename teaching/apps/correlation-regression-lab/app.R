@@ -383,7 +383,7 @@ critical_curve_svg <- function(){
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=coefficient-table'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=compact-category-labels'),
   tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
@@ -501,6 +501,11 @@ server <- function(input,output,session){
  outputOptions(output,'survey_group',suspendWhenHidden=FALSE)
  survey <- reactive({
   d<-survey_raw()
+  if(is.character(d[['自評人格']])){
+   original<-unique(na.omit(d[['自評人格']]))
+   labels<-sub('^([0-9]+[.] +[^ -~]+) +[A-Za-z].*$', '\\1', original)
+   if(!anyDuplicated(labels))d[['自評人格']]<-labels[match(d[['自評人格']],original)]
+  }
   observation<-seq_len(nrow(d))
   if(length(input$survey_zodiac)&&nzchar(input$survey_zodiac)){
    take<-which(d[['星座']]==input$survey_zodiac)
