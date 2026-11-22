@@ -64,7 +64,16 @@ def header(active, prefix):
 def footer(prefix):
     return f'''<section class="contact-band" id="contact" aria-labelledby="contact-title"><div class="container contact-inner">
 <div class="contact-details"><a href="mailto:{url(S['email'])}">{E(S['email'])}</a><div class="contact-meta">國立臺灣師範大學管理學院 · <a class="phone-link" href="tel:{url(S['telephone'])}">02-7749-3312</a></div><div class="copy-row"><button type="button" data-copy="{E(S['email'])}" hidden>複製 Email</button><span role="status" aria-live="polite"></span></div></div>
-<div><div class="eyebrow">Book information</div><h2 id="contact-title">專書資訊查詢</h2><p>專書著作與購買資訊，請直接至各出版社網站檢索。本站「專書著作」頁提供各書的出版社連結。</p></div>
+<div class="project-citation" id="citation">
+<div class="eyebrow" lang="en">Citation</div><h2 id="contact-title">引述方法說明</h2>
+<p>請引用實際使用的專案。以下以「相關與迴歸」為例，引用其他專案時，請換成該專案的名稱、發布年份與網址。</p>
+<h3>中文格式</h3>
+<p>邱皓政（2026）。<i>相關與迴歸</i>［互動統計教材］。<a href="https://hawjeng.github.io/correlation-regression-lab/">https://hawjeng.github.io/correlation-regression-lab/</a><br>文內引述（邱皓政，2026）</p>
+<div lang="en">
+<h3>English · APA 7th edition</h3>
+<p>Cite the project you used. For other projects, substitute the project title, release year, and URL.</p>
+<p>Chiou, H. (2026). <i>Correlation and regression</i> [Interactive statistical teaching application]. <a href="https://hawjeng.github.io/correlation-regression-lab/">https://hawjeng.github.io/correlation-regression-lab/</a><br>In-text citation (Chiou, 2026)</p>
+</div></div>
 </div></section><footer class="site-footer"><div class="container footer-inner"><div>© 2026 邱皓政 Hawjeng Chiou <span class="footer-date">· 資料核對 {E(S['updated'])}</span></div><div class="footer-links">{ext(S['github'],'GitHub','')}{ext(S['oldSite'],'師大原網站','')}<a href="{prefix}sources.html">資料來源</a><a href="#top">回到頂端</a></div></div></footer>'''
 
 def public_path(path):

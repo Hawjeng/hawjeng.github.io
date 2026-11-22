@@ -57,3 +57,5 @@
 .timeline-detail{margin-inline-start:.5em;color:var(--muted);font-size:.88em;font-weight:400}
 
 @media screen and (min-width:1024px){#book-resources{grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(14px,1.5vw,20px)}#book-resources .book-art{height:214px;padding:16px}#book-resources .book-info{padding:16px}}
+
+.project-citation{min-width:0}.project-citation h3{margin:12px 0 3px;font-size:1rem}.project-citation p{font-size:.92rem;margin-top:4px}.project-citation p+p{margin-top:6px}.project-citation a{text-decoration:underline;overflow-wrap:anywhere}
