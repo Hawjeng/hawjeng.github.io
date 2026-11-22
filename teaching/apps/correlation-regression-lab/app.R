@@ -40,6 +40,24 @@ show_table <- function(t,row_class=rep(NA_character_,nrow(t))){
   tags$thead(tags$tr(lapply(names(t),function(name)tags$th(scope='col',name)))),
   tags$tbody(rows)))
 }
+display_correlation_matrix <- function(analysis){
+ d<-analysis$data
+ means<-vapply(d,mean,numeric(1))
+ sds<-vapply(d,sd,numeric(1))
+ correlations<-suppressWarnings(cor(d,method='pearson'))
+ format_value<-function(x)ifelse(is.finite(x),num(x),'—')
+ indices<-seq_along(d)
+ cells<-matrix('',nrow=length(indices),ncol=length(indices))
+ lower<-lower.tri(correlations)
+ cells[lower]<-format_value(correlations[lower])
+ diag(cells)<-'—'
+ section<-data.frame(變數=paste0(indices,'. ',unname(analysis$labels[names(d)])),
+  Mean=format_value(means),SD=format_value(sds),cells,check.names=FALSE)
+ names(section)[-(1:3)]<-as.character(indices)
+ tagList(h4('Pearson 相關係數矩陣'),
+  p(paste0('依目前分析的有效樣本計算（n = ',nrow(d),'）。SD 為樣本標準差。')),
+  show_table(section))
+}
 diagnostic_data <- function(a){
  fit<-fit_design(a$data)
  external<-suppressWarnings(rstudent(fit))
@@ -468,7 +486,7 @@ critical_curve_svg <- function(){
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=collinearity-severity'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=book-plot-right'),
   tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
@@ -495,7 +513,7 @@ ui <- fluidPage(
       uiOutput('multiple_fit_summary'))),
     includeHTML('www/multiple.html')))),
   tabPanel('課本範例',card(select('case','課本案例',case_choices(FALSE)),uiOutput('case_options'),uiOutput('case_source'),downloadButton('case_csv','下載案例原始 CSV')),
-   card(plot_controls('book'),div(class='book-example-layout',div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520,hover=hoverOpts('book_hover',delay=75,nullOutside=TRUE)),uiOutput('book_point_tip',class='plot-label-layer'),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('book_result'),uiOutput('book_diagnostics'))))),
+   card(plot_controls('book'),div(class='book-example-layout book-plot-right',div(class='chart-results',uiOutput('book_result'),uiOutput('book_diagnostics')),div(class='chart-panel',uiOutput('book_plot_key'),div(class='plot-surface',plotOutput('book_plot',height=520,hover=hoverOpts('book_hover',delay=75,nullOutside=TRUE)),uiOutput('book_point_tip',class='plot-label-layer'),uiOutput('book_plot_label',class='plot-label-layer')),uiOutput('book_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG'))))),
   tabPanel('調查習作',
    card(h3('手機使用行為調查'),p('預設案例為玩手遊時間與手機遊戲成癮的 Pearson 相關。可切換全體或單一星座，也可改選變數。'),
     tags$details(tags$summary('載入其他調查資料'),
@@ -504,7 +522,7 @@ ui <- fluidPage(
     row_controls(uiOutput('survey_group'),select('survey_method','分析方法',methods)),uiOutput('survey_options'),uiOutput('survey_levels'),
     downloadButton('raw_survey','下載逐筆分析資料 CSV')),
    card(plot_controls('survey'),div(class='book-example-layout',div(class='chart-panel',uiOutput('survey_plot_key'),div(class='plot-surface',plotOutput('survey_plot',height=520,hover=hoverOpts('survey_hover',delay=75,nullOutside=TRUE)),uiOutput('survey_point_tip',class='plot-label-layer'),uiOutput('survey_plot_label',class='plot-label-layer')),uiOutput('survey_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('survey_result'))),
-    uiOutput('survey_coefficients'),uiOutput('survey_diagnostics'))),
+    uiOutput('survey_coefficients'),uiOutput('survey_diagnostics'),uiOutput('survey_correlation_matrix'))),
   tabPanel('習題解答',card(select('exercise','習題',case_choices(TRUE)),uiOutput('exercise_options'),uiOutput('exercise_source'),downloadButton('exercise_csv','下載習題原始 CSV')),
    card(plot_controls('exercise'),div(class='chart-panel',uiOutput('exercise_plot_key'),div(class='plot-surface',plotOutput('exercise_plot',height=520,hover=hoverOpts('exercise_hover',delay=75,nullOutside=TRUE)),uiOutput('exercise_point_tip',class='plot-label-layer'),uiOutput('exercise_plot_label',class='plot-label-layer')),uiOutput('exercise_equation_text'),tags$button(type='button',class='btn btn-default',onclick='downloadPlot(this)','下載圖形 PNG')),div(class='chart-results',uiOutput('exercise_result'),uiOutput('exercise_diagnostics')),uiOutput('worked_answers'))),
   tabPanel('R 與 Python 語法',
@@ -693,6 +711,7 @@ server <- function(input,output,session){
   id<-key;get_analysis<-analyses[[id]]
   if(id=='survey'){
    survey_fit<-reactive(fit_design(get_analysis()$data))
+   output$survey_correlation_matrix<-renderUI(checks(display_correlation_matrix(get_analysis())))
    output$survey_coefficients<-renderUI(checks({
     a<-get_analysis()
     if(!a$kind %in% c('cor','pb'))display_result(a,section='details',fit=survey_fit())
