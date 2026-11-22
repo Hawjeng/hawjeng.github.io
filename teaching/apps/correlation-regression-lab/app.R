@@ -61,14 +61,15 @@ display_correlation_matrix <- function(analysis){
   Mean=format_value(means),SD=format_value(sds),cells,check.names=FALSE)
  names(section)[-(1:3)]<-as.character(indices)
  stars_at<-function(i,j)if(j>3L && i>j-3L)significance_stars(p_values[i,j-3L]) else ''
- tagList(h4('Pearson 相關係數矩陣'),
+ div(class='survey-correlation-export',h4('Pearson 相關係數矩陣'),
   p(paste0('依目前分析的有效樣本計算（n = ',nrow(d),'）。SD 為樣本標準差。')),
   div(class='survey-correlation-table',show_table(section,cell=function(i,j){
    value<-section[[j]][i]
    if(j==1L)return(value)
    tagList(value,tags$sup(class='correlation-stars',stars_at(i,j)))
   },cell_class=function(i,j)if(nzchar(stars_at(i,j)))'significant-correlation')),
-  p('雙尾檢定：* p < .05　 ** p < .01　 *** p < .001'))
+  p('雙尾檢定：* p < .05　 ** p < .01　 *** p < .001'),
+  tags(type='button',class='btn btn-default',onclick='downloadCorrelationMatrix(this)','下載相關矩陣 PNG'))
 }
 diagnostic_data <- function(a){
  fit<-fit_design(a$data)
@@ -504,7 +505,7 @@ critical_curve_svg <- function(){
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
  tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=survey-matrix-highlight'),
-  tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=single-critical-curve')),
+  tags$script(src='console.js?v=correlation-png'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
   h1('相關與迴歸'),p('從兩個變數的散布圖，到多元模型與個案診斷。')),

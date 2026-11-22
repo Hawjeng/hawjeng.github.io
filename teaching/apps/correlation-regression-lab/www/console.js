@@ -126,3 +126,66 @@ document.addEventListener('keydown',event=>{
   event.preventDefault();
   movePlotLabel(label,current.x-bounds.x+delta[0],current.y-bounds.y+delta[1]);
 });
+
+async function downloadCorrelationMatrix(button) {
+  const section = button.closest('.survey-correlation-export');
+  const table = section.querySelector('table');
+  const [sampleNote, significanceNote] = section.querySelectorAll('p');
+  const title = section.querySelector('h4');
+  const bounds = table.getBoundingClientRect();
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  const padding = 16;
+  const tableTop = 72;
+  const scale = 2;
+  const font = style => [style.fontWeight, style.fontSize, style.fontFamily].join(' ');
+  function textWidth(element) {
+    context.font = font(getComputedStyle(element));
+    return context.measureText(element.textContent).width;
+  }
+  const width = Math.max(bounds.width, textWidth(title), textWidth(sampleNote), textWidth(significanceNote)) + 2 * padding;
+  const height = tableTop + bounds.height + 48;
+  canvas.width = Math.ceil(width * scale);
+  canvas.height = Math.ceil(height * scale);
+  context.scale(scale, scale);
+  context.fillStyle = '#fff';
+  context.fillRect(0, 0, width, height);
+  context.textBaseline = 'middle';
+  function drawLabel(element, y) {
+    const style = getComputedStyle(element);
+    context.fillStyle = style.color;
+    context.font = font(style);
+    context.fillText(element.textContent, padding, y);
+  }
+  drawLabel(title, 24);
+  drawLabel(sampleNote, 50);
+  for (const cell of table.querySelectorAll('th, td')) {
+    const box = cell.getBoundingClientRect();
+    const style = getComputedStyle(cell);
+    const left = padding + box.left - bounds.left;
+    const top = tableTop + box.top - bounds.top;
+    context.fillStyle = style.backgroundColor;
+    context.fillRect(left, top, box.width, box.height);
+    context.fillStyle = style.borderBottomColor;
+    context.fillRect(left, top + box.height - 1, box.width, 1);
+    context.fillStyle = style.color;
+    context.font = font(style);
+    const stars = cell.querySelector('sup');
+    const suffix = stars?.textContent.trim() || '';
+    const value = cell.textContent.trim().slice(0, cell.textContent.trim().length - suffix.length).trim();
+    const right = style.textAlign === 'right';
+    const x = right ? left + box.width - parseFloat(style.paddingRight) : left + parseFloat(style.paddingLeft);
+    context.textAlign = right ? 'right' : 'left';
+    context.fillText(value, x, top + box.height / 2);
+    if (suffix) {
+      const starStyle = getComputedStyle(stars);
+      context.textAlign = 'left';
+      context.font = font(starStyle);
+      context.fillText(suffix, x + 4, top + box.height / 2 - 5);
+    }
+  }
+  context.textAlign = 'left';
+  drawLabel(significanceNote, tableTop + bounds.height + 24);
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  if (blob) saveBlob(blob, 'pearson-correlation-matrix.png');
+}
