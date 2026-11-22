@@ -225,7 +225,12 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
    tags$li('F = MSR ÷ MSE = ',num(msr),' ÷ ',num(mse),' ≈ ',num(f[1]),'。p 為 H₀ 下 F 分配的右尾機率 P(F ≥ ',
     num(f[1]),') = ',format.pval(p_model,digits=4),'。'))),
   if(is.finite(f[1]))f_inference_plot(unname(f[1]),unname(f[2]),unname(f[3]),p_model),
-  if(!is.finite(f[1]))p('H₀：ρ² = 0'))
+  if(!is.finite(f[1]))p('H₀：ρ² = 0'),
+  h4('變異數分析（ANOVA）'),
+  show_table(data.frame(變異來源=c('迴歸','殘差','總計'),
+   平方和=num(c(ssr,sse,sst)),自由度=c(k,residual_df,n-1L),
+   均方=c(num(c(msr,mse)),'—'),F=c(num(f[1]),'—','—'),
+   p=c(format.pval(p_model,digits=4),'—','—'),check.names=FALSE)))
  if(section=='overview')return(overview)
  coef <- s$coefficients
  p_coef<-coef[,4]
