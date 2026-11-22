@@ -50,30 +50,59 @@ diagnostic_data <- function(a){
   p=unname(p),校正後p=unname(adjusted),
   顯著異常=ifelse(is.na(adjusted),'—',ifelse(adjusted<.05,'是','否')),check.names=FALSE)
 }
+cor_inference_plots <- function(t,df,r,ci){
+ cv<-qt(.975,df)
+ edge<-max(5,min(abs(t)+.5,8),cv+.5)
+ tx<-function(x)210+180*x/edge
+ ty<-function(x)110-75*dt(x,df)/dt(0,df)
+ density_path<-function(from,to){
+  x<-seq(from,to,length.out=100)
+  paste(sprintf('%.2f,%.2f',tx(x),ty(x)),collapse='L')
+ }
+ tail_path<-function(from,to)sprintf('M%.2f,110L%sV110Z',tx(from),density_path(from,to))
+ marker<-tx(max(-edge,min(edge,t)))
+ limit<-max(1,abs(ci))+.08
+ rx<-function(x)210+180*x/limit
+ axis_text<-function(x,y,label)tags$text(x=x,y=y,`text-anchor`='middle',label)
+ tagList(
+  tags$svg(viewBox='0 0 420 144',width='100%',role='img',
+   `aria-label`=paste('雙尾 t 分配、拒絕區與觀察到的 t 值',num(t)),
+   tags$path(d=tail_path(-edge,-cv),fill='#f3c4ad'),
+   tags$path(d=tail_path(cv,edge),fill='#f3c4ad'),
+   tags$path(d=paste0('M',density_path(-edge,edge)),fill='none',stroke='#176f7a',`stroke-width`=2),
+   tags$path(d='M30 110H390 M210 35V110',fill='none',stroke='#9bb1b5'),
+   tags$line(x1=marker,x2=marker,y1=69,y2=110,stroke='#ac512e',`stroke-width`=2),
+   tags$circle(cx=marker,cy=110,r=4,fill='#ac512e'),
+   tags$g(fill='#173b44',`font-size`=13,
+    axis_text(210,24,'H₀：ρ = 0'),axis_text(tx(-cv),132,num(-cv)),axis_text(210,132,'0'),axis_text(tx(cv),132,num(cv)))),
+  if(abs(t)>edge)tags$small('觀察到的 t 超出圖示範圍，圓點標在相應的圖邊。'),
+  h4('95% Wald 信賴區間'),
+  p('r ± 1.96 × SE = [',paste(num(ci),collapse=', '),']'),
+  tags$svg(viewBox='0 0 420 100',width='100%',role='img',
+   `aria-label`=paste('95% Wald 信賴區間',paste(num(ci),collapse=' 至 ')),
+   tags$line(x1=rx(-1),x2=rx(1),y1=72,y2=72,stroke='#9bb1b5'),
+   tags$line(x1=210,x2=210,y1=20,y2=72,stroke='#9bb1b5',`stroke-dasharray`='4 3'),
+   tags$line(x1=rx(ci[1]),x2=rx(ci[2]),y1=45,y2=45,stroke='#176f7a',`stroke-width`=3),
+   lapply(ci,function(endpoint)tags$line(x1=rx(endpoint),x2=rx(endpoint),y1=39,y2=51,stroke='#176f7a',`stroke-width`=2)),
+   tags$circle(cx=rx(r),cy=45,r=4,fill='#176f7a'),
+   tags$g(fill='#173b44',`font-size`=13,
+    axis_text(rx(-1),91,'−1'),axis_text(210,91,'0'),axis_text(rx(1),91,'1'))))
+}
 display_result <- function(analysis, extra=NULL, book=FALSE) {
  d <- analysis$data
  kind <- analysis$kind
  labels <- analysis$labels
  if(kind %in% c('cor','pb')){
   r <- cor_fit(d)
-  if(book){
-   se <- (1-r$estimate^2)/sqrt(nrow(d))
-   ci <- r$estimate+c(-1,1)*qnorm(.975)*se
-   return(tagList(
-    h3(paste0(if(kind=='pb')analysis$x_name else labels[2]," × ",labels[1])),
-    p('配對有效 n = ',nrow(d),'｜r = ',num(r$estimate)),
-    h4('雙尾 t 檢定'),
-    p('H₀：ρ = 0｜t(',r$parameter,') = ',num(r$statistic),'｜p = ',format.pval(r$p.value,digits=4)),
-    h4('95% Wald 信賴區間'),
-    p('r ± 1.96 × SE = [',paste(num(ci),collapse=', '),']'),
-    if(any(abs(ci)>1))p('Wald 近似區間超出相關係數的範圍 [−1, 1]。'),
-    if(kind=='pb')p('正相關表示編碼 1 組的平均數較高。')))
-  }
+  se <- (1-r$estimate^2)/sqrt(nrow(d))
+  ci <- r$estimate+c(-1,1)*qnorm(.975)*se
   return(tagList(
    h3(paste0(if(kind=='pb')analysis$x_name else labels[2]," × ",labels[1])),
-   p('配對有效 n = ',nrow(d),'｜r = ',num(r$estimate),'｜t = ',num(r$statistic),'｜df = ',r$parameter),
-   p('雙尾 p = ',format.pval(r$p.value,digits=4),'｜95% Fisher z 信賴區間 [',paste(num(r$conf.int),collapse=', '),']'),
-   p('r = SP / √(SSₓ × SSᵧ)；t = r × √[(n − 2)/(1 − r²)]。'),
+   p('配對有效 n = ',nrow(d),'｜r = ',num(r$estimate)),
+   h4('雙尾 t 檢定'),
+   p('t(',r$parameter,') = ',num(r$statistic),'｜p = ',format.pval(r$p.value,digits=4)),
+   cor_inference_plots(unname(r$statistic),unname(r$parameter),unname(r$estimate),ci),
+   if(any(abs(ci)>1))p('Wald 近似區間超出相關係數的範圍 [−1, 1]。'),
    if(kind=='pb')p('正相關表示編碼 1 組的平均數較高。')))
  }
  fit <- fit_design(d)
