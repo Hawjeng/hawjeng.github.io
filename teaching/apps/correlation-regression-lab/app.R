@@ -329,6 +329,7 @@ data_selection <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
  category_names <- setdiff(names(d),numeric_names)
  groups <- if(length(category_names))unique(c(category_names,numeric_names[vapply(d[numeric_names],function(x)length(unique(na.omit(x)))<=15,logical(1))])) else numeric_names
  x_choices <- if(kind %in% c('pb','dummy'))groups else numeric_names
+ if(prefix=='survey'&&kind=='lm')x_choices<-c(intersect('性別',category_names),x_choices)
  default_y <- if(prefix=='survey' && '手機遊戲成癮' %in% numeric_names)'手機遊戲成癮' else tail(numeric_names,1)
  y <- if(length(current_y)==1L && current_y %in% numeric_names) current_y else default_y
  x <- setdiff(intersect(current_x,x_choices),y)
@@ -338,8 +339,13 @@ data_selection <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
 }
 data_controls <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
  options<-data_selection(prefix,d,kind,current_x,current_y)
+ y_control<-select(paste0(prefix,'_y'),'Y 結果變數',options$numeric_names,selected=options$y)
+ if(prefix=='survey'&&kind=='lm')return(tagList(
+  row_controls(y_control),
+  div(class='predictor-options',
+   checkboxGroupInput(paste0(prefix,'_x'),'X 解釋變數（可複選）',setdiff(options$x_choices,options$y),selected=options$x,width='100%'))))
  row_controls(
-  select(paste0(prefix,'_y'),'Y 結果變數',options$numeric_names,selected=options$y),
+  y_control,
   if(kind=='lm')div(class='predictor-options',
    checkboxGroupInput(paste0(prefix,'_x'),'X 解釋變數（可複選）',setdiff(options$x_choices,options$y),selected=options$x))
   else select(paste0(prefix,'_x'),'X 變數',options$x_choices,selected=options$x),
@@ -527,6 +533,15 @@ server <- function(input,output,session){
     '請回到分析來源選擇結果變數與至少一個解釋變數。'))
    g<-if(method=='pb')c(input[[paste0(prefix,'_g0')]],input[[paste0(prefix,'_g1')]]) else input[[paste0(prefix,'_g0')]]
    degree<-if(method=='poly')req(input[[paste0(prefix,'_degree')]]) else 2L
+   if(prefix=='survey'&&method=='lm'&&'性別' %in% x&&!is.numeric(d[['性別']])){
+    gender<-enc2utf8(d[['性別']])
+    levels<-sort(unique(gender[!is.na(gender)&nzchar(gender)]),method='radix')
+    validate(need(length(levels)==2L,'性別須有兩個有效類別才能納入此迴歸。'))
+    d[['性別']]<-match(gender,levels)-1L
+    analysis<-prepare_design(d,method,x,y,g,degree)
+    analysis$labels[match('性別',analysis$labels)]<-paste0('性別（0 = ',levels[1],'，1 = ',levels[2],'）')
+    return(analysis)
+   }
    prepare_design(d,method,x,y,g,degree)
   }))
  }
