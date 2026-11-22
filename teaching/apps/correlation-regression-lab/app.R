@@ -162,7 +162,7 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
  stars<-ifelse(is.na(p_coef),'',ifelse(p_coef<.001,'***',ifelse(p_coef<.01,'**',ifelse(p_coef<.05,'*',''))))
  ci <- confint(fit)
  diag <- vif_table(fit)
- t <- data.frame(變數=c('截距',unname(labels[-1])),b=num(coef[,1]),星號=stars,SE=num(coef[,2]),t=num(coef[,3]),
+ t <- data.frame(變數=c('截距',unname(labels[-1])),b=num(coef[,1]),顯著性=stars,SE=num(coef[,2]),t=num(coef[,3]),
   p=format.pval(coef[,4],digits=4),下限=num(ci[,1]),上限=num(ci[,2]))
  tagList(if(section=='all')overview,
   if(book||section=='details')h4('迴歸係數、雙尾 t 檢定與 95% 信賴區間'),
