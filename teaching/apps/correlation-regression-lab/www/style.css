@@ -68,3 +68,7 @@ details{padding:10px 0}summary{cursor:pointer;font-weight:650;color:var(--accent
 .collinearity-low td:last-child{background:#e6f3ec;color:#205940}
 .collinearity-watch td:last-child{background:#fff2d6;color:#6a4500;font-weight:600}
 .collinearity-high td:last-child{background:#fce7e7;color:#8a2424;font-weight:700}
+
+.survey-correlation-table th:not(:first-child),.survey-correlation-table td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums;padding-right:calc(12px + 2ch)}
+.survey-correlation-table td{position:relative}
+.survey-correlation-table .correlation-stars{position:absolute;top:12px;right:6px;width:2.3ch;text-align:left}

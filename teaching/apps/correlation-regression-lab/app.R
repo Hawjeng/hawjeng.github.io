@@ -31,9 +31,12 @@ file_link<-function(label,name,content,mime){
  encoded<-gsub('[\r\n]','',encoded)
  tags$a(class='btn btn-default',download=name,href=paste0('data:',mime,';charset=utf-8;base64,',encoded),label)
 }
-show_table <- function(t,row_class=rep(NA_character_,nrow(t))){
+significance_stars <- function(p){
+ ifelse(is.na(p),'',ifelse(p<.001,'***',ifelse(p<.01,'**',ifelse(p<.05,'*',''))))
+}
+show_table <- function(t,row_class=rep(NA_character_,nrow(t)),cell=function(i,j)t[[j]][i]){
  rows<-lapply(seq_len(nrow(t)),function(i){
-  cells<-lapply(t,function(column)tags$td(column[i]))
+  cells<-lapply(seq_along(t),function(j)tags$td(cell(i,j)))
   tags$tr(class=if(!is.na(row_class[i]))row_class[i],cells)
  })
  div(class='table-scroll',tags$table(
@@ -45,7 +48,10 @@ display_correlation_matrix <- function(analysis){
  means<-vapply(d,mean,numeric(1))
  sds<-vapply(d,sd,numeric(1))
  correlations<-suppressWarnings(cor(d,method='pearson'))
- format_value<-function(x)ifelse(is.finite(x),num(x),'—')
+ format_value<-function(x)ifelse(is.finite(x),sprintf('%.3f',round(x,3)+0),'—')
+ df<-nrow(d)-2L
+ abs_r<-pmin(abs(correlations),1)
+ p_values<-2*pt(abs_r*sqrt(df/((1-abs_r)*(1+abs_r))),df,lower.tail=FALSE)
  indices<-seq_along(d)
  cells<-matrix('',nrow=length(indices),ncol=length(indices))
  lower<-lower.tri(correlations)
@@ -56,7 +62,13 @@ display_correlation_matrix <- function(analysis){
  names(section)[-(1:3)]<-as.character(indices)
  tagList(h4('Pearson 相關係數矩陣'),
   p(paste0('依目前分析的有效樣本計算（n = ',nrow(d),'）。SD 為樣本標準差。')),
-  show_table(section))
+  div(class='survey-correlation-table',show_table(section,cell=function(i,j){
+   value<-section[[j]][i]
+   if(j==1L)return(value)
+   stars<-if(j>3L && i>j-3L)significance_stars(p_values[i,j-3L]) else ''
+   tagList(value,tags$sup(class='correlation-stars',stars))
+  })),
+  p('雙尾檢定：* p < .05　 ** p < .01　 *** p < .001'))
 }
 diagnostic_data <- function(a){
  fit<-fit_design(a$data)
@@ -217,7 +229,7 @@ display_result <- function(analysis, extra=NULL, book=FALSE, section="all", fit=
  if(section=='overview')return(overview)
  coef <- s$coefficients
  p_coef<-coef[,4]
- stars<-ifelse(is.na(p_coef),'',ifelse(p_coef<.001,'***',ifelse(p_coef<.01,'**',ifelse(p_coef<.05,'*',''))))
+ stars<-significance_stars(p_coef)
  ci <- confint(fit)
  standardized_b<-coef[-1,1]*vapply(d[-1],sd,numeric(1))/sd(d$y)
  t <- data.frame(變數=c('截距',unname(labels[-1])),b=num(coef[,1]),顯著性=stars,SE=num(coef[,2]),t=num(coef[,3]),
@@ -486,7 +498,7 @@ critical_curve_svg <- function(){
 }
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
- tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=book-plot-right'),
+ tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=survey-matrix-significance'),
   tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=single-critical-curve')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
   p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
