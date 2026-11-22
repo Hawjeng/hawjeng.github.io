@@ -44,16 +44,6 @@ function saveBlob(blob, filename) {
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
-function downloadAnalysis(button) {
-  const filename = button.dataset.analysisFile;
-  const output = button.closest('.shiny-html-output');
-  if (output.classList.contains('recalculating')) return;
-  const csv = filename === 'analysis.csv';
-  const payload = output.querySelector(csv ? '.console-csv' : '.source-code code');
-  if (!payload?.textContent) return;
-  const mimeType = csv ? 'text/csv;charset=utf-8' : 'text/plain;charset=utf-8';
-  saveBlob(new Blob([payload.textContent, '\n'], {type:mimeType}), filename);
-}
 async function downloadPlot(button) {
   const image = button.closest('.chart-panel').querySelector('.shiny-plot-output img');
   if (!image || !image.complete || !image.naturalWidth) return;

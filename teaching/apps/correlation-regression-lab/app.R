@@ -314,9 +314,9 @@ critical_curve_svg <- function(){
 ui <- fluidPage(
  tags$head(tags$link(rel="stylesheet", href="https://hawjeng.github.io/assets/lab-return.css")),
  tags$head(tags$title('相關與迴歸｜統計互動教材'),tags$link(rel='stylesheet',href='style.css?v=correlation-focus'),
-  tags$script(src='console.js?v=syntax-downloads'),tags$script(src='critical-curve.js?v=paired-curves')),
+  tags$script(src='console.js?v=analysis-files'),tags$script(src='critical-curve.js?v=paired-curves')),
  div(class='mast',tags$a(class='lab-return',href='https://hawjeng.github.io/resources.html#statistics-apps','← 返回教學與專案'),
-  p(class='eyebrow','STATISTICS LAB'),
+  p(class='eyebrow',lang='en','STATISTICS LAB · CORRELATION AND REGRESSION'),
   h1('相關與迴歸'),p('從兩個變數的散布圖，到多元模型與個案診斷。')),
  tabsetPanel(id='unit',
   tabPanel('原理說明',tabsetPanel(id='theory_topic',
@@ -629,14 +629,20 @@ server <- function(input,output,session){
  output$script_text<-renderUI(checks({
   a<-current()
   filename<-if(req(input$lang)=='R')'analysis.R' else 'analysis.py'
+  source_code<-script()
+  csv_data<-paste(capture.output(write.csv(a$data,row.names=FALSE)),collapse='\n')
+  file_link<-function(label,name,content,mime){
+   encoded<-jsonlite::base64_enc(charToRaw(enc2utf8(paste0(content,'\n'))))
+   tags$a(class='btn btn-default',download=name,href=paste0('data:',mime,';charset=utf-8;base64,',encoded),label)
+  }
   tagList(
    div(class='toolbar',
     tags$button(type='button',class='btn btn-default',onclick='copyCode(this)','複製語法'),
-    tags$button(type='button',class='btn btn-default',onclick='downloadAnalysis(this)',`data-analysis-file`=filename,'下載語法'),
-    tags$button(type='button',class='btn btn-default',onclick='downloadAnalysis(this)',`data-analysis-file`='analysis.csv','下載 analysis.csv')),
+    file_link('下載語法',filename,source_code,'text/plain'),
+    file_link('下載 analysis.csv','analysis.csv',csv_data,'text/csv')),
    p(code(paste(if(input$lang=='R')'Rscript' else 'python',filename))),
-   tags$pre(class='source-code',tags$code(script())),
-   tags$pre(class='console-csv',hidden=NA,paste(capture.output(write.csv(a$data,row.names=FALSE)),collapse='\n')))
+   tags$pre(class='source-code',tags$code(source_code)),
+   tags$pre(class='console-csv',hidden=NA,csv_data))
  }))
  output$console<-renderUI(checks({
   a<-current()
