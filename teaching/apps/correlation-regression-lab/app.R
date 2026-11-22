@@ -305,7 +305,7 @@ data_controls <- function(prefix,d,kind,current_x=NULL,current_y=NULL){
   select(paste0(prefix,'_y'),'Y 結果變數',options$numeric_names,selected=options$y),
   if(kind=='lm')div(class='predictor-options',
    checkboxGroupInput(paste0(prefix,'_x'),'X 解釋變數（可複選）',setdiff(options$x_choices,options$y),selected=options$x))
-  else select(paste0(prefix,'_x'),'X 預測／分組變數',options$x_choices,selected=options$x),
+  else select(paste0(prefix,'_x'),'X 變數',options$x_choices,selected=options$x),
   if(kind=='poly')select(paste0(prefix,'_degree'),'多項式次數',2:3))
 }
 cor_critical <- function(n,alpha,tails){
