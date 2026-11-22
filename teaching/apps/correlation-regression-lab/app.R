@@ -633,6 +633,7 @@ server <- function(input,output,session){
   csv_data<-paste(capture.output(write.csv(a$data,row.names=FALSE)),collapse='\n')
   file_link<-function(label,name,content,mime){
    encoded<-jsonlite::base64_enc(charToRaw(enc2utf8(paste0(content,'\n'))))
+   encoded<-gsub('[\r\n]','',encoded)
    tags$a(class='btn btn-default',download=name,href=paste0('data:',mime,';charset=utf-8;base64,',encoded),label)
   }
   tagList(
