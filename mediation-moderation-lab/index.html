@@ -1,16 +1,30 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="從圖 12.1 的簡單迴歸、圖 12.2 的第三變數與五個方程式，理解中介、調節及幸福企業案例。"><title>原理｜中介與調節效果分析｜邱皓政</title><link rel="canonical" href="https://hawjeng.github.io/mediation-moderation-lab/"><link rel="icon" href="../assets/favicon.svg"><link rel="stylesheet" href="style.css?v=units-2"><script defer src="navigation.js?v=units-2"></script></head><body><a class="skip" href="#main">跳到內容</a><header><div class="header-inner"><a class="return-link" href="../resources.html#advanced-statistics-apps">返回教學與專案</a><a href="../index.html">邱皓政｜高階統計</a></div></header><main id="main"><div class="page-hero"><h1>中介與調節效果分析 <span lang="en">Mediation &amp; Moderation</span></h1><p>從圖 12.1 的簡單迴歸出發，用幸福企業案例理解效果如何傳遞、在什麼條件下改變。</p></div><nav class="main-tabs" aria-label="教材單元"><a href="index.html" aria-current="page">原理</a><a href="examples.html">範例與互動</a><a href="syntax.html">語法與結果</a><a href="checklist.html">研究檢核</a><a href="downloads.html">下載與來源</a><a href="references.html">參考文獻</a></nav><div class="lesson-frame"><nav class="topic-tabs" aria-label="原理主題"><a href="#concepts" data-topic="concepts">圖 12.1 與圖 12.2</a><a href="#happy-workplace" data-topic="happy-workplace">幸福企業案例</a><a href="#moderation-theory" data-topic="moderation-theory">調節效果</a><a href="#mediation-theory" data-topic="mediation-theory">中介效果</a><a href="#conditional-theory" data-topic="conditional-theory">條件歷程</a><a href="#inference" data-topic="inference">推論與軟體</a></nav><section class="topic-panel" id="concepts" tabindex="-1">
-  <h2>從圖 12.1 讀懂簡單迴歸</h2>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="用幸福企業案例理解簡單迴歸、控制變數、中介與調節。"><title>原理｜中介與調節效果分析｜邱皓政</title><link rel="canonical" href="https://hawjeng.github.io/mediation-moderation-lab/"><link rel="icon" href="../assets/favicon.svg"><link rel="stylesheet" href="style.css?v=principle-paths"><script defer src="navigation.js?v=units-2"></script></head><body><a class="skip" href="#main">跳到內容</a><header><div class="header-inner"><a class="return-link" href="../resources.html#advanced-statistics-apps">返回教學與專案</a><a href="../index.html">邱皓政｜高階統計</a></div></header><main id="main"><div class="page-hero"><h1>中介與調節效果分析 <span lang="en">Mediation &amp; Moderation</span></h1><p>從幸福企業案例出發，理解組織氣氛與工作滿意的關聯、可能的中介歷程及調節條件。</p></div><nav class="main-tabs" aria-label="教材單元"><a href="index.html" aria-current="page">原理</a><a href="examples.html">範例與互動</a><a href="syntax.html">語法與結果</a><a href="checklist.html">研究檢核</a><a href="downloads.html">下載與來源</a><a href="references.html">參考文獻</a></nav><div class="lesson-frame"><nav class="topic-tabs" aria-label="原理主題"><a href="#concepts" data-topic="concepts">迴歸與第三變數</a><a href="#moderation-theory" data-topic="moderation-theory">調節效果</a><a href="#mediation-theory" data-topic="mediation-theory">中介效果</a><a href="#conditional-theory" data-topic="conditional-theory">條件歷程</a><a href="#inference" data-topic="inference">推論與軟體</a></nav><section class="topic-panel" id="concepts" tabindex="-1">
+  <h2>從簡單迴歸到控制、中介與調節</h2>
+  <p>一家連鎖零售企業想改善員工的工作體驗。公司試辦提早兩週公布班表、公開換班規則，並請店長每週回覆排班問題。員工感受到的組織氣氛改善後，工作滿意度是否也會提高？我們從這個問題開始，再看工作負荷、認同承諾和職務如何進入分析。</p>
+  <h3>用組織氣氛預測工作滿意</h3>
   <figure class="card" style="margin-inline:0">
-    <div class="formula">Z（尚未納入模型）<br>X（組織氣氛） ── <i>c</i> → Y（工作滿意）<br>Ŷ = α₁ + cX</div>
+    <svg class="principle-diagram" viewBox="0 0 440 155" role="img" aria-labelledby="simple-path-title" xmlns="http://www.w3.org/2000/svg">
+  <title id="simple-path-title">組織氣氛以斜率 c 預測工作滿意。第三變數尚未納入。</title>
+  <defs><marker id="simple-path-tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#3e6c65"/></marker></defs>
+  <path d="M139 126 H301" fill="none" stroke="#3e6c65" stroke-width="2.4" marker-end="url(#simple-path-tip)"/>
+  <rect x="13" y="107" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
+  <text x="75" y="126" dominant-baseline="central">X 組織氣氛</text>
+  <rect x="303" y="107" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
+  <text x="365" y="126" dominant-baseline="central">Y 工作滿意</text>
+  <rect x="158" y="16" width="124" height="38" rx="8" fill="#f5f7f4" stroke="#74958d" stroke-dasharray="5 4"/>
+  <text x="220" y="35" dominant-baseline="central">Z 第三變數</text>
+  <text x="220" y="116">c</text>
+</svg>
+    <div class="formula">Ŷ = α₁ + cX</div>
     <figcaption>圖 12.1　兩個變數的簡單迴歸圖示（依課本重繪）。第三變數 Z 可能存在，目前尚未進入方程式。</figcaption>
   </figure>
   <p>用員工感受到的組織氣氛 X 預測工作滿意 Y，截距是 X = 0 時的預測值，斜率 <i>c</i> 表示 X 每差 1 分，預測的 Y 相差幾分。這條箭頭表示迴歸的預測方向。員工可能因為本來就滿意工作而給氣氛較高的評分，也可能因為部門原本的工作負荷同時影響兩項評分。</p>
 
-  <h2>圖 12.2 與五個迴歸方程式</h2>
+  <h3>第三變數如何改變分析</h3>
   <p>先分別看三組兩兩關係，再決定怎麼把第三變數 Z 納入模型。以下用 Ŷ 和 Ẑ 表示預測值，α 表示各式自己的截距。</p>
   <div class="table-wrap">
     <table>
-      <thead><tr><th scope="col">課本式號</th><th scope="col">方程式</th><th scope="col">對照圖 12.1 與圖 12.2</th></tr></thead>
+      <thead><tr><th scope="col">課本式號</th><th scope="col">方程式</th><th scope="col">分析用途</th></tr></thead>
       <tbody>
         <tr><th scope="row">(12-1)</th><td>Ŷ = α₁ + cX</td><td>圖 12.1 的起點。只用 X 預測 Y，得到未納入 Z 的斜率 c。</td></tr>
         <tr><th scope="row">(12-2)</th><td>Ŷ = α₂ + bZ</td><td>只用 Z 預測 Y。這裡的 b 是兩變數斜率，尚未控制 X。</td></tr>
@@ -20,34 +34,72 @@
       </tbody>
     </table>
   </div>
-  <figure class="card" style="margin-inline:0">
-    <h3>(a) 控制變數</h3>
-    <div class="formula">X ↔ Z，X → Y，Z → Y</div>
+  <figure class="principle-figure">
+    <h3>控制原有工作負荷</h3>
+<svg class="principle-diagram" viewBox="0 0 440 155" role="img" aria-labelledby="control-path-title" xmlns="http://www.w3.org/2000/svg">
+  <title id="control-path-title">組織氣氛與原工作負荷相關，兩者共同預測工作滿意。</title>
+  <defs><marker id="control-path-tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#3e6c65"/></marker></defs>
+  <path d="M116 105 Q131 66 166 56" fill="none" stroke="#3e6c65" stroke-width="2.4" marker-end="url(#control-path-tip)" marker-start="url(#control-path-tip)"/>
+  <path d="M274 56 L326 105" fill="none" stroke="#3e6c65" stroke-width="2.4" marker-end="url(#control-path-tip)"/>
+  <path d="M139 126 H301" fill="none" stroke="#3e6c65" stroke-width="2.4" marker-end="url(#control-path-tip)"/>
+  <rect x="13" y="107" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
+  <text x="75" y="126" dominant-baseline="central">X 組織氣氛</text>
+  <rect x="303" y="107" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
+  <text x="365" y="126" dominant-baseline="central">Y 工作滿意</text>
+  <rect x="158" y="16" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
+  <text x="220" y="35" dominant-baseline="central">Z 原工作負荷</text>
+  <text x="129" y="69">r</text>
+  <text x="323" y="81">b′</text>
+  <text x="220" y="116">c′</text>
+</svg>
     <p>例如試辦前的工作負荷可能同時影響氣氛評價與滿意度。用式 (12-4) 比較工作負荷相同的員工，看看 X 和 Y 的關聯是否改變。</p>
-    <h3>(b) 中介變數</h3>
-    <div class="formula">X → Z → Y，另有 X → Y</div>
-    <p>若 Z 是認同承諾，假設是氣氛先影響認同，認同再連到滿意度。合用式 (12-3) 與 (12-4)，得到間接效果 ab′。後面的中介章節把控制 X 後的路徑 b′ 簡寫成 b。</p>
-    <h3>(c) 調節變數</h3>
-    <div class="formula">X、Z、X × Z → Y</div>
+    </figure>
+  <figure class="principle-figure" id="happy-workplace">
+    <h3>檢驗認同承諾的中介路徑</h3>
+<svg class="principle-diagram" viewBox="0 0 440 155" role="img" aria-labelledby="commitment-path-title" xmlns="http://www.w3.org/2000/svg">
+  <title id="commitment-path-title">組織氣氛經由認同承諾連到工作滿意，並保留直接路徑。課本估計 a 為 0.750，b 為 0.517，直接效果為 0.336。</title>
+  <defs><marker id="commitment-path-tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#3e6c65"/></marker></defs>
+  <path d="M110 105 L180 56" fill="none" stroke="#3e6c65" stroke-width="2.4" marker-end="url(#commitment-path-tip)"/>
+  <path d="M260 56 L330 105" fill="none" stroke="#3e6c65" stroke-width="2.4" marker-end="url(#commitment-path-tip)"/>
+  <path d="M139 126 H301" fill="none" stroke="#3e6c65" stroke-width="2.4" marker-end="url(#commitment-path-tip)"/>
+  <rect x="13" y="107" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
+  <text x="75" y="126" dominant-baseline="central">X 組織氣氛</text>
+  <rect x="303" y="107" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
+  <text x="365" y="126" dominant-baseline="central">Y 工作滿意</text>
+  <rect x="158" y="16" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
+  <text x="220" y="35" dominant-baseline="central">Z 認同承諾</text>
+  <text x="101" y="72">a = 0.750</text>
+  <text x="339" y="72">b′ = 0.517</text>
+  <text x="220" y="116">c′ = 0.336</text>
+</svg>
+    <p>認同承諾反映員工對組織的認同與歸屬感。假設是氣氛先影響認同，認同再連到滿意度。合用式 (12-3) 與 (12-4)，得到間接效果 ab′。後面的中介章節把控制 X 後的路徑 b′ 簡寫成 b。</p>
+      <p>課本組織行為資料的總效果 c = 0.724。按課本量尺，組織氣氛高 1 單位，預測的認同承諾高 0.750 單位。比較氣氛相同的員工時，認同承諾每高 1 單位，預測的工作滿意高 0.517 單位。兩段相乘得到間接效果 0.388，95% 偏誤校正拔靴信賴區間為 [0.327, 0.452]。加上直接效果 0.336，得到總效果 0.724。這些是書中的估計結果，門市試辦是教學情境。</p>
+  </figure>
+  <figure class="principle-figure">
+    <h3>比較主管與非主管的斜率</h3>
+<svg class="principle-diagram" viewBox="0 0 440 180" role="img" aria-labelledby="moderation-path-title" xmlns="http://www.w3.org/2000/svg">
+  <title id="moderation-path-title">組織氣氛、主管職及兩者交乘項共同預測工作滿意。</title>
+  <defs><marker id="moderation-path-tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#3e6c65"/></marker></defs>
+  <path d="M139 32 L301 74" fill="none" stroke="#3e6c65" stroke-width="2.4" marker-end="url(#moderation-path-tip)"/>
+  <path d="M139 88 H301" fill="none" stroke="#3e6c65" stroke-width="2.4" marker-end="url(#moderation-path-tip)"/>
+  <path d="M139 144 L301 102" fill="none" stroke="#3e6c65" stroke-width="2.4" marker-end="url(#moderation-path-tip)"/>
+  <rect x="13" y="13" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
+  <text x="75" y="32" dominant-baseline="central">X 組織氣氛</text>
+  <rect x="13" y="69" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
+  <text x="75" y="88" dominant-baseline="central">Z 主管職</text>
+  <rect x="13" y="125" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
+  <text x="75" y="144" dominant-baseline="central">X × Z</text>
+  <rect x="303" y="69" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
+  <text x="365" y="88" dominant-baseline="central">Y 工作滿意</text>
+  <text x="220" y="43">c″</text>
+  <text x="220" y="80">b″</text>
+  <text x="220" y="146">d</text>
+</svg>
     <p>若 Z 是職位（0 為非主管，1 為主管），式 (12-5) 可直接比較兩組的斜率。非主管是 c″，主管是 c″ + d，兩組的斜率差就是 d。</p>
     <figcaption>圖 12.2　三種第三變數關係圖示（依課本重繪）。</figcaption>
   </figure>
   <aside class="note"><p>控制與中介可以共用同一條多元迴歸式。要判斷 Z 的角色，須依理論與量測時序判斷它發生在 X 之前，或可能由 X 改變。即使 c 與 c′ 不同，係數變化本身也無法辨識機制。</p></aside>
-  <p><a class="button" href="#happy-workplace">閱讀幸福企業案例</a></p>
-</section>
-
-<section class="topic-panel" id="happy-workplace" tabindex="-1">
-  <h2>幸福企業如何帶來快樂員工</h2>
-  <p>一間有多家門市的零售企業想降低人員流動，先以工作滿意度作為試辦的主要結果。公司讓門市提早兩週公布班表、公開換班規則，並要求店長每週回覆員工提出的排班問題。管理者要知道，員工感受到的氣氛若變好，滿意度是否也會提高，以及這段關聯有多少可能經過<strong>認同承諾</strong>，也就是員工對組織的認同與歸屬感。</p>
-  <div class="path-diagram">
-    <div>組織氣氛 X</div><span>a = 0.750</span>
-    <div>認同承諾 M</div><span>b = 0.517</span>
-    <div>工作滿意 Y</div>
-    <p>控制認同承諾後的 X → Y 路徑，c′ = 0.336</p>
-  </div>
-  <h3>用表 12.2 的估計值讀路徑</h3>
-  <p>課本組織行為資料的總效果 c = 0.724。按課本量尺，組織氣氛高 1 單位，預測的認同承諾高 0.750 單位。比較氣氛相同的員工時，認同承諾每高 1 單位，預測的工作滿意高 0.517 單位。兩段相乘得到間接效果 0.388，95% 偏誤校正拔靴信賴區間為 [0.327, 0.452]。加上直接效果 0.336，得到總效果 0.724。這些是書中的估計結果，門市試辦是教學情境。</p>
-  <h3>把分析變成管理決策</h3>
+  <h3>如何評估門市試辦</h3>
   <p>可在試辦前記錄原有工作負荷與滿意度，試辦後依序量測氣氛、認同承諾和滿意度。有條件時，以門市為單位隨機決定先試辦或稍後試辦，並在分析中處理同店員工的相依性。隨機分派有助於估計方案的效果，認同承諾的中介解讀仍須考慮承諾和滿意度之間可能存在的未測混淆。</p>
   <p>如果試辦顯示氣氛與滿意度改善，但認同承諾沒有明顯起色，可先訪談員工，找出改善是否主要來自班表更可預期。若要判斷主管與非主管是否同樣受益，可把試辦前的主管職作為調節變數，直接估計兩組斜率差或條件間接效果差及其區間。若氣氛以員工個人評分衡量，解讀在員工層次。若改用門市平均氣氛衡量共享環境，則要區分店內與店間關聯。</p>
   <p class="source">課本依據為第 12 章 §12.1.1、圖 12.7(a) 及表 12.2。<a href="../books/multilevel-2017.html">《多層次模式與縱貫資料分析》</a></p>

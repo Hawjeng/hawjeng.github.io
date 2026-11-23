@@ -44,3 +44,25 @@ footer{max-width:1420px;padding:0 28px 30px;font-size:.9rem}
 @media(min-width:1550px){main,.header-inner,footer{max-width:1640px}}
 @media(max-width:1100px){.syntax-layout{grid-template-columns:210px minmax(0,1fr);gap:18px}.code-results{grid-template-columns:1fr}.syntax-card .source-code,.syntax-card .output-code{height:380px;max-height:380px}}
 @media(max-width:760px){main{padding:0 16px}.header-inner{padding:12px 16px}.header-inner a{font-size:.85rem}.page-hero{padding:24px 0 18px}.page-hero h1 span{display:block;margin:5px 0 0;font-size:.57em}.page-hero p{font-size:.95rem}.main-tabs a{padding:8px 10px;font-size:.9rem}.lesson-frame{padding:20px 18px;margin-top:20px}.topic-tabs a{padding:8px 11px;font-size:.91rem}.lesson-frame h2{font-size:1.4rem}.syntax-layout{grid-template-columns:1fr}.syntax-settings{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 15px;padding:16px}.syntax-settings h3,.syntax-settings>p{grid-column:1/-1}.syntax-settings label{margin:7px 0}.syntax-settings a{font-size:.9rem}.syntax-card{padding:15px}.syntax-card .source-code,.syntax-card .output-code{height:350px;max-height:350px}.software-tabs{gap:1px}.software-tabs button{padding:8px 9px;font-size:.9rem}}
+
+.principle-figure {
+  margin: 18px 0;
+  padding: clamp(16px, 3vw, 26px);
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.principle-diagram {
+  display: block;
+  width: min(100%, 520px);
+  height: auto;
+  margin: 0 auto 12px;
+}
+
+.principle-diagram text {
+  fill: var(--ink);
+  font-size: 17px;
+  font-weight: 650;
+  text-anchor: middle;
+}
