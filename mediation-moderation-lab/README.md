@@ -1,6 +1,6 @@
 # 中介與調節效果分析
 
-邱皓政高階統計互動教材，依《量化研究法（二）：統計原理與分析技術》2021 二版增修版第 16、17 章與作者提供的範例資料整理。書籍來源：https://hawjeng.github.io/books/quantitative-ii-2021.html
+邱皓政高階統計互動教材，依《量化研究法（二）：統計原理與分析技術》2021 二版增修版及作者提供的範例資料整理。書籍來源：https://hawjeng.github.io/books/quantitative-ii-2021.html
 
 ## 開啟教材
 
@@ -25,7 +25,7 @@
 - ch16d：x=X1，w=X2，y=Y，n=25。此為 y=30−5xw 的確定性資料，殘差為 0，不進行顯著性解讀。原 R 檔的 math/agg/att 欄名未與提供的 CSV 對應，新版使用實際欄名。
 - salary：由 Ch17a.sav 選取原 X、Z、Y、M，依序改名 x、m、y、w；n=474，無缺失，未刪離群值或標準化。教育為年，起薪／薪資為萬元，w=0 女性、1 男性。
 
-原始資料包另保留全部提供的第 16 章 R/SPSS/CSV/SAV 檔及第 17 章 XLSX/SAV 檔。Word 原章節未公開散布。
+原始資料包另保留全部提供的R/SPSS/CSV/SAV 與 XLSX/SAV 原始檔。Word 原章節未公開散布。
 
 ## 數值核對
 
@@ -44,7 +44,7 @@ Mplus 的二元 Model 59 使用兩群組迴歸，放開兩組斜率及截距，�
 
 ## 參考與權利
 
-- 原理：作者提供之第 16、17 章，與上述書籍頁。
+- 原理：作者提供的教材與上述書籍。
 - https://www.afhayes.com/download.html
 - https://www.afhayes.com/faq.html
 - https://interactions.jacob-long.com/reference/johnson_neyman.html
