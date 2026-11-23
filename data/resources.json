@@ -1,5 +1,16 @@
 [
   {
+    "id": "statistics-fifth-data",
+    "bookId": "statistics-2026",
+    "title": "統計學第五版｜範例資料",
+    "format": "RAR",
+    "url": "https://www.wunan.com.tw/www2/download/1H90%20%E7%AF%84%E4%BE%8B%E8%B3%87%E6%96%99%E6%AA%94.RAR",
+    "source": "https://www.wunan.com.tw/bookdetail?NO=12266",
+    "description": "出版社書籍頁提供的 1H90 範例資料檔，供統計分析與 Excel 實作使用。",
+    "category": "RAR · BOOK MATERIALS",
+    "label": "下載配套資料（RAR）"
+  },
+  {
     "id": "heterogeneity-data",
     "bookId": "heterogeneity-2023",
     "title": "潛在異質性分析｜範例資料",
