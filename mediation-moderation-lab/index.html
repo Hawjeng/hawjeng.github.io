@@ -1,6 +1,6 @@
 <!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="用幸福企業案例理解簡單迴歸、控制變數、中介與調節。"><title>原理｜中介與調節效果分析｜邱皓政</title><link rel="canonical" href="https://hawjeng.github.io/mediation-moderation-lab/"><link rel="icon" href="../assets/favicon.svg"><link rel="stylesheet" href="style.css?v=process-paths"><script defer src="navigation.js?v=units-2"></script></head><body><a class="skip" href="#main">跳到內容</a><header><div class="header-inner"><a class="return-link" href="../resources.html#advanced-statistics-apps">返回教學與專案</a><a href="../index.html">邱皓政｜高階統計</a></div></header><main id="main"><div class="page-hero"><h1>中介與調節效果分析 <span lang="en">Mediation &amp; Moderation</span></h1><p>從幸福企業案例出發，理解工作氣氛與工作滿意的關聯、可能的中介歷程及調節條件。</p></div><nav class="main-tabs" aria-label="教材單元"><a href="index.html" aria-current="page">原理</a><a href="examples.html">範例與互動</a><a href="syntax.html">語法與結果</a><a href="checklist.html">研究檢核</a><a href="downloads.html">下載與來源</a><a href="references.html">參考文獻</a></nav><div class="lesson-frame"><nav class="topic-tabs" aria-label="原理主題"><a href="#concepts" data-topic="concepts">迴歸與第三變數</a><a href="#moderation-theory" data-topic="moderation-theory">調節效果</a><a href="#mediation-theory" data-topic="mediation-theory">中介效果</a><a href="#conditional-theory" data-topic="conditional-theory">條件歷程</a><a href="#process-models" data-topic="process-models">PROCESS 模型</a><a href="#inference" data-topic="inference">推論與軟體</a></nav><section class="topic-panel" id="concepts" tabindex="-1">
   <h2>從簡單迴歸到控制、中介與調節</h2>
-  <p>一家連鎖零售企業想改善員工的工作體驗。公司試辦提早兩週公布班表、公開換班規則，並請店長每週回覆排班問題。員工感受到的工作氣氛改善後，工作滿意度是否也會提高？我們從這個問題開始，再看工作壓力、認同承諾和職務如何進入分析。</p>
+  <p>一家連鎖零售企業想改善員工的工作體驗。公司試辦提早兩週公布班表、公開換班規則，並請店長每週回覆排班問題。員工感受到的工作氣氛改善後，工作滿意度是否也會提高？我們從這個問題開始，再看認同承諾如何作為控制變數或中介變數，以及職務如何調節這段關聯。</p>
   <h3>用工作氣氛預測工作滿意</h3>
   <figure class="card" style="margin-inline:0">
     <svg class="principle-diagram" viewBox="0 0 440 155" role="img" aria-labelledby="simple-path-title" xmlns="http://www.w3.org/2000/svg">
@@ -35,9 +35,9 @@
     </table>
   </div>
   <figure class="principle-figure">
-    <h3>控制原有工作壓力</h3>
+    <h3>將認同承諾作為控制變數</h3>
 <svg class="principle-diagram" viewBox="0 0 440 155" role="img" aria-labelledby="control-path-title" xmlns="http://www.w3.org/2000/svg">
-  <title id="control-path-title">工作氣氛與原工作壓力相關，兩者共同預測工作滿意。</title>
+  <title id="control-path-title">工作氣氛與認同承諾相關，兩者共同預測工作滿意。</title>
   <defs><marker id="control-path-tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#3e6c65"/></marker></defs>
   <path d="M116 105 Q131 66 166 56" fill="none" stroke="#3e6c65" stroke-width="2.4" marker-end="url(#control-path-tip)" marker-start="url(#control-path-tip)"/>
   <path d="M274 56 L326 105" fill="none" stroke="#3e6c65" stroke-width="2.4" marker-end="url(#control-path-tip)"/>
@@ -47,12 +47,12 @@
   <rect x="303" y="107" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
   <text x="365" y="126" dominant-baseline="central">Y 工作滿意</text>
   <rect x="158" y="16" width="124" height="38" rx="8" fill="#eff5f2" stroke="#74958d"/>
-  <text x="220" y="35" dominant-baseline="central">Z 原工作壓力</text>
+  <text x="220" y="35" dominant-baseline="central">Z 認同承諾</text>
   <text x="129" y="69">r</text>
   <text x="323" y="81">b′</text>
   <text x="220" y="116">c′</text>
 </svg>
-    <p>例如試辦前的工作壓力可能同時影響氣氛評價與滿意度。用式 (4) 比較工作壓力相同的員工，看看 X 和 Y 的關聯是否改變。</p>
+    <p>如果分析目的是比較認同承諾相同的員工，就用式 (4) 估計工作氣氛與工作滿意的關聯。圖中的雙向箭頭 r 只表示工作氣氛與認同承諾可以相關，未指定兩者的作用方向。</p>
     </figure>
   <figure class="principle-figure" id="happy-workplace">
     <h3>檢驗認同承諾的中介路徑</h3>
@@ -72,7 +72,7 @@
   <text x="339" y="72">b′ = 0.517</text>
   <text x="220" y="116">c′ = 0.336</text>
 </svg>
-    <p>認同承諾反映員工對組織的認同與歸屬感。假設是氣氛先影響認同，認同再連到滿意度。合用式 (3) 與 (4)，得到間接效果 ab′。後面的中介章節把控制 X 後的路徑 b′ 簡寫成 b。</p>
+    <p>本圖沿用上圖的三個變數。認同承諾反映員工對組織的認同與歸屬感。這裡提出有方向的假設：工作氣氛先影響認同承諾，認同承諾再連到工作滿意。合用式 (3) 與 (4)，得到間接效果 ab′。後面的中介章節把控制 X 後的路徑 b′ 簡寫成 b。</p>
       <p>課本組織行為資料的總效果 c = 0.724。按課本量尺，工作氣氛高 1 單位，預測的認同承諾高 0.750 單位。比較氣氛相同的員工時，認同承諾每高 1 單位，預測的工作滿意高 0.517 單位。兩段相乘得到間接效果 0.388，95% 偏誤校正拔靴信賴區間為 [0.327, 0.452]。加上直接效果 0.336，得到總效果 0.724。這些是書中的估計結果，門市試辦是教學情境。</p>
   </figure>
   <figure class="principle-figure">
