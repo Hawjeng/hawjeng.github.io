@@ -1,0 +1,88 @@
+
+
+Call:
+
+lm(formula = m ~ x, data = d)
+
+
+
+Residuals:
+
+    Min      1Q  Median      3Q     Max 
+
+-1.0622 -0.3555 -0.1394  0.2171  5.3448 
+
+
+
+Coefficients:
+
+            Estimate Std. Error t value Pr(>|t|)    
+
+(Intercept) -0.62910    0.13409  -4.692 3.56e-06 ***
+
+x            0.17275    0.00972  17.773  < 2e-16 ***
+
+---
+
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+
+
+Residual standard error: 0.6098 on 472 degrees of freedom
+
+Multiple R-squared:  0.4009,	Adjusted R-squared:  0.3997 
+
+F-statistic: 315.9 on 1 and 472 DF,  p-value: < 2.2e-16
+
+
+
+
+
+Call:
+
+lm(formula = y ~ x + m, data = d)
+
+
+
+Residuals:
+
+    Min      1Q  Median      3Q     Max 
+
+-2.9581 -0.4093 -0.0741  0.2917  4.9218 
+
+
+
+Coefficients:
+
+            Estimate Std. Error t value Pr(>|t|)    
+
+(Intercept) -0.78087    0.17539  -4.452 1.06e-05 ***
+
+x            0.10204    0.01606   6.356 4.91e-10 ***
+
+m            1.67263    0.05885  28.423  < 2e-16 ***
+
+---
+
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+
+
+Residual standard error: 0.7797 on 471 degrees of freedom
+
+Multiple R-squared:  0.7924,	Adjusted R-squared:  0.7915 
+
+F-statistic: 898.9 on 2 and 471 DF,  p-value: < 2.2e-16
+
+
+
+       a.x        b.m   direct.x indirect.x    total.x 
+
+ 0.1727528  1.6726305  0.1020390  0.2889517  0.3909907 
+
+Percentile bootstrap 95% CI; B=5000
+
+     2.5%     97.5% 
+
+0.2458521 0.3355423 
+

@@ -1,0 +1,6 @@
+  (Intercept)             x             w           x:w 
+
+ 3.000000e+01 -7.850462e-16 -1.004859e-15 -5.000000e+00 
+
+Deterministic y=30-5*x*w. No inferential tests.
+

@@ -1,0 +1,32 @@
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.830
+Model:                            OLS   Adj. R-squared:                  0.829
+Method:                 Least Squares   F-statistic:                     563.6
+Date:                Mon, 23 Nov 2026   Prob (F-statistic):          8.87e-133
+Time:                        15:08:29   Log-Likelihood:                -366.33
+No. Observations:                 350   AIC:                             740.7
+Df Residuals:                     346   BIC:                             756.1
+Df Model:                           3                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept     -1.9114      0.289     -6.613      0.000      -2.480      -1.343
+x              2.4668      0.097     25.453      0.000       2.276       2.657
+w              0.1005      0.021      4.858      0.000       0.060       0.141
+x:w           -0.0499      0.007     -7.087      0.000      -0.064      -0.036
+==============================================================================
+Omnibus:                      136.949   Durbin-Watson:                   1.831
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              872.915
+Skew:                           1.496   Prob(JB):                    2.81e-190
+Kurtosis:                      10.135   Cond. No.                         329.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+{'w': np.float64(2.333333333), 'effect': np.float64(2.3503239299465744), 'lo': np.float64(2.187168610647074), 'hi': np.float64(2.5134792492460747)}
+{'w': np.float64(10.000000000219998), 'effect': np.float64(1.9677388091063834), 'lo': np.float64(1.8707515307961753), 'hi': np.float64(2.0647260874165916)}
+{'w': np.float64(35.0), 'effect': np.float64(0.7201786325546058), 'lo': np.float64(0.3886419970126795), 'hi': np.float64(1.051715268096532)}
+Real J-N roots: [41.13880893 63.9687266 ]
+Observed moderator range: 2.333333333 35.0

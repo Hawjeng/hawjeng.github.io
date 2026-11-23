@@ -62,10 +62,23 @@ function mediation(){
  $('conditional-summary').textContent=`兩組間接效果差為 ${fmt(c.estimates[2])}，${level}% 拔靴 CI ${CI(cc[2])}，${sig(cc[2])?'不含':'包含'} 0。請勿將此結果解讀成性別的因果效果。`;
  plot('conditional-chart',{title:'兩組條件間接效果及拔靴區間',xrange:[-.3,1.3],yrange:padRange([0,...cc.slice(0,2).flat()]),xlabel:'w：0 女性；1 男性',ylabel:'條件間接效果',hlines:[0],series:cc.slice(0,2).map((a,i)=>({points:[[i,a[0]],[i,a[1]]],color:i===g?'#b44c25':'#087e85'})),dots:c.estimates.slice(0,2).map((v,i)=>[i,v])});
 }
-function software(name){$('code').textContent=window.LAB_CODES[name];$('code-title').textContent=name==='SPSS'?'SPSS：原生迴歸與 PROCESS':name;const path={R:'analysis.R',Python:'analysis.py',SPSS:'analysis.sps',Mplus:'moderation.inp'};$('code-download').href='syntax/'+path[name];$('code-download').textContent=name==='Mplus'?'下載調節 .inp（其餘見完整教材）':'下載語法';document.querySelectorAll('[data-software]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.software===name)));$('copy-status').textContent=''}
-document.querySelectorAll('[data-software]').forEach(b=>b.addEventListener('click',()=>software(b.dataset.software)));
-$('dataset').addEventListener('change',()=>{selected=D.moderation.find(d=>d.id===$('dataset').value);moderation(true)});
-$('w-slider').addEventListener('input',()=>moderation());$('confidence').addEventListener('change',()=>{alpha=+$('confidence').value;moderation();mediation()});$('gender').addEventListener('change',mediation);
-$('copy-code').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('code').textContent);$('copy-status').textContent='已複製'}catch{$('copy-status').textContent='請選取語法複製，或使用下載'}});
+let lastBook="ch16b",lastExercise="ex16a";
+function updateExercise(id){
+ lastExercise=id;
+ selected=D.moderation.find(d=>d.id===id);$('dataset').value=id;moderation(true);
+ if($('exercise-intro'))$('exercise-intro').textContent=id==='ex16a'?'解題步驟：估計 y ~ x*w，交互作用約為 −0.0499；再用 θ(w)=2.4668−0.0499w 檢查 X1 的效果如何隨 X2 改變。對照下方目前 w 的區間，不單憑斜率正負判斷顯著性。':'解題步驟：令 x=原 Z（組別）、w=原 X，估計的條件組間差為 θ(w)=−4.7699+1.1930w。使用 J–N 區間，找出觀察範圍內哪些 w 的組間差區間不含 0。';
+}
+function locateExample(){
+ if(!$('shared-mod-lab'))return;
+ const exercise=location.hash==='#exercises',destination=exercise?$('exercise-lab'):$('moderation');destination.appendChild($('shared-mod-lab'));
+ const values=exercise?['ex16a','ex16b']:['ch16b','ch16d'];
+ $('dataset').innerHTML=values.map(id=>{const d=D.moderation.find(v=>v.id===id);return `<option value="${id}">${d.title}</option>`}).join('');
+ if(exercise)updateExercise(lastExercise);else{selected=D.moderation.find(d=>d.id===lastBook);$('dataset').value=lastBook;moderation(true)}
+}
+if($('dataset')){
+ $('dataset').addEventListener('change',()=>{selected=D.moderation.find(d=>d.id===$('dataset').value);moderation(true);if(location.hash==='#exercises')updateExercise(selected.id);else lastBook=selected.id});
+ $('w-slider').addEventListener('input',()=>moderation());$('confidence').addEventListener('change',()=>{alpha=+$('confidence').value;moderation();mediation()});$('gender').addEventListener('change',mediation);
+ document.querySelectorAll('[data-exercise]').forEach(b=>b.addEventListener('click',()=>updateExercise(b.dataset.exercise)));
+ window.addEventListener('hashchange',locateExample);locateExample();mediation();
+}
 document.querySelectorAll('.quiz').forEach(b=>b.addEventListener('click',()=>{const p=b.parentElement.querySelector('.feedback');p.textContent=(b.dataset.answer==='true'?'答對了。':'再想一想。')+p.dataset.explanation}));
-moderation(true);mediation();software('R');

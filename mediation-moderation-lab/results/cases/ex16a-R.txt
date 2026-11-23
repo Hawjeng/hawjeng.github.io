@@ -1,0 +1,30 @@
+
+Call:
+lm(formula = y ~ x * w, data = d)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.4128 -0.3547 -0.0982  0.2500  4.6575 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -1.911371   0.289043  -6.613 1.43e-10 ***
+x            2.466763   0.096914  25.453  < 2e-16 ***
+w            0.100481   0.020682   4.858 1.80e-06 ***
+x:w         -0.049902   0.007041  -7.087 7.74e-12 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.6931 on 346 degrees of freedom
+Multiple R-squared:  0.8301,	Adjusted R-squared:  0.8286 
+F-statistic: 563.6 on 3 and 346 DF,  p-value: < 2.2e-16
+
+       w effect.x     lo.x     hi.x 
+2.333333 2.350324 2.187169 2.513479 
+        w  effect.x      lo.x      hi.x 
+10.000000  1.967739  1.870752  2.064726 
+         w   effect.x       lo.x       hi.x 
+35.0000000  0.7201786  0.3886420  1.0517153 
+       x        x 
+41.13881 63.96873 
+Interpret J-N roots only within the observed moderator range: 2.333333 35 

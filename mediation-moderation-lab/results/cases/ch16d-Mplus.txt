@@ -1,0 +1,2 @@
+This is a deterministic illustration (y=30-5*x*w).
+No stochastic Mplus estimation was performed.

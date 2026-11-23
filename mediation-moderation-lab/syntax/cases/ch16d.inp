@@ -1,0 +1,3 @@
+! Ch16d is deterministic: y=30-5*x*w.
+! No stochastic Mplus model is fitted.
+! Use this case to understand the interaction coefficient.

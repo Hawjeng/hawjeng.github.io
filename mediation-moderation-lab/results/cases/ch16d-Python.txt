@@ -1,0 +1,12 @@
+Intercept    3.000000e+01
+
+x           -3.053113e-16
+
+w            9.714451e-17
+
+x:w         -5.000000e+00
+
+dtype: float64
+
+Deterministic y=30-5*x*w. No inferential tests.
+

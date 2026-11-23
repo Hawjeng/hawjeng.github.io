@@ -328,7 +328,7 @@ def build():
     if S['siteUrl']:
         base = S['siteUrl'].rstrip('/')
         discoverable = [public_path(p) for p in pages if p != '404.html']
-        discoverable += ['mediation-moderation-lab/', 'lca-lab/', 'anova-lab/', 'correlation-regression-lab/', 'time-series-lab/', 'chi-square-nonparametric-lab/', 'mean-difference-lab/', 'statistical-inference-lab/', 'teaching/probability-distributions/', 'teaching/central-limit-theorem/']
+        discoverable += ['mediation-moderation-lab/', 'mediation-moderation-lab/examples.html', 'mediation-moderation-lab/syntax.html', 'mediation-moderation-lab/checklist.html', 'mediation-moderation-lab/downloads.html', 'mediation-moderation-lab/references.html', 'lca-lab/', 'anova-lab/', 'correlation-regression-lab/', 'time-series-lab/', 'chi-square-nonparametric-lab/', 'mean-difference-lab/', 'statistical-inference-lab/', 'teaching/probability-distributions/', 'teaching/central-limit-theorem/']
         xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join(f'<url><loc>{E(base+"/"+p)}</loc></url>' for p in discoverable)+'</urlset>'
         (target/'sitemap.xml').write_text(xml,encoding='utf-8')
         (target/'robots.txt').write_text('User-agent: *\nAllow: /\nSitemap: '+base+'/sitemap.xml\n',encoding='utf-8')

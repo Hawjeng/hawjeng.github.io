@@ -1,0 +1,238 @@
+Mplus VERSION 9.1
+MUTHEN & MUTHEN
+11/23/2026   3:09 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE: Moderation ex16a;
+  DATA: FILE=data/ex16a.dat;
+  VARIABLE: NAMES=x w y; USEVARIABLES=x w y xw;
+  DEFINE: xw=x*w;
+  ANALYSIS: ESTIMATOR=ML;
+  MODEL:
+   y ON x (bx);
+   y ON w (bw);
+   y ON xw (bi);
+  OUTPUT: SAMPSTAT CINTERVAL TECH3;
+  ! ML z inference differs from OLS residual-df t inference.
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+Moderation ex16a;
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         350
+
+Number of dependent variables                                    1
+Number of independent variables                                  3
+Number of continuous latent variables                            0
+
+Observed dependent variables
+
+  Continuous
+   Y
+
+Observed independent variables
+   X           W           XW
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  data/ex16a.dat
+
+Input data format  FREE
+
+
+SAMPLE STATISTICS
+
+
+     SAMPLE STATISTICS
+
+
+           Means
+              Y             X             W             XW
+              ________      ________      ________      ________
+                5.000         3.000        10.000        29.933
+
+
+           Covariances
+              Y             X             W             XW
+              ________      ________      ________      ________
+ Y              2.796
+ X              1.152         0.616
+ W             -2.402        -0.067        54.580
+ XW             5.626         7.211       154.725       555.255
+
+
+           Correlations
+              Y             X             W             XW
+              ________      ________      ________      ________
+ Y              1.000
+ X              0.878         1.000
+ W             -0.194        -0.012         1.000
+ XW             0.143         0.390         0.889         1.000
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y                     5.000       1.564       3.050    0.29%       3.815      4.190      4.385
+             350.000       2.796       1.893      10.875    0.29%       4.625      6.000
+     X                     3.000       2.069       2.120    0.86%       2.495      2.720      2.720
+             350.000       0.616       4.820       7.220    0.29%       2.795      3.275
+     W                    10.000       1.414       2.333    0.29%       4.250      5.917      7.167
+             350.000      54.580       1.423      35.000    0.29%       8.917     15.500
+     XW                   29.933       1.614       5.863    0.29%      11.970     16.770     21.008
+             350.000     555.255       2.686     148.271    0.29%      26.308     46.150
+
+
+     VIF (VARIANCE INFLATION FACTOR) FOR EXPLORING MULTICOLLINEARITY OF INDEPENDENT VARIABLES
+
+     Variable        VIF       Variable        VIF       Variable        VIF
+
+     X              4.214      W             17.008      XW            20.056
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        5
+
+Loglikelihood
+
+          H0 Value                        -366.334
+          H1 Value                        -366.334
+
+Information Criteria
+
+          Akaike (AIC)                     742.669
+          Bayesian (BIC)                   761.958
+          Sample-Size Adjusted BIC         746.096
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                              0.000
+          Degrees of Freedom                     0
+          P-Value                           0.0000
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.000
+          Probability RMSEA <= .05           0.000
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                            620.427
+          Degrees of Freedom                     3
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.000
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ Y        ON
+    X                  2.467      0.096     25.600      0.000
+    W                  0.100      0.021      4.886      0.000
+    XW                -0.050      0.007     -7.128      0.000
+
+ Intercepts
+    Y                 -1.911      0.287     -6.651      0.000
+
+ Residual Variances
+    Y                  0.475      0.036     13.229      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.952E-05
+       (ratio of smallest to largest eigenvalue)
+
+
+CONFIDENCE INTERVALS OF MODEL RESULTS
+
+                  Lower .5%  Lower 2.5%    Lower 5%    Estimate    Upper 5%  Upper 2.5%   Upper .5%
+
+ Y        ON
+    X                2.219       2.278       2.308       2.467       2.625       2.656       2.715
+    W                0.048       0.060       0.067       0.100       0.134       0.141       0.153
+    XW              -0.068      -0.064      -0.061      -0.050      -0.038      -0.036      -0.032
+
+ Intercepts
+    Y               -2.652      -2.475      -2.384      -1.911      -1.439      -1.348      -1.171
+
+ Residual Variances
+    Y                0.382       0.405       0.416       0.475       0.534       0.545       0.567
+
+
+TECHNICAL 3 OUTPUT
+
+
+           ESTIMATED COVARIANCE MATRIX FOR PARAMETER ESTIMATES
+                  1             2             3             4             5
+              ________      ________      ________      ________      ________
+      1     0.825915D-01
+      2    -0.270353D-01  0.928500D-02
+      3    -0.509235D-02  0.168148D-02  0.422868D-03
+      4     0.169695D-02 -0.589134D-03 -0.139671D-03  0.490149D-04
+      5    -0.542806D-07  0.172160D-07  0.404482D-08 -0.131023D-08  0.128906D-02
+
+
+           ESTIMATED CORRELATION MATRIX FOR PARAMETER ESTIMATES
+                  1             2             3             4             5
+              ________      ________      ________      ________      ________
+      1         1.000
+      2        -0.976         1.000
+      3        -0.862         0.849         1.000
+      4         0.843        -0.873        -0.970         1.000
+      5         0.000         0.000         0.000         0.000         1.000
+
+
+     Beginning Time:  15:09:33
+        Ending Time:  15:09:33
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2026 Muthen & Muthen

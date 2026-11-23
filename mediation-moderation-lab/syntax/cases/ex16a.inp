@@ -1,0 +1,11 @@
+TITLE: Moderation ex16a;
+DATA: FILE=data/ex16a.dat;
+VARIABLE: NAMES=x w y; USEVARIABLES=x w y xw;
+DEFINE: xw=x*w;
+ANALYSIS: ESTIMATOR=ML;
+MODEL:
+ y ON x (bx);
+ y ON w (bw);
+ y ON xw (bi);
+OUTPUT: SAMPSTAT CINTERVAL TECH3;
+! ML z inference differs from OLS residual-df t inference.

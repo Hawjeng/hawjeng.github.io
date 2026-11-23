@@ -1,0 +1,64 @@
+                            OLS Regression Results                            
+
+==============================================================================
+
+Dep. Variable:                      y   R-squared:                       0.921
+
+Model:                            OLS   Adj. R-squared:                  0.915
+
+Method:                 Least Squares   F-statistic:                     140.6
+
+Date:                Mon, 23 Nov 2026   Prob (F-statistic):           6.18e-20
+
+Time:                        15:03:22   Log-Likelihood:                -31.006
+
+No. Observations:                  40   AIC:                             70.01
+
+Df Residuals:                      36   BIC:                             76.77
+
+Df Model:                           3                                         
+
+Covariance Type:            nonrobust                                         
+
+==============================================================================
+
+                 coef    std err          t      P>|t|      [0.025      0.975]
+
+------------------------------------------------------------------------------
+
+Intercept     10.2162      0.427     23.903      0.000       9.349      11.083
+
+x            -11.7474      0.622    -18.875      0.000     -13.010     -10.485
+
+w             -0.1060      0.007    -15.196      0.000      -0.120      -0.092
+
+x:w            0.2027      0.010     20.373      0.000       0.182       0.223
+
+==============================================================================
+
+Omnibus:                        0.096   Durbin-Watson:                   1.867
+
+Prob(Omnibus):                  0.953   Jarque-Bera (JB):                0.289
+
+Skew:                           0.073   Prob(JB):                        0.866
+
+Kurtosis:                       2.610   Cond. No.                         580.
+
+==============================================================================
+
+
+
+Notes:
+
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+{'w': np.int64(30), 'effect': np.float64(-5.667389925457948), 'lo': np.float64(-6.370041802008465), 'hi': np.float64(-4.964738048907431)}
+
+{'w': np.float64(60.0), 'effect': np.float64(0.4125716143282734), 'lo': np.float64(0.05640897360953623), 'hi': np.float64(0.7687342550470105)}
+
+{'w': np.int64(90), 'effect': np.float64(6.4925331541144935), 'lo': np.float64(5.790668945831473), 'hi': np.float64(7.194397362397514)}
+
+Real J-N roots: [56.16542244 59.72191801]
+
+Observed moderator range: 30 90
+

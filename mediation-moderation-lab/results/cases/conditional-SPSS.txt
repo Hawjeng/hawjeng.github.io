@@ -1,0 +1,278 @@
+Run MATRIX procedure:
+
+
+
+**************** PROCESS Procedure for SPSS Version 5.1.1 ****************
+
+
+
+                    Written by Andrew F. Hayes, Ph.D.
+
+    Documentation available in Hayes (2022). www.guilford.com/p/hayes3
+
+           and Hayes and Darlington (2027). www.afhayes.com
+
+
+
+**************************************************************************
+
+
+
+PROCESS is now ready for use.
+
+
+
+Copyright 2013-2026 by Andrew F. Hayes. ALL RIGHTS RESERVED.
+
+This version of PROCESS requires SPSS version 26 or later
+
+Workshop schedule available at haskayne.ucalgary.ca/CCRAM
+
+In SPSS 29 and later, change default output font to Courier New for
+
+tidier output.
+
+
+
+------ END MATRIX -----
+
+Run MATRIX procedure:
+
+
+
+**************** PROCESS Procedure for SPSS Version 5.1.1 ****************
+
+
+
+                    Written by Andrew F. Hayes, Ph.D.
+
+    Documentation available in Hayes (2022). www.guilford.com/p/hayes3
+
+           and Hayes and Darlington (2027). www.afhayes.com
+
+
+
+**************************************************************************
+
+  Model: 59
+
+      Y: y
+
+      X: x
+
+      M: m
+
+      W: w
+
+
+
+Sample
+
+Size:  474
+
+
+
+Custom
+
+Seed:     20261123
+
+
+
+**************************************************************************
+
+
+
+OUTCOME VARIABLE:
+
+ m
+
+
+
+Model Summary
+
+          R       R-sq   Adj R-sq          F          p      SEest        PRE
+
+      .7122      .5072      .5041   161.2483      .0000      .5543      .2958
+
+
+
+                 SS         df         MS
+
+Regress    148.6159     3.0000    49.5386
+
+Residual   144.3932   470.0000      .3072
+
+Total      293.0090   473.0000      .6195
+
+
+
+Model
+
+              coeff         se          t          p       LLCI       ULCI
+
+constant      .5667      .2051     2.7626      .0060      .1636      .9698
+
+x             .0600      .0163     3.6825      .0003      .0280      .0921
+
+w           -1.2947      .2670    -4.8484      .0000    -1.8195     -.7700
+
+Int_1         .1311      .0200     6.5529      .0000      .0918      .1704
+
+
+
+Product terms key:
+
+ Int_1    :        x        x        w
+
+
+
+Test(s) of highest order unconditional interaction(s):
+
+       R2-chng          F        df1        df2          p
+
+X*W      .0450    42.9406     1.0000   470.0000      .0000
+
+----------
+
+    Focal predict: x        (X)
+
+          Mod var: w        (W)
+
+
+
+Conditional effects of the focal predictor at values of the moderator(s):
+
+
+
+          w     Effect         se          t          p       LLCI       ULCI
+
+      .0000      .0600      .0163     3.6825      .0003      .0280      .0921
+
+     1.0000      .1911      .0116    16.4705      .0000      .1683      .2139
+
+
+
+**************************************************************************
+
+
+
+OUTCOME VARIABLE:
+
+ y
+
+
+
+Model Summary
+
+          R       R-sq   Adj R-sq          F          p      SEest        PRE
+
+      .8915      .7949      .7927   362.6652      .0000      .7775      .5447
+
+
+
+                 SS         df         MS
+
+Regress   1096.2378     5.0000   219.2476
+
+Residual   282.9272   468.0000      .6045
+
+Total     1379.1650   473.0000     2.9158
+
+
+
+Model
+
+              coeff         se          t          p       LLCI       ULCI
+
+constant     -.5074      .3104    -1.6348      .1028    -1.1172      .1025
+
+x             .0738      .0260     2.8429      .0047      .0228      .1249
+
+m            1.6783      .2052     8.1803      .0000     1.2752     2.0815
+
+w            -.2801      .3954     -.7084      .4791    -1.0570      .4968
+
+Int_1         .0425      .0333     1.2751      .2029     -.0230      .1079
+
+Int_2        -.0758      .2162     -.3505      .7261     -.5006      .3491
+
+
+
+Product terms key:
+
+ Int_1    :        x        x        w
+
+ Int_2    :        m        x        w
+
+
+
+Test(s) of highest order unconditional interaction(s):
+
+       R2-chng          F        df1        df2          p
+
+X*W      .0007     1.6259     1.0000   468.0000      .2029
+
+M*W      .0001      .1228     1.0000   468.0000      .7261
+
+
+
+
+
+****************** DIRECT AND INDIRECT EFFECTS OF X ON Y ******************
+
+
+
+Conditional direct effects of X on Y
+
+          w     Effect         se          t          p       LLCI       ULCI
+
+      .0000      .0738      .0260     2.8429      .0047      .0228      .1249
+
+     1.0000      .1163      .0209     5.5770      .0000      .0753      .1573
+
+
+
+Conditional indirect effects of X on Y:
+
+
+
+INDIRECT EFFECT:
+
+ x           ->    m           ->    y
+
+
+
+          w     Effect     BootSE   BootLLCI   BootULCI
+
+      .0000      .1007      .0183      .0670      .1372
+
+     1.0000      .3063      .0295      .2531      .3678
+
+
+
+Index of moderated mediation (difference between conditional indirect effects):
+
+       Index     BootSE   BootLLCI   BootULCI
+
+w      .2056      .0349      .1427      .2760
+
+
+
+*********************** ANALYSIS NOTES AND ERRORS ************************
+
+
+
+Level of confidence for all confidence intervals in output:
+
+  95.0000
+
+
+
+Number of bootstrap samples for percentile bootstrap confidence intervals:
+
+  5000
+
+
+
+------ END MATRIX -----
+

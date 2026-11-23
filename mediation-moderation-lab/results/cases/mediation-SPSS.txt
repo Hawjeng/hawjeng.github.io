@@ -1,0 +1,363 @@
+Run MATRIX procedure:
+
+
+
+
+
+**************** PROCESS Procedure for SPSS Version 5.1.1 ****************
+
+
+
+
+
+                    Written by Andrew F. Hayes, Ph.D.
+
+
+    Documentation available in Hayes (2022). www.guilford.com/p/hayes3
+
+
+           and Hayes and Darlington (2027). www.afhayes.com
+
+
+
+
+
+**************************************************************************
+
+
+
+
+
+PROCESS is now ready for use.
+
+
+
+
+
+Copyright 2013-2026 by Andrew F. Hayes. ALL RIGHTS RESERVED.
+
+
+This version of PROCESS requires SPSS version 26 or later
+
+
+Workshop schedule available at haskayne.ucalgary.ca/CCRAM
+
+
+In SPSS 29 and later, change default output font to Courier New for
+
+
+tidier output.
+
+
+
+
+
+------ END MATRIX -----
+
+
+Run MATRIX procedure:
+
+
+
+
+
+**************** PROCESS Procedure for SPSS Version 5.1.1 ****************
+
+
+
+
+
+                    Written by Andrew F. Hayes, Ph.D.
+
+
+    Documentation available in Hayes (2022). www.guilford.com/p/hayes3
+
+
+           and Hayes and Darlington (2027). www.afhayes.com
+
+
+
+
+
+**************************************************************************
+
+
+  Model: 4
+
+
+      Y: y
+
+
+      X: x
+
+
+      M: m
+
+
+
+
+
+Sample
+
+
+Size:  474
+
+
+
+
+
+Custom
+
+
+Seed:     20261123
+
+
+
+
+
+**************************************************************************
+
+
+
+
+
+OUTCOME VARIABLE:
+
+
+ m
+
+
+
+
+
+Model Summary
+
+
+          R       R-sq   Adj R-sq          F          p      SEest        PRE
+
+
+      .6332      .4009      .3997   315.8967      .0000      .6098      .2252
+
+
+
+
+
+                 SS         df         MS
+
+
+Regress    117.4781     1.0000   117.4781
+
+
+Residual   175.5310   472.0000      .3719
+
+
+Total      293.0090   473.0000      .6195
+
+
+
+
+
+Model
+
+
+              coeff         se          t          p       LLCI       ULCI
+
+
+constant     -.6291      .1341    -4.6915      .0000     -.8926     -.3656
+
+
+x             .1728      .0097    17.7735      .0000      .1537      .1919
+
+
+
+
+
+**************************************************************************
+
+
+
+
+
+OUTCOME VARIABLE:
+
+
+ y
+
+
+
+
+
+Model Summary
+
+
+          R       R-sq   Adj R-sq          F          p      SEest        PRE
+
+
+      .8902      .7924      .7915   898.9469      .0000      .7797      .5434
+
+
+
+
+
+                 SS         df         MS
+
+
+Regress   1092.8639     2.0000   546.4319
+
+
+Residual   286.3011   471.0000      .6079
+
+
+Total     1379.1650   473.0000     2.9158
+
+
+
+
+
+Model
+
+
+              coeff         se          t          p       LLCI       ULCI
+
+
+constant     -.7809      .1754    -4.4523      .0000    -1.1255     -.4362
+
+
+x             .1020      .0161     6.3556      .0000      .0705      .1336
+
+
+m            1.6726      .0588    28.4234      .0000     1.5570     1.7883
+
+
+
+
+
+************************** TOTAL EFFECT MODEL ****************************
+
+
+
+
+
+OUTCOME VARIABLE:
+
+
+ y
+
+
+
+
+
+Model Summary
+
+
+          R       R-sq   Adj R-sq          F          p      SEest        PRE
+
+
+      .6606      .4363      .4351   365.3814      .0000     1.2834      .2484
+
+
+
+
+
+                 SS         df         MS
+
+
+Regress    601.7822     1.0000   601.7822
+
+
+Residual   777.3828   472.0000     1.6470
+
+
+Total     1379.1650   473.0000     2.9158
+
+
+
+
+
+Model
+
+
+              coeff         se          t          p       LLCI       ULCI
+
+
+constant    -1.8331      .2822    -6.4960      .0000    -2.3876    -1.2786
+
+
+x             .3910      .0205    19.1150      .0000      .3508      .4312
+
+
+
+
+
+
+
+
+************** TOTAL, DIRECT, AND INDIRECT EFFECTS OF X ON Y **************
+
+
+
+
+
+Total effect of X on Y
+
+
+     Effect         se          t          p       LLCI       ULCI
+
+
+      .3910      .0205    19.1150      .0000      .3508      .4312
+
+
+
+
+
+Direct effect of X on Y
+
+
+     Effect         se          t          p       LLCI       ULCI
+
+
+      .1020      .0161     6.3556      .0000      .0705      .1336
+
+
+
+
+
+Indirect effect(s) of X on Y:
+
+
+      Effect     BootSE   BootLLCI   BootULCI
+
+
+m      .2890      .0227      .2472      .3347
+
+
+
+
+
+*********************** ANALYSIS NOTES AND ERRORS ************************
+
+
+
+
+
+Level of confidence for all confidence intervals in output:
+
+
+  95.0000
+
+
+
+
+
+Number of bootstrap samples for percentile bootstrap confidence intervals:
+
+
+  5000
+
+
+
+
+
+------ END MATRIX -----
+
+

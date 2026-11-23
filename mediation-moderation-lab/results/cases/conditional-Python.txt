@@ -1,0 +1,120 @@
+                            OLS Regression Results                            
+
+==============================================================================
+
+Dep. Variable:                      m   R-squared:                       0.507
+
+Model:                            OLS   Adj. R-squared:                  0.504
+
+Method:                 Least Squares   F-statistic:                     161.2
+
+Date:                Mon, 23 Nov 2026   Prob (F-statistic):           7.39e-72
+
+Time:                        15:06:56   Log-Likelihood:                -390.86
+
+No. Observations:                 474   AIC:                             789.7
+
+Df Residuals:                     470   BIC:                             806.4
+
+Df Model:                           3                                         
+
+Covariance Type:            nonrobust                                         
+
+==============================================================================
+
+                 coef    std err          t      P>|t|      [0.025      0.975]
+
+------------------------------------------------------------------------------
+
+Intercept      0.5667      0.205      2.763      0.006       0.164       0.970
+
+x              0.0600      0.016      3.682      0.000       0.028       0.092
+
+w             -1.2947      0.267     -4.848      0.000      -1.819      -0.770
+
+x:w            0.1311      0.020      6.553      0.000       0.092       0.170
+
+==============================================================================
+
+Omnibus:                      374.771   Durbin-Watson:                   2.105
+
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):             9443.372
+
+Skew:                           3.193   Prob(JB):                         0.00
+
+Kurtosis:                      23.913   Cond. No.                         209.
+
+==============================================================================
+
+
+
+Notes:
+
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+                            OLS Regression Results                            
+
+==============================================================================
+
+Dep. Variable:                      y   R-squared:                       0.795
+
+Model:                            OLS   Adj. R-squared:                  0.793
+
+Method:                 Least Squares   F-statistic:                     362.7
+
+Date:                Mon, 23 Nov 2026   Prob (F-statistic):          2.03e-158
+
+Time:                        15:06:56   Log-Likelihood:                -550.28
+
+No. Observations:                 474   AIC:                             1113.
+
+Df Residuals:                     468   BIC:                             1138.
+
+Df Model:                           5                                         
+
+Covariance Type:            nonrobust                                         
+
+==============================================================================
+
+                 coef    std err          t      P>|t|      [0.025      0.975]
+
+------------------------------------------------------------------------------
+
+Intercept     -0.5074      0.310     -1.635      0.103      -1.117       0.102
+
+x              0.0738      0.026      2.843      0.005       0.023       0.125
+
+m              1.6783      0.205      8.180      0.000       1.275       2.081
+
+w             -0.2801      0.395     -0.708      0.479      -1.057       0.497
+
+x:w            0.0425      0.033      1.275      0.203      -0.023       0.108
+
+m:w           -0.0758      0.216     -0.350      0.726      -0.501       0.349
+
+==============================================================================
+
+Omnibus:                      197.364   Durbin-Watson:                   1.821
+
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):             1420.585
+
+Skew:                           1.636   Prob(JB):                    3.34e-309
+
+Kurtosis:                      10.825   Cond. No.                         232.
+
+==============================================================================
+
+
+
+Notes:
+
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+IE(0), IE(1), difference: [np.float64(0.10073708525481734), np.float64(0.30630666235234366), np.float64(0.20556957709752632)]
+
+Percentile bootstrap 95% CI; columns IE(0), IE(1), difference:
+
+[[0.06682569 0.25322737 0.14104609]
+
+ [0.13880781 0.36550212 0.27598383]]
+
