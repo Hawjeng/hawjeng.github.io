@@ -1,0 +1,179 @@
+During startup - Warning messages:
+1: Setting LC_COLLATE=C.UTF-8 failed 
+2: Setting LC_CTYPE=C.UTF-8 failed 
+3: Setting LC_MONETARY=C.UTF-8 failed 
+4: Setting LC_TIME=C.UTF-8 failed 
+
+MODERATION: ch16b 
+
+Call:
+lm(formula = y ~ x * w, data = d)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.07311 -0.30878 -0.01118  0.33891  1.24713 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  10.216246   0.427396   23.90   <2e-16 ***
+x           -11.747351   0.622371  -18.88   <2e-16 ***
+w            -0.105989   0.006975  -15.20   <2e-16 ***
+x:w           0.202665   0.009948   20.37   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.5537 on 36 degrees of freedom
+Multiple R-squared:  0.9214,	Adjusted R-squared:  0.9148 
+F-statistic: 140.6 on 3 and 36 DF,  p-value: < 2.2e-16
+
+         w    slope.x         se       lo.x       hi.x 
+42.1186245 -3.2113642  0.2501213 -3.7186338 -2.7040947 
+          w     slope.x          se        lo.x        hi.x 
+60.00000000  0.41257161  0.17561446  0.05640897  0.76873426 
+         w    slope.x         se       lo.x       hi.x 
+77.8813755  4.0365075  0.2498006  3.5298883  4.5431266 
+Johnson-Neyman roots: 56.16542 59.72192 ; observed w: 30 90 
+
+MODERATION: ex16a 
+
+Call:
+lm(formula = y ~ x * w, data = d)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.4128 -0.3547 -0.0982  0.2500  4.6575 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -1.911371   0.289043  -6.613 1.43e-10 ***
+x            2.466763   0.096914  25.453  < 2e-16 ***
+w            0.100481   0.020682   4.858 1.80e-06 ***
+x:w         -0.049902   0.007041  -7.087 7.74e-12 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.6931 on 346 degrees of freedom
+Multiple R-squared:  0.8301,	Adjusted R-squared:  0.8286 
+F-statistic: 563.6 on 3 and 346 DF,  p-value: < 2.2e-16
+
+         w    slope.x         se       lo.x       hi.x 
+2.60158471 2.33693754 0.08140693 2.17682282 2.49705226 
+          w     slope.x          se        lo.x        hi.x 
+10.00000000  1.96773881  0.04931112  1.87075153  2.06472609 
+          w     slope.x          se        lo.x        hi.x 
+17.39841529  1.59854008  0.06053014  1.47948674  1.71759342 
+Johnson-Neyman roots: 41.13881 63.96873 ; observed w: 2.333333 35 
+Warning message:
+
+In summary.lm(fit) : essentially perfect fit: summary may be unreliable
+MODERATION: ex16b 
+
+Call:
+lm(formula = y ~ x * w, data = d)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.9545 -1.1728 -0.0586  1.2563  3.5432 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 11.01235    1.59532   6.903 3.55e-06 ***
+x           -4.76992    2.48180  -1.922  0.07260 .  
+w            0.04938    0.28282   0.175  0.86358    
+x:w          1.19304    0.40038   2.980  0.00884 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.88 on 16 degrees of freedom
+Multiple R-squared:  0.6562,	Adjusted R-squared:  0.5917 
+F-statistic: 10.18 on 3 and 16 DF,  p-value: 0.0005433
+
+         w    slope.x         se       lo.x       hi.x 
+ 3.5286917 -0.5600457  1.2605603 -3.2323141  2.1122227 
+        w   slope.x        se      lo.x      hi.x 
+5.7500000 2.0900673 0.8714856 0.2426004 3.9375343 
+       w  slope.x       se     lo.x     hi.x 
+7.971308 4.740180 1.229602 2.133541 7.346820 
+Johnson-Neyman roots: -1.261757 5.556192 ; observed w: 3 10 
+
+MODERATION: ch16d 
+
+Call:
+lm(formula = y ~ x * w, data = d)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-1.200e-14 -2.555e-15 -8.093e-16  8.882e-16  1.959e-14 
+
+Coefficients:
+              Estimate Std. Error    t value Pr(>|t|)    
+(Intercept)  3.000e+01  1.392e-15  2.155e+16   <2e-16 ***
+x           -7.850e-16  9.843e-16 -7.980e-01    0.434    
+w           -1.005e-15  9.843e-16 -1.021e+00    0.319    
+x:w         -5.000e+00  6.960e-16 -7.184e+15   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 6.96e-15 on 21 degrees of freedom
+Multiple R-squared:      1,	Adjusted R-squared:      1 
+F-statistic: 1.72e+31 on 3 and 21 DF,  p-value: < 2.2e-16
+
+Deterministic illustration: do not interpret p-values.
+
+MEDIATION: a, b, direct, indirect, total
+       a.x        b.m   direct.x indirect.x    total.x 
+ 0.1727528  1.6726305  0.1020390  0.2889517  0.3909907 
+    SobelZ.x          p.x 
+1.506977e+01 2.559974e-51 
+Percentile bootstrap 95% CIs (R RNG; may differ from Python):
+                 2.5%     97.5%
+indirect   0.24585209 0.3355423
+w0         0.06630978 0.1378100
+w1         0.25123562 0.3693907
+difference 0.14166049 0.2772415
+
+MODEL 59 equations:
+
+Call:
+lm(formula = m ~ x * w, data = s)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.9536 -0.2670 -0.0720  0.1807  5.0944 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  0.56670    0.20513   2.763 0.005958 ** 
+x            0.06002    0.01630   3.682 0.000258 ***
+w           -1.29472    0.26704  -4.848 1.69e-06 ***
+x:w          0.13112    0.02001   6.553 1.49e-10 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.5543 on 470 degrees of freedom
+Multiple R-squared:  0.5072,	Adjusted R-squared:  0.5041 
+F-statistic: 161.2 on 3 and 470 DF,  p-value: < 2.2e-16
+
+
+Call:
+lm(formula = y ~ x + m + w + x:w + m:w, data = s)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.8117 -0.4122 -0.0876  0.3068  4.8930 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -0.50736    0.31035  -1.635  0.10277    
+x            0.07383    0.02597   2.843  0.00467 ** 
+m            1.67832    0.20517   8.180 2.69e-15 ***
+w           -0.28007    0.39536  -0.708  0.47905    
+x:w          0.04247    0.03331   1.275  0.20290    
+m:w         -0.07578    0.21620  -0.350  0.72613    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.7775 on 468 degrees of freedom
+Multiple R-squared:  0.7949,	Adjusted R-squared:  0.7927 
+F-statistic: 362.7 on 5 and 468 DF,  p-value: < 2.2e-16
+

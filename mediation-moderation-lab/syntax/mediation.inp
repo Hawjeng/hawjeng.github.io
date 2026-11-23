@@ -1,0 +1,8 @@
+TITLE: Salary mediation - units are 10000 dollars as in book;
+DATA: FILE = data/salary.dat;
+VARIABLE: NAMES=x m y w; USEVARIABLES=x m y;
+ANALYSIS: ESTIMATOR=ML; BOOTSTRAP=5000;
+MODEL: m ON x (a); y ON m (b); y ON x (cp);
+MODEL INDIRECT: y IND m x;
+MODEL CONSTRAINT: NEW(indirect total); indirect=a*b; total=cp+a*b;
+OUTPUT: SAMPSTAT CINTERVAL(BOOTSTRAP);

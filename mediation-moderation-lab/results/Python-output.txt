@@ -1,0 +1,193 @@
+
+MODERATION ch16b
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.921
+Model:                            OLS   Adj. R-squared:                  0.915
+Method:                 Least Squares   F-statistic:                     140.6
+Date:                Mon, 23 Nov 2026   Prob (F-statistic):           6.18e-20
+Time:                        14:39:58   Log-Likelihood:                -31.006
+No. Observations:                  40   AIC:                             70.01
+Df Residuals:                      36   BIC:                             76.77
+Df Model:                           3                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept     10.2162      0.427     23.903      0.000       9.349      11.083
+x            -11.7474      0.622    -18.875      0.000     -13.010     -10.485
+w             -0.1060      0.007    -15.196      0.000      -0.120      -0.092
+x:w            0.2027      0.010     20.373      0.000       0.182       0.223
+==============================================================================
+Omnibus:                        0.096   Durbin-Watson:                   1.867
+Prob(Omnibus):                  0.953   Jarque-Bera (JB):                0.289
+Skew:                           0.073   Prob(JB):                        0.866
+Kurtosis:                       2.610   Cond. No.                         580.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+{'w': np.float64(42.11862450079442), 'slope': np.float64(-3.211364229459912), 'se': np.float64(0.25012131564679124), 'lo': np.float64(-3.718633769240507), 'hi': np.float64(-2.704094689679317)}
+{'w': np.float64(60.0), 'slope': np.float64(0.4125716143282734), 'se': np.float64(0.17561446389889024), 'lo': np.float64(0.05640897360953623), 'hi': np.float64(0.7687342550470105)}
+{'w': np.float64(77.88137549920557), 'slope': np.float64(4.036507458116459), 'se': np.float64(0.24980063602162242), 'lo': np.float64(3.5298882867599053), 'hi': np.float64(4.543126629473012)}
+J-N real roots: [56.16542244 59.72191801] Observed w: [np.int64(30), np.int64(90)]
+
+MODERATION ex16a
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.830
+Model:                            OLS   Adj. R-squared:                  0.829
+Method:                 Least Squares   F-statistic:                     563.6
+Date:                Mon, 23 Nov 2026   Prob (F-statistic):          8.87e-133
+Time:                        14:39:58   Log-Likelihood:                -366.33
+No. Observations:                 350   AIC:                             740.7
+Df Residuals:                     346   BIC:                             756.1
+Df Model:                           3                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept     -1.9114      0.289     -6.613      0.000      -2.480      -1.343
+x              2.4668      0.097     25.453      0.000       2.276       2.657
+w              0.1005      0.021      4.858      0.000       0.060       0.141
+x:w           -0.0499      0.007     -7.087      0.000      -0.064      -0.036
+==============================================================================
+Omnibus:                      136.949   Durbin-Watson:                   1.831
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              872.915
+Skew:                           1.496   Prob(JB):                    2.81e-190
+Kurtosis:                      10.135   Cond. No.                         329.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+{'w': np.float64(2.6015847054741714), 'slope': np.float64(2.336937540762291), 'se': np.float64(0.08140692616890562), 'lo': np.float64(2.1768228247552655), 'hi': np.float64(2.497052256769317)}
+{'w': np.float64(10.000000000219998), 'slope': np.float64(1.9677388091063834), 'se': np.float64(0.04931112143605701), 'lo': np.float64(1.8707515307961753), 'hi': np.float64(2.0647260874165916)}
+{'w': np.float64(17.398415294965826), 'slope': np.float64(1.5985400774504754), 'se': np.float64(0.0605301419076889), 'lo': np.float64(1.4794867371817888), 'hi': np.float64(1.717593417719162)}
+J-N real roots: [41.13880893 63.9687266 ] Observed w: [np.float64(2.333333333), np.float64(35.0)]
+
+MODERATION ex16b
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.656
+Model:                            OLS   Adj. R-squared:                  0.592
+Method:                 Least Squares   F-statistic:                     10.18
+Date:                Mon, 23 Nov 2026   Prob (F-statistic):           0.000543
+Time:                        14:39:58   Log-Likelihood:                -38.772
+No. Observations:                  20   AIC:                             85.54
+Df Residuals:                      16   BIC:                             89.53
+Df Model:                           3                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept     11.0123      1.595      6.903      0.000       7.630      14.394
+x             -4.7699      2.482     -1.922      0.073     -10.031       0.491
+w              0.0494      0.283      0.175      0.864      -0.550       0.649
+x:w            1.1930      0.400      2.980      0.009       0.344       2.042
+==============================================================================
+Omnibus:                        0.201   Durbin-Watson:                   2.535
+Prob(Omnibus):                  0.904   Jarque-Bera (JB):                0.402
+Skew:                           0.104   Prob(JB):                        0.818
+Kurtosis:                       2.338   Cond. No.                         47.5
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+{'w': np.float64(3.5286917084034037), 'slope': np.float64(-0.560045694688192), 'se': np.float64(1.2605602749293288), 'lo': np.float64(-3.2323141014986776), 'hi': np.float64(2.1122227121222936)}
+{'w': np.float64(5.75), 'slope': np.float64(2.0900673400673444), 'se': np.float64(0.8714855933071992), 'lo': np.float64(0.24260041262043375), 'hi': np.float64(3.937534267514255)}
+{'w': np.float64(7.971308291596596), 'slope': np.float64(4.74018037482288), 'se': np.float64(1.2296020309528974), 'lo': np.float64(2.1335405134726155), 'hi': np.float64(7.346820236173144)}
+J-N real roots: [-1.26175652  5.55619153] Observed w: [np.int64(3), np.int64(10)]
+
+MODERATION ch16d
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       1.000
+Model:                            OLS   Adj. R-squared:                  1.000
+Method:                 Least Squares   F-statistic:                 1.118e+31
+Date:                Mon, 23 Nov 2026   Prob (F-statistic):               0.00
+Time:                        14:39:58   Log-Likelihood:                 776.29
+No. Observations:                  25   AIC:                            -1545.
+Df Residuals:                      21   BIC:                            -1540.
+Df Model:                           3                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept     30.0000   1.73e-15   1.74e+16      0.000      30.000      30.000
+x          -3.053e-16   1.22e-15     -0.250      0.805   -2.84e-15    2.23e-15
+w           9.714e-17   1.22e-15      0.080      0.937   -2.44e-15    2.64e-15
+x:w           -5.0000   8.63e-16  -5.79e+15      0.000      -5.000      -5.000
+==============================================================================
+Omnibus:                        1.386   Durbin-Watson:                   1.185
+Prob(Omnibus):                  0.500   Jarque-Bera (JB):                0.654
+Skew:                           0.391   Prob(JB):                        0.721
+Kurtosis:                       3.128   Cond. No.                         2.00
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+Deterministic illustration: no inferential p-values.
+MEDIATION {'a': np.float64(0.1727528301583426), 'b': np.float64(1.6726305217227324), 'direct': np.float64(0.10203901421007674), 'indirect': np.float64(0.2889516564368272), 'total': np.float64(0.39099067064690374), 'SobelZ': np.float64(15.069771361236041)}
+MODEL 59
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      m   R-squared:                       0.507
+Model:                            OLS   Adj. R-squared:                  0.504
+Method:                 Least Squares   F-statistic:                     161.2
+Date:                Mon, 23 Nov 2026   Prob (F-statistic):           7.39e-72
+Time:                        14:39:58   Log-Likelihood:                -390.86
+No. Observations:                 474   AIC:                             789.7
+Df Residuals:                     470   BIC:                             806.4
+Df Model:                           3                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept      0.5667      0.205      2.763      0.006       0.164       0.970
+x              0.0600      0.016      3.682      0.000       0.028       0.092
+w             -1.2947      0.267     -4.848      0.000      -1.819      -0.770
+x:w            0.1311      0.020      6.553      0.000       0.092       0.170
+==============================================================================
+Omnibus:                      374.771   Durbin-Watson:                   2.105
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):             9443.372
+Skew:                           3.193   Prob(JB):                         0.00
+Kurtosis:                      23.913   Cond. No.                         209.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.795
+Model:                            OLS   Adj. R-squared:                  0.793
+Method:                 Least Squares   F-statistic:                     362.7
+Date:                Mon, 23 Nov 2026   Prob (F-statistic):          2.03e-158
+Time:                        14:39:58   Log-Likelihood:                -550.28
+No. Observations:                 474   AIC:                             1113.
+Df Residuals:                     468   BIC:                             1138.
+Df Model:                           5                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept     -0.5074      0.310     -1.635      0.103      -1.117       0.102
+x              0.0738      0.026      2.843      0.005       0.023       0.125
+w             -0.2801      0.395     -0.708      0.479      -1.057       0.497
+x:w            0.0425      0.033      1.275      0.203      -0.023       0.108
+m              1.6783      0.205      8.180      0.000       1.275       2.081
+m:w           -0.0758      0.216     -0.350      0.726      -0.501       0.349
+==============================================================================
+Omnibus:                      197.364   Durbin-Watson:                   1.821
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):             1420.585
+Skew:                           1.636   Prob(JB):                    3.34e-309
+Kurtosis:                      10.825   Cond. No.                         232.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+Percentile bootstrap 95% CIs:
+               0.025     0.975
+indirect    0.246197  0.335203
+w0          0.066826  0.138808
+w1          0.253227  0.365502
+difference  0.141046  0.275984

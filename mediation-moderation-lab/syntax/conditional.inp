@@ -1,0 +1,22 @@
+TITLE: Model 59 with binary w - equivalent multiple-group regressions;
+DATA: FILE = data/salary.dat;
+VARIABLE: NAMES=x m y w; USEVARIABLES=x m y;
+ GROUPING=w (0=female 1=male);
+ANALYSIS: ESTIMATOR=ML; BOOTSTRAP=5000;
+MODEL:
+ m ON x; y ON m x;
+MODEL female:
+ m ON x (af); y ON m (bf); y ON x (cf);
+ [m] (imf); [y] (iyf);
+ m (vm); y (vy);
+MODEL male:
+ m ON x (am); y ON m (bm); y ON x (cm);
+ [m] (imm); [y] (iym);
+ m (vm); y (vy);
+MODEL CONSTRAINT:
+ NEW(ind0 ind1 diff);
+ ind0=af*bf; ind1=am*bm; diff=ind1-ind0;
+OUTPUT: SAMPSTAT CINTERVAL(BOOTSTRAP);
+! Equal residual variances across groups reproduce pooled OLS slopes.
+! Slopes/intercepts are free across groups: equivalent to all w interactions.
+! Group bootstrap draws preserve group sample sizes in Mplus.

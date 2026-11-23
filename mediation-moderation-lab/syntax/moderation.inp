@@ -1,0 +1,14 @@
+TITLE: Observed moderation - x=D and w=X from Ch16b;
+DATA: FILE = data/ch16b.dat;
+VARIABLE: NAMES = x w y; USEVARIABLES = x w y xw;
+DEFINE: xw = x*w;
+ANALYSIS: ESTIMATOR = ML;
+MODEL: y ON x (bx); y ON w (bw); y ON xw (bi);
+MODEL CONSTRAINT:
+ NEW(s30 s60 s90);
+ s30=bx+30*bi; s60=bx+60*bi; s90=bx+90*bi;
+ PLOT(slope); LOOP(wval,30,90,1); slope=bx+bi*wval;
+PLOT: TYPE=PLOT2;
+OUTPUT: SAMPSTAT CINTERVAL TECH3;
+! Mplus uses asymptotic z/ML covariance by default; OLS t intervals differ.
+! For exact OLS J-N boundaries use R/Python or SPSS PROCESS.
