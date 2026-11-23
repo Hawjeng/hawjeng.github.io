@@ -66,3 +66,32 @@ footer{max-width:1420px;padding:0 28px 30px;font-size:.9rem}
   font-weight: 650;
   text-anchor: middle;
 }
+
+.process-diagram {
+  width: min(100%, 360px);
+  min-width: 226px;
+  margin: 0 0 6px;
+}
+
+.process-diagram > rect {
+  fill: var(--soft);
+  stroke: #74958d;
+}
+
+.process-diagram > path {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 2;
+}
+
+.process-diagram > .conditional-path {
+  stroke: var(--orange);
+  stroke-dasharray: 5 3;
+}
+
+.process-diagram text {
+  paint-order: stroke fill;
+  stroke: white;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
