@@ -13,6 +13,7 @@ class Page(HTMLParser):
         self.titles=0; self.description=False; self.label_refs=[]; self.in_head=False
     def handle_starttag(self,tag,attrs):
         a=dict(attrs)
+        if tag=='head': self.in_head=True
         if 'id' in a: self.ids.append(a['id'])
         for attribute in ('aria-labelledby','aria-describedby','aria-controls'):
             if a.get(attribute): self.label_refs.extend(a[attribute].split())
