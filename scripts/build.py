@@ -70,7 +70,7 @@ def footer(prefix):
 <div lang="en">
 <p>Chiou, H. (2026). <i>Correlation and regression</i> [Interactive statistical teaching application]. <a href="https://hawjeng.github.io/correlation-regression-lab/">https://hawjeng.github.io/correlation-regression-lab/</a></p>
 </div></div>
-</div></section><footer class="site-footer"><div class="container footer-inner"><div>© 2026 邱皓政 Hawjeng Chiou <span class="footer-date">· 資料核對 {E(S['updated'])}</span></div><div class="footer-links">{ext(S['github'],'GitHub','')}{ext(S['oldSite'],'師大原網站','')}<a href="{prefix}sources.html">資料來源</a><a href="#top">回到頂端</a></div></div></footer>'''
+</div></section><footer class="site-footer"><div class="container footer-inner"><div>© 2026 邱皓政 Hawjeng Chiou <span class="footer-date">· 資料核對 {E(S['updated'])}</span></div><div class="footer-links">{ext(S['orcid'],'ORCID','')}{ext(S['github'],'GitHub','')}{ext(S['oldSite'],'師大原網站','')}<a href="{prefix}sources.html">資料來源</a><a href="#top">回到頂端</a></div></div></footer>'''
 
 def public_path(path):
     return '' if path == 'index.html' else path
@@ -96,7 +96,7 @@ def page(path, title, description, body, active=None):
             schema['mainEntity'].update({
                 '@id': home_url + '#person',
                 'url': home_url,
-                'sameAs': [S['oldSite']],
+                'sameAs': [S['oldSite'], S['orcid']],
             })
             if path == 'index.html':
                 website = {'@type': 'WebSite', 'url': home_url, 'name': '邱皓政 Hawjeng Chiou'}
@@ -214,7 +214,7 @@ def research_page():
 
 def about_page():
     body = heading('About','學經歷','Hawjeng Chiou, Ph.D.','國立臺灣師範大學企業管理學系特聘教授、教育心理與輔導學系合聘教授、中央研究院人文社會科學研究中心合聘研究員。美國南加州大學心理計量學博士。')
-    body += f'<div class="container about-layout"><aside class="about-sidebar"><img src="assets/images/hawjeng4.jpg" width="542" height="747" alt="邱皓政在統計方法講座中演講"><div><h2>邱皓政</h2><p lang="en">Hawjeng Chiou, Ph.D.</p><p>研究、教學與專書寫作</p></div>{ext(S["cv"],"完整履歷 PDF","button")}</aside><div><section class="about-section"><h2>教育背景</h2>{timeline(P["education"], bilingual=True)}</section><section class="about-section"><h2>主要學術經歷</h2>{timeline([R,*P["career"]], bilingual=True)}</section><section class="about-section"><h2>學術與行政服務</h2>{timeline(P["service"], bilingual=True)}</section></div></div>'
+    body += f'<div class="container about-layout"><aside class="about-sidebar"><img src="assets/images/hawjeng4.jpg" width="542" height="747" alt="邱皓政在統計方法講座中演講"><div><h2>邱皓政</h2><p lang="en">Hawjeng Chiou, Ph.D.</p><p>研究、教學與專書寫作</p></div>{ext(S["cv"],"完整履歷 PDF","button")}<p>{ext(S["orcid"],"ORCID: " + S["orcid"].rsplit("/", 1)[-1],"")}</p></aside><div><section class="about-section"><h2>教育背景</h2>{timeline(P["education"], bilingual=True)}</section><section class="about-section"><h2>主要學術經歷</h2>{timeline([R,*P["career"]], bilingual=True)}</section><section class="about-section"><h2>學術與行政服務</h2>{timeline(P["service"], bilingual=True)}</section></div></div>'
     return page('about.html','個人介紹與學經歷','邱皓政的心理計量學背景、中央研究院人文社會科學研究中心合聘研究員職務、統計方法專書、教育背景與學術經歷。',body)
 
 def talks_page():
