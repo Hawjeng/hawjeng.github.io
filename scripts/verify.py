@@ -10,7 +10,7 @@ class Page(HTMLParser):
     def __init__(self):
         super().__init__()
         self.ids=[]; self.links=[]; self.images=[]; self.h1=0; self.lang=None
-        self.titles=0; self.description=False; self.label_refs=[]
+        self.titles=0; self.description=False; self.label_refs=[]; self.in_head=False
     def handle_starttag(self,tag,attrs):
         a=dict(attrs)
         if 'id' in a: self.ids.append(a['id'])
@@ -18,11 +18,14 @@ class Page(HTMLParser):
             if a.get(attribute): self.label_refs.extend(a[attribute].split())
         if tag=='html': self.lang=a.get('lang')
         if tag=='h1': self.h1+=1
-        if tag=='title': self.titles+=1
+        if tag=='title' and self.in_head: self.titles+=1
         if tag=='meta' and a.get('name')=='description': self.description=True
         if tag in ('a','link') and a.get('href'): self.links.append(a['href'])
         if tag in ('img','script') and a.get('src'): self.links.append(a['src'])
         if tag=='img': self.images.append(a)
+
+    def handle_endtag(self, tag):
+        if tag=='head': self.in_head=False
 
 def main():
     parser=argparse.ArgumentParser()
